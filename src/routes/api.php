@@ -17,7 +17,7 @@ Route::prefix('auth')->group(function () {
     });
 });
 
-Route::prefix('application')->group(function () {
+Route::prefix('applications')->group(function () {
     Route::post('/', [ApplicationController::class, 'submit']);
     Route::post('/upload', [ApplicationController::class, 'upload']);
     Route::get('/status/{id}', [ApplicationController::class, 'status']);
