@@ -2,15 +2,10 @@
 
 namespace App\Domains\Application\Services;
 
-
 use App\Core\Services\BaseService;
 use Illuminate\Support\Facades\DB;
 
 use App\Domains\Application\Models\Application;
-
-use App\Domains\Application\Services\ApplicationExperienceService;
-use App\Domains\Application\Services\ApplicationEducationService;
-use App\Domains\Application\Services\ApplicationCertificationService;
 
 class ApplicationService extends BaseService
 {
@@ -25,29 +20,53 @@ class ApplicationService extends BaseService
 
     public function createFull(array $data, array $relations): Application
     {
-        return DB::transaction(function () use ($data, $relations) {
+        // 🔥 normalize
+        $relations = array_merge([
+            'education' => [],
+            'workExperience' => [],
+            'certifications' => [],
+        ], $relations);
 
-            $app = $this->create($data);
+        // 🔥 anti duplicate (simple)
+        if (!empty($data['personal_info']['email'])) {
+            $exists = Application::where('personal_info->email', $data['personal_info']['email'])
+                ->latest()
+                ->first();
 
-            // ✅ education
-            $this->educationService->createMany(
-                $app->id,
-                $relations['education'] ?? []
-            );
+            if ($exists) {
+                return $exists;
+            }
+        }
 
-            // ✅ experience
-            $this->experienceService->createMany(
-                $app->id,
-                $relations['workExperience'] ?? []
-            );
+        try {
+            return DB::transaction(function () use ($data, $relations) {
 
-            // ✅ certification
-            $this->certificationService->createMany(
-                $app->id,
-                $relations['certifications'] ?? []
-            );
+                $app = $this->create($data);
 
-            return $app;
-        });
+                // education
+                $this->educationService->createMany(
+                    $app->id,
+                    $relations['education']
+                );
+
+                // experience
+                $this->experienceService->createMany(
+                    $app->id,
+                    $relations['workExperience']
+                );
+
+                // certification
+                $this->certificationService->createMany(
+                    $app->id,
+                    $relations['certifications']
+                );
+
+                return $app;
+            });
+
+        } catch (\Throwable $e) {
+            report($e);
+            throw new \Exception('Gagal menyimpan application');
+        }
     }
 }

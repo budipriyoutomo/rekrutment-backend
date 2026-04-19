@@ -14,6 +14,7 @@ class Application extends BaseModel
         'parent_info' => 'array',
         'spouse_info' => 'array',
         'additional_info' => 'array',
+        'documents' => 'array',
     ];
 
     public function educations()
@@ -29,5 +30,21 @@ class Application extends BaseModel
     public function certifications()
     {
         return $this->hasMany(ApplicationCertification::class);
+    }
+
+     /*
+    |--------------------------------------------------------------------------
+    | HELPERS (OPTIONAL TAPI BAGUS)
+    |--------------------------------------------------------------------------
+    */
+
+    public function getDocument(string $type): ?array
+    {
+        return $this->documents[$type] ?? null;
+    }
+
+    public function hasDocument(string $type): bool
+    {
+        return isset($this->documents[$type]);
     }
 }

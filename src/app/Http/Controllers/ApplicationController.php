@@ -25,23 +25,53 @@ class ApplicationController extends BaseApiController
 
     public function upload(Request $request, FileUploadService $service)
     {
-        $request->validate([
-            'file' => ['required', 'file'],
-            'type' => ['required', 'in:cv,photo,idCard,diploma']
+        $validated = $request->validate([
+            'file' => [
+                'required',
+                'file',
+                'max:2048',
+                'mimes:pdf,jpg,jpeg,png,doc,docx'
+            ],
+            'type' => [
+                'required',
+                'in:cv,foto,ktp,ijazah,others'
+            ]
         ]);
 
-        $result = $service->upload($request->file('file'), $request->type);
+        // mapping folder biar tidak hardcoded di FE
+        $directory = $this->resolveDirectory($validated['type']);
+
+        $result = $service->upload(
+            $validated['file'],
+            $directory
+        );
 
         return $this->success($result, 'Upload berhasil');
     }
 
-    public function status($id)
+    public function status(string $id)
     {
-        $app = Application::findOrFail($id);
+        $app = Application::query()
+            ->select(['id', 'status', 'updated_at'])
+            ->findOrFail($id);
 
         return $this->success([
             'status' => $app->status,
             'updatedAt' => $app->updated_at,
         ]);
+    }
+
+    /**
+     * Mapping type → directory
+     */
+    protected function resolveDirectory(string $type): string
+    {
+        return match ($type) {
+            'cv' => 'applications/cv',
+            'foto' => 'applications/foto',
+            'ktp' => 'applications/ktp',
+            'ijazah' => 'applications/ijazah',
+            default => 'applications/others',
+        };
     }
 }
