@@ -9,6 +9,8 @@ RUN apt-get update && apt-get install -y \
     git unzip curl libzip-dev libpng-dev libxml2-dev \
     && docker-php-ext-install \
         pdo \
+        pdo_pgsql \
+        pgsql \
         zip \
         opcache \
         bcmath \
@@ -45,6 +47,8 @@ RUN apt-get update && apt-get install -y \
     libzip-dev libpng-dev \
     && docker-php-ext-install \
         pdo \
+        pdo_pgsql \
+        pgsql \
         opcache \
         bcmath \
     && apt-get clean && rm -rf /var/lib/apt/lists/*
