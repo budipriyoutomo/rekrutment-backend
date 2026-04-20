@@ -9,14 +9,10 @@ class ApplicationEducationService
 {
     public function createMany(string $applicationId, array $items): void
     {
-        $data = [];
-
         foreach ($items as $item) {
-            $data[] = $this->map($applicationId, $item);
-        }
-
-        if (!empty($data)) {
-            ApplicationEducation::insert($data);
+            ApplicationEducation::create(
+                $this->map($applicationId, $item)
+            );
         }
     }
 

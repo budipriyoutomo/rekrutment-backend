@@ -29,8 +29,9 @@ class ApplicationExperience extends BaseModel
     protected $casts = [
         'responsibilities' => 'array',
         'shifts' => 'array',
-        'year_start' => 'integer',
-        'year_end' => 'integer',
+        'restaurant_type' => 'array',
+        'pos_experience' => 'array',
+        'pos_system' => 'array',
     ];
 
     public function application()

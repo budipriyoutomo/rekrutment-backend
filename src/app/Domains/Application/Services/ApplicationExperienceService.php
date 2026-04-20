@@ -12,14 +12,10 @@ class ApplicationExperienceService
      */
     public function createMany(string $applicationId, array $items): void
     {
-        $data = [];
-
         foreach ($items as $item) {
-            $data[] = $this->map($applicationId, $item);
-        }
-
-        if (!empty($data)) {
-            ApplicationExperience::insert($data);
+            ApplicationExperience::create(
+                $this->map($applicationId, $item)
+            );
         }
     }
 
@@ -80,12 +76,22 @@ class ApplicationExperienceService
             'job_description' => $item['jobDescription'] ?? null,
 
             'restaurant_industry' => $item['restaurantIndustry'] ?? null,
-            'restaurant_type' => $item['restaurantType'] ?? null,
+            
             'position_category' => $item['positionCategory'] ?? null,
 
             'responsibilities' => $item['responsibilities'] ?? [],
-            'pos_experience' => $item['posExperience'] ?? null,
-            'pos_system' => $item['posSystem'] ?? null,
+            'pos_experience' => is_array($item['posExperience'] ?? null)
+                ? $item['posExperience']
+                : null,
+
+            'pos_system' => is_array($item['posSystem'] ?? null)
+                ? $item['posSystem']
+                : null,
+
+            'restaurant_type' => is_array($item['restaurantType'] ?? null)
+                ? $item['restaurantType']
+                : null,
+                
             'shifts' => $item['shifts'] ?? [],
 
             'team_size' => $item['teamSize'] ?? null,

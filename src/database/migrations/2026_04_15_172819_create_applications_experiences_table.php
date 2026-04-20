@@ -20,12 +20,12 @@ return new class extends Migration {
             $table->text('job_description')->nullable();
 
             $table->string('restaurant_industry')->nullable();
-            $table->string('restaurant_type')->nullable();
+            $table->json('restaurant_type')->nullable();
             $table->string('position_category')->nullable();
 
             $table->json('responsibilities')->nullable();
-            $table->string('pos_experience')->nullable();
-            $table->string('pos_system')->nullable();
+            $table->json('pos_experience')->nullable();
+            $table->json('pos_system')->nullable();
             $table->json('shifts')->nullable();
 
             $table->string('team_size')->nullable();

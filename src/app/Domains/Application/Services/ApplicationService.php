@@ -66,7 +66,7 @@ class ApplicationService extends BaseService
 
         } catch (\Throwable $e) {
             report($e);
-            throw new \Exception('Gagal menyimpan application');
+            throw new \Exception($e->getMessage());
         }
     }
 }

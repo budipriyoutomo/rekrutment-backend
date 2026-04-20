@@ -8,15 +8,11 @@ use Illuminate\Support\Facades\DB;
 class ApplicationCertificationService
 {
     public function createMany(string $applicationId, array $items): void
-    {
-        $data = [];
-
+    {  
         foreach ($items as $item) {
-            $data[] = $this->map($applicationId, $item);
-        }
-
-        if (!empty($data)) {
-            ApplicationCertification::insert($data);
+            ApplicationCertification::create(
+                $this->map($applicationId, $item)
+            );
         }
     }
 
