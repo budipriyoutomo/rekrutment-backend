@@ -1,7 +1,7 @@
 # =========================================
-# STAGE 1 — Build Laravel (PHP 8.3)
+# STAGE 1 — Build Laravel (PHP 8.4)
 # =========================================
-FROM php:8.3-fpm AS builder
+FROM php:8.4-fpm AS builder
 
 WORKDIR /var/www/html
 
@@ -45,7 +45,7 @@ RUN php artisan config:cache \
 # =========================================
 # STAGE 2 — Runtime
 # =========================================
-FROM php:8.3-fpm
+FROM php:8.4-fpm
 
 WORKDIR /var/www/html
 
