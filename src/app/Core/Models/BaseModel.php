@@ -3,13 +3,12 @@
 namespace App\Core\Models;
 
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\SoftDeletes;
 use App\Traits\HasUuid;
 use App\Traits\HasUserstamps;
 
 abstract class BaseModel extends Model
 {
-    use SoftDeletes, HasUuid, HasUserstamps;
+    use  HasUuid, HasUserstamps;
 
     protected $guarded = [];
 

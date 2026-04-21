@@ -22,3 +22,6 @@ Route::prefix('applications')->group(function () {
     Route::post('/upload', [ApplicationController::class, 'upload']);
     Route::get('/status/{id}', [ApplicationController::class, 'status']);
 });
+
+
+    Route::get('/applicants', [ApplicationController::class, 'index']);

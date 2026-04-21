@@ -9,9 +9,33 @@ use App\Domains\Application\Actions\SubmitApplicationAction;
 use App\Core\Services\FileUploadService;
 use App\Domains\Application\Models\Application;
 use Illuminate\Http\Request;
+use App\Domains\Application\Services\ApplicationService;
+use App\Domains\Application\Resources\ApplicationResource;
 
 class ApplicationController extends BaseApiController
 {
+
+    public function index(Request $request, ApplicationService $service)
+    {
+        $data = $service->getList(
+            filters: $request->only(['status', 'search', 'startDate', 'endDate']),
+            perPage: $request->get('per_page', 10)
+        );
+
+        return $this->success(
+            ApplicationResource::collection($data)
+        );
+    }
+
+    public function show(string $id, ApplicationService $service)
+    {
+        $data = $service->getDetail($id);
+
+        return $this->success(
+            new ApplicationResource($data)
+        );
+    }
+
     public function submit(
         SubmitApplicationRequest $request,
         SubmitApplicationAction $action
@@ -35,7 +59,13 @@ class ApplicationController extends BaseApiController
             'type' => [
                 'required',
                 'in:cv,foto,ktp,ijazah,others'
-            ]
+            ],
+            'application_id' => [
+                'required',
+                'uuid',
+                'exists:applications,id'
+            ],
+
         ]);
 
         // mapping folder biar tidak hardcoded di FE
@@ -45,6 +75,16 @@ class ApplicationController extends BaseApiController
             $validated['file'],
             $directory
         );
+
+        $app = Application::findOrFail($validated['application_id']);
+
+        $documents = $app->documents ?? [];
+
+        $documents[$validated['type']] = $result;
+
+        $app->update([
+            'documents' => $documents
+        ]);
 
         return $this->success($result, 'Upload berhasil');
     }
