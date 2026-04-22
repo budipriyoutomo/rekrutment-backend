@@ -6,9 +6,7 @@ services:
     image: rekrutment-backend:latest
     container_name: rekrutment-backend
     restart: unless-stopped
-    working_dir: /var/www
-    volumes:
-      - ./:/var/www:cached
+    working_dir: /var/www/html
     ports:
       - "8002:80"   
     networks:
