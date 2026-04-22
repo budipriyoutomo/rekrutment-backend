@@ -5,8 +5,8 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
-    image: rekrutment-app
-    container_name: rekrutment-app
+    image: rekrutment-backend
+    container_name: rekrutment-backend
     restart: unless-stopped
     working_dir: /var/www
     volumes:
