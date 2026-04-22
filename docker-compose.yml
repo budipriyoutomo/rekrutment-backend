@@ -16,4 +16,4 @@ services:
 networks:
   maharasa-net:
     external: true
-    name: maharasa-net
+    name: helpdesk_maharasa-net
