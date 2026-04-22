@@ -15,4 +15,5 @@ services:
       - maharasa-net
 networks:
   maharasa-net:
-  external: true
+    external: true
+    name: maharasa-net
