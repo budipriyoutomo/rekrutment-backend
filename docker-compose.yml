@@ -1,14 +1,14 @@
 services:
   rekrutment-backend:
     build:
-      context: ./rekrutment-backend
+      context: .
       dockerfile: Dockerfile
     image: rekrutment-backend:latest
     container_name: rekrutment-backend
     restart: unless-stopped
     working_dir: /var/www
     volumes:
-      - ./rekrutment-backend:/var/www:cached
+      - ./:/var/www:cached
     ports:
       - "8001:80"   
     networks:
