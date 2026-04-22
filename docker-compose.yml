@@ -1,14 +1,18 @@
-rekrutment-backend:
-  build:
-    context: ./rekrutment-backend
-    dockerfile: Dockerfile
-  image: rekrutment-backend:latest
-  container_name: rekrutment-backend
-  restart: unless-stopped
-  working_dir: /var/www
-  volumes:
-    - ./rekrutment-backend:/var/www:cached
-  ports:
-    - "8001:80"   
-  networks:
-    - maharasa-net
+services:
+  rekrutment-backend:
+    build:
+      context: ./rekrutment-backend
+      dockerfile: Dockerfile
+    image: rekrutment-backend:latest
+    container_name: rekrutment-backend
+    restart: unless-stopped
+    working_dir: /var/www
+    volumes:
+      - ./rekrutment-backend:/var/www:cached
+    ports:
+      - "8001:80"   
+    networks:
+      - maharasa-net
+networks:
+  maharasa-net:
+  external: true
