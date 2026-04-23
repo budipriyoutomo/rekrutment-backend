@@ -24,4 +24,22 @@ Route::prefix('applications')->group(function () {
 });
 
 
+
+Route::prefix('applicants')->group(function () {
+    Route::post('/', [ApplicationController::class, 'submit']);
+    Route::get('/{id}', [ApplicationController::class, 'show']);
+});
+
+
     Route::get('/applicants', [ApplicationController::class, 'index']);
+
+    use Illuminate\Support\Facades\Storage;
+
+Route::get('/test-s3', function () {
+    $result = Storage::disk('s3')->put('test.txt', 'hello world');
+
+    return [
+        'result' => $result,
+        'exists' => Storage::disk('s3')->exists('test.txt'),
+    ];
+});

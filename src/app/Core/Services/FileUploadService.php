@@ -5,6 +5,8 @@ namespace App\Core\Services;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
+use Illuminate\Support\Facades\Log;
+
 
 class FileUploadService
 {
@@ -21,13 +23,31 @@ class FileUploadService
     public function upload(UploadedFile $file, string $directory): array
     {
         $filename = $this->generateFilename($file);
-
+        /*
         $path = Storage::disk($this->disk)->putFileAs(
             $directory,
             $file,
             $filename,
             ['visibility' => 'public']
-        );
+        );*/
+
+        try {
+            $path = Storage::disk($this->disk)->putFileAs(
+                $directory,
+                $file,
+                $filename,
+                ['visibility' => 'public']
+            );
+        } catch (\Throwable $e) {
+            Log::error('UPLOAD ERROR', [
+                'message' => $e->getMessage()
+            ]);
+            throw $e;
+        }
+        
+        if (!$path) {
+            throw new \Exception('Failed to upload file');
+        }
 
         return $this->formatResponse($path, $file);
     }
