@@ -101,6 +101,21 @@ class ApplicationController extends BaseApiController
         ]);
     }
 
+    public function updateStatus(string $id, Request $request, ApplicationService $service)
+    {
+        $validated = $request->validate([
+            'status' => [
+                'required',
+                'in:applied, screening, interview, final_interview, offer, hired, rejected'
+
+            ]
+        ]);
+
+        $result = $service->updateStatus($id, $validated['status']);
+
+        return $this->success($result, 'Status berhasil diperbarui');
+    }
+
     /**
      * Mapping type → directory
      */

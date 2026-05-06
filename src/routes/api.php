@@ -28,6 +28,7 @@ Route::prefix('applications')->group(function () {
 Route::prefix('applicants')->group(function () {
     Route::post('/', [ApplicationController::class, 'submit']);
     Route::get('/{id}', [ApplicationController::class, 'show']);
+    Route::patch('/{id}/stage', [ApplicationController::class, 'updateStatus']);
 });
 
 

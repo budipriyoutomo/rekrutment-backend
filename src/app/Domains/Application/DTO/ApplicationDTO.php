@@ -39,7 +39,7 @@ class ApplicationDTO
             'parent_info' => $this->parentInfo,
             'spouse_info' => $this->spouseInfo,
             'additional_info' => $this->additionalInfo,
-            'status' => 'submitted',
+            'status' => 'applied',
         ];
     }
 }
