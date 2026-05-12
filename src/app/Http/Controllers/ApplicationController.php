@@ -18,8 +18,8 @@ class ApplicationController extends BaseApiController
     public function index(Request $request, ApplicationService $service)
     {
         $data = $service->getList(
-            filters: $request->only(['status', 'search', 'startDate', 'endDate']),
-            perPage: $request->get('per_page', 10)
+            filters: $request->only(['status', 'stage', 'search', 'startDate', 'endDate']),
+            perPage: $request->get('per_page', $request->get('limit', 10))
         );
 
         return $this->success(
@@ -92,11 +92,12 @@ class ApplicationController extends BaseApiController
     public function status(string $id)
     {
         $app = Application::query()
-            ->select(['id', 'status', 'updated_at'])
+            ->select(['id', 'stage', 'updated_at'])
             ->findOrFail($id);
 
         return $this->success([
-            'status' => $app->status,
+            'status' => $app->stage,
+            'stage' => $app->stage,
             'updatedAt' => $app->updated_at,
         ]);
     }
@@ -104,14 +105,14 @@ class ApplicationController extends BaseApiController
     public function updateStatus(string $id, Request $request, ApplicationService $service)
     {
         $validated = $request->validate([
-            'status' => [
+            'stage' => [
                 'required',
-                'in:applied, screening, interview, final_interview, offer, hired, rejected'
+                'in:applied,screening,interview,final_interview,offer,hired,rejected'
 
             ]
         ]);
 
-        $result = $service->updateStatus($id, $validated['status']);
+        $result = $service->updateStatus($id, $validated['stage']);
 
         return $this->success($result, 'Status berhasil diperbarui');
     }

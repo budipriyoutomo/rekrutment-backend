@@ -3,6 +3,7 @@
 namespace App\Domains\Application\Models;
 
 use App\Core\Models\BaseModel;
+use App\Domains\Interview\Models\Interview;
 
 class Application extends BaseModel
 {
@@ -30,6 +31,11 @@ class Application extends BaseModel
     public function certifications()
     {
         return $this->hasMany(ApplicationCertification::class);
+    }
+
+    public function interviews()
+    {
+        return $this->hasMany(Interview::class, 'applicant_id');
     }
 
      /*

@@ -69,9 +69,10 @@ class ApplicationService extends BaseService
     {
         $query = Application::query();
 
-        // 🔍 filter status
-        if (!empty($filters['status'])) {
-            $query->where('status', $filters['status']);
+        // 🔍 filter stage/status
+        $stage = $filters['stage'] ?? $filters['status'] ?? null;
+        if (!empty($stage)) {
+            $query->where('stage', $stage);
         }
 
         // 🔍 search name / email
@@ -113,15 +114,15 @@ class ApplicationService extends BaseService
 
     /**
      * ============================================
-     * UPDATE STATUS
+     * UPDATE STAGE
      * ============================================
      */
-    public function updateStatus(string $id, string $status): Application
+    public function updateStatus(string $id, string $stage): Application
     {
         $app = Application::findOrFail($id);
 
         $app->update([
-            'status' => $status
+            'stage' => $stage
         ]);
 
         return $app;

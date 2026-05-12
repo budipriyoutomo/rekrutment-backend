@@ -4,8 +4,7 @@ use Illuminate\Support\Facades\Route;
 
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\ApplicationController;
-
-
+use App\Http\Controllers\InterviewController;
 
 Route::prefix('auth')->group(function () {
     Route::post('login', [AuthController::class, 'login']);
@@ -23,24 +22,18 @@ Route::prefix('applications')->group(function () {
     Route::get('/status/{id}', [ApplicationController::class, 'status']);
 });
 
-
-
 Route::prefix('applicants')->group(function () {
+    Route::get('/', [ApplicationController::class, 'index']);
     Route::post('/', [ApplicationController::class, 'submit']);
     Route::get('/{id}', [ApplicationController::class, 'show']);
     Route::patch('/{id}/stage', [ApplicationController::class, 'updateStatus']);
 });
 
-
-    Route::get('/applicants', [ApplicationController::class, 'index']);
-
-    use Illuminate\Support\Facades\Storage;
-
-Route::get('/test-s3', function () {
-    $result = Storage::disk('s3')->put('test.txt', 'hello world');
-
-    return [
-        'result' => $result,
-        'exists' => Storage::disk('s3')->exists('test.txt'),
-    ];
+Route::prefix('interviews')->group(function () {
+    Route::get('/', [InterviewController::class, 'index']);
+    Route::post('/', [InterviewController::class, 'store']);
+    Route::get('/{id}', [InterviewController::class, 'show']);
+    Route::patch('/{id}', [InterviewController::class, 'update']);
+    Route::delete('/{id}', [InterviewController::class, 'destroy']);
+    Route::post('/{id}/send-invitation', [InterviewController::class, 'sendInvitation']);
 });

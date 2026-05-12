@@ -24,4 +24,12 @@ abstract class BaseResource extends JsonResource
         if (is_numeric($value)) return $value + 0;
         return $value;
     }
+
+    protected function formatArray(array $data): array
+    {
+        return collect($data)
+            ->except($this->hidden)
+            ->map(fn ($value) => $this->format($value))
+            ->toArray();
+    }
 }

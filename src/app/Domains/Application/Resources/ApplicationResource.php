@@ -14,7 +14,7 @@ class ApplicationResource extends JsonResource
             // BASIC
             // =========================
             'id' => $this->id,
-            'status' => $this->status,
+            'stage' => $this->stage,
             'createdAt' => $this->created_at,
             'updatedAt' => $this->updated_at,
 

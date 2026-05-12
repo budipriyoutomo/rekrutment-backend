@@ -19,7 +19,7 @@ return new class extends Migration
             $table->json('spouse_info')->nullable();
             $table->json('additional_info')->nullable();
             $table->json('documents')->nullable();
-            $table->string('status')->default('submitted');
+            $table->string('stage')->default('new');
             $table->timestamps();
         });
     }
