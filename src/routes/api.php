@@ -5,6 +5,7 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\ApplicationController;
 use App\Http\Controllers\InterviewController;
+use App\Http\Controllers\InterviewerController;
 
 Route::prefix('auth')->group(function () {
     Route::post('login', [AuthController::class, 'login']);
@@ -36,4 +37,12 @@ Route::prefix('interviews')->group(function () {
     Route::patch('/{id}', [InterviewController::class, 'update']);
     Route::delete('/{id}', [InterviewController::class, 'destroy']);
     Route::post('/{id}/send-invitation', [InterviewController::class, 'sendInvitation']);
+});
+
+Route::prefix('interviewers')->group(function () {
+    Route::get('/', [InterviewerController::class, 'index']);
+    Route::post('/', [InterviewerController::class, 'store']);
+    Route::get('/{id}', [InterviewerController::class, 'show']);
+    Route::patch('/{id}', [InterviewerController::class, 'update']);
+    Route::delete('/{id}', [InterviewerController::class, 'destroy']);
 });
