@@ -4,6 +4,7 @@ use Illuminate\Support\Facades\Route;
 
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\ApplicationController;
+use App\Http\Controllers\EvaluationController;
 use App\Http\Controllers\InterviewController;
 use App\Http\Controllers\InterviewerController;
 
@@ -45,4 +46,12 @@ Route::prefix('interviewers')->group(function () {
     Route::get('/{id}', [InterviewerController::class, 'show']);
     Route::patch('/{id}', [InterviewerController::class, 'update']);
     Route::delete('/{id}', [InterviewerController::class, 'destroy']);
+});
+
+Route::prefix('evaluations')->group(function () {
+    Route::get('/', [EvaluationController::class, 'index']);
+    Route::post('/', [EvaluationController::class, 'store']);
+    Route::get('/{id}', [EvaluationController::class, 'show']);
+    Route::patch('/{id}', [EvaluationController::class, 'update']);
+    Route::delete('/{id}', [EvaluationController::class, 'destroy']);
 });
