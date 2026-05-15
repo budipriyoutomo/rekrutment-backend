@@ -3,11 +3,10 @@
 namespace App\Domains\Interview\Resources;
 
 use App\Core\Http\Resources\BaseResource;
-use Illuminate\Http\Request;
 
 class InterviewResource extends BaseResource
 {
-    public function toArray(Request $request): array
+    public function toArray($request): array
     {
         return $this->formatArray([
             'id' => $this->id,
