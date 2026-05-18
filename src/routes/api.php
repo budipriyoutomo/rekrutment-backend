@@ -29,6 +29,7 @@ Route::prefix('applicants')->group(function () {
     Route::post('/', [ApplicationController::class, 'submit']);
     Route::get('/{id}', [ApplicationController::class, 'show']);
     Route::patch('/{id}/stage', [ApplicationController::class, 'updateStatus']);
+    Route::post('/{id}/notes', [ApplicationController::class, 'addNote']);
 });
 
 Route::prefix('interviews')->group(function () {

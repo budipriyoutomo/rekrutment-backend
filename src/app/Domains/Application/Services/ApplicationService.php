@@ -4,6 +4,7 @@ namespace App\Domains\Application\Services;
 
 use App\Core\Services\BaseService;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Str;
 
 use App\Domains\Application\Models\Application;
 
@@ -126,5 +127,29 @@ class ApplicationService extends BaseService
         ]);
 
         return $app;
+    }
+
+    /**
+     * ============================================
+     * ADD HR NOTE
+     * ============================================
+     */
+    public function addNote(string $id, string $text): Application
+    {
+        $app = Application::findOrFail($id);
+        $notes = $app->notes ?? [];
+
+        array_unshift($notes, [
+            'id' => Str::uuid()->toString(),
+            'text' => $text,
+            'date' => now()->toDateString(),
+            'createdAt' => now()->toISOString(),
+        ]);
+
+        $app->update([
+            'notes' => $notes,
+        ]);
+
+        return $app->refresh();
     }
 }

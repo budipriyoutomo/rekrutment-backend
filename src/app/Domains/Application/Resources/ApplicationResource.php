@@ -88,6 +88,11 @@ class ApplicationResource extends JsonResource
             ],
 
             // =========================
+            // HR NOTES
+            // =========================
+            'notes' => $this->notes ?? [],
+
+            // =========================
             // RELATIONS
             // =========================
             'education' => ApplicationEducationResource::collection(

@@ -16,6 +16,7 @@ class Application extends BaseModel
         'spouse_info' => 'array',
         'additional_info' => 'array',
         'documents' => 'array',
+        'notes' => 'array',
     ];
 
     public function educations()

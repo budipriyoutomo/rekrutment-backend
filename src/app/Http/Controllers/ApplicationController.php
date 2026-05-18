@@ -117,6 +117,20 @@ class ApplicationController extends BaseApiController
         return $this->success($result, 'Status berhasil diperbarui');
     }
 
+    public function addNote(string $id, Request $request, ApplicationService $service)
+    {
+        $validated = $request->validate([
+            'text' => ['required', 'string', 'max:5000'],
+        ]);
+
+        $result = $service->addNote($id, $validated['text']);
+
+        return $this->success(
+            new ApplicationResource($result),
+            'Catatan berhasil ditambahkan'
+        );
+    }
+
     /**
      * Mapping type → directory
      */
