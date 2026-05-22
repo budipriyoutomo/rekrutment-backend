@@ -2,11 +2,32 @@
 
 namespace App\Domains\Auth\Services;
 
+use App\Models\User;
 use PHPOpenSourceSaver\JWTAuth\Facades\JWTAuth;
 use Symfony\Component\HttpKernel\Exception\UnauthorizedHttpException;
+use Illuminate\Support\Facades\Hash;
 
 class AuthService
 {
+    /**
+     * Register new user
+     */
+    public function registerUser(string $name, string $email, string $password): array
+    {
+        $user = User::create([
+            'name' => $name,
+            'email' => $email,
+            'password' => Hash::make($password),
+            'role' => 'user',
+            'is_active' => false,
+        ]);
+
+        return [
+            'message' => 'Registrasi berhasil. Tunggu aktivasi admin untuk melakukan login.',
+            'user' => $this->transformUser($user),
+        ];
+    }
+
     /**
      * Login user & generate token
      */

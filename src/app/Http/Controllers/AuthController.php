@@ -4,12 +4,24 @@ namespace App\Http\Controllers;
 
 use App\Core\Http\Controllers\BaseApiController;
 use App\Domains\Auth\Requests\LoginRequest;
+use App\Domains\Auth\Requests\RegisterRequest;
 use App\Domains\Auth\DTO\LoginDTO;
+use App\Domains\Auth\DTO\RegisterDTO;
 use App\Domains\Auth\Actions\LoginAction;
+use App\Domains\Auth\Actions\RegisterAction;
 use App\Domains\Auth\Services\AuthService;
 
 class AuthController extends BaseApiController
 {
+    public function register(RegisterRequest $request, RegisterAction $action)
+    {
+        $dto = RegisterDTO::fromRequest($request);
+
+        $result = $action->execute($dto);
+
+        return $this->success($result, 'Registrasi berhasil');
+    }
+
     public function login(LoginRequest $request, LoginAction $action)
     {
         $dto = LoginDTO::fromRequest($request);
