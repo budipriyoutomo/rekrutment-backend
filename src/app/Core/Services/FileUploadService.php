@@ -169,8 +169,15 @@ class FileUploadService
     {
         $binary = $this->resolveLibreOfficeBinary();
 
+        $profileDir = storage_path('app/libreoffice-profile');
+
+        if (!is_dir($profileDir)) {
+            mkdir($profileDir, 0777, true);
+        }
+
         $process = new Process([
             $binary,
+            '-env:UserInstallation=file://' . $profileDir,
             '--headless',
             '--convert-to',
             'pdf',
