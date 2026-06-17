@@ -5,8 +5,13 @@ namespace App\Domains\Application\Resources;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 
-class ApplicationResource extends JsonResource
+class ApplicationBundleResource extends JsonResource
 {
+    /**
+     * Transform the resource into an array.
+     *
+     * @return array<string, mixed>
+     */
     public function toArray(Request $request): array
     {
         return [
@@ -15,7 +20,6 @@ class ApplicationResource extends JsonResource
             // =========================
             'id' => $this->id,
             'stage' => $this->stage,
-            'profileCompletionStatus' => $this->profile_completion_status ?? 'undone',
             'createdAt' => $this->created_at,
             'updatedAt' => $this->updated_at,
 
@@ -76,8 +80,6 @@ class ApplicationResource extends JsonResource
                 'expectedSalary' => $this->additional_info['expectedSalary'] ?? null,
                 'positionApplied' => $this->additional_info['positionApplied'] ?? null,
                 'availableDate' => $this->additional_info['availableDate'] ?? null,
-                'jobSource' => $this->additional_info['jobSource'] ?? null,
-                'quickApply' => $this->additional_info['quickApply'] ?? null,
             ],
 
             // =========================

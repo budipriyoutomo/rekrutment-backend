@@ -6,11 +6,17 @@ use App\Core\Http\Controllers\BaseApiController;
 use App\Domains\Application\Requests\SubmitApplicationRequest;
 use App\Domains\Application\DTO\ApplicationDTO;
 use App\Domains\Application\Actions\SubmitApplicationAction;
+use App\Domains\Application\Actions\BundleApplicationDocumentAction;
 use App\Core\Services\FileUploadService;
 use App\Domains\Application\Models\Application;
+use App\Domains\ProfileCompletion\Actions\SendProfileCompletionEmailAction;
 use Illuminate\Http\Request;
 use App\Domains\Application\Services\ApplicationService;
 use App\Domains\Application\Resources\ApplicationResource;
+use App\Domains\Application\Resources\ApplicationBundleResource;
+use Illuminate\Support\Facades\Log;
+use Exception;
+
 
 class ApplicationController extends BaseApiController
 {
@@ -71,10 +77,9 @@ class ApplicationController extends BaseApiController
         // mapping folder biar tidak hardcoded di FE
         $directory = $this->resolveDirectory($validated['type']);
 
-        $result = $service->upload(
-            $validated['file'],
-            $directory
-        );
+        $result = $validated['type'] === 'cv'
+            ? $service->uploadCvAsPdf($validated['file'], $directory)
+            : $service->upload($validated['file'], $directory);
 
         $app = Application::findOrFail($validated['application_id']);
 
@@ -107,7 +112,7 @@ class ApplicationController extends BaseApiController
         $validated = $request->validate([
             'stage' => [
                 'required',
-                'in:applied,screening,interview,final_interview,offer,hired,rejected'
+                'in:applied,screening,profile_completion,interview,offer,hired,rejected,on_hold'
 
             ]
         ]);
@@ -129,6 +134,61 @@ class ApplicationController extends BaseApiController
             new ApplicationResource($result),
             'Catatan berhasil ditambahkan'
         );
+    }
+
+    public function sendProfileCompletion(string $id, SendProfileCompletionEmailAction $action)
+    {
+        $app = Application::findOrFail($id);
+
+        try {
+            $action->execute($app);
+
+            return $this->success(null, 'Email profile completion berhasil dikirim.');
+        } catch (\InvalidArgumentException $e) {
+            return response()->json([
+                'success' => false,
+                'message' => $e->getMessage(),
+            ], 422);
+        } catch (Exception $e) {
+            Log::error('Gagal mengirim email profile completion: ' . $e->getMessage(), [
+                'application_id' => $id,
+            ]);
+
+            return response()->json([
+                'success' => false,
+                'message' => 'Gagal mengirim email. Silakan coba lagi.',
+            ], 500);
+        }
+    }
+
+    public function bundleDocuments(string $id, BundleApplicationDocumentAction $action)
+    {
+        try {
+            $action->execute($id);
+
+            $app = Application::with(['educations', 'experiences', 'certifications'])->findOrFail($id);
+
+        // Gunakan ApplicationBundleResource di sini
+            return $this->success(
+                new ApplicationBundleResource($app), 
+                'Proses penggabungan berkas pelamar berhasil dimasukkan ke antrean. File final akan segera siap di S3.'
+            );
+        } catch (\InvalidArgumentException $e) {
+            return response()->json([
+                'success' => false,
+                'message' => $e->getMessage()
+            ], 422);
+
+        } catch (Exception $e) {
+            Log::error("Gagal memicu bundling pada ApplicationController: " . $e->getMessage(), [
+                'application_id' => $id
+            ]);
+
+            return response()->json([
+                'success' => false,
+                'message' => 'Terjadi kesalahan sistem internal saat mempersiapkan dokumen.'
+            ], 500);
+        }
     }
 
     /**

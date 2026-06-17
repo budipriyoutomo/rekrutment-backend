@@ -49,6 +49,8 @@ WORKDIR /var/www/html
 RUN apt-get update && apt-get install -y \
     nginx supervisor curl libpq-dev \
     libzip-dev libpng-dev \
+    libreoffice-headless \
+    fonts-dejavu \
     && docker-php-ext-install \
         pdo \
         pdo_pgsql \
