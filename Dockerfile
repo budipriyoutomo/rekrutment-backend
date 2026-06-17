@@ -57,8 +57,12 @@ RUN apt-get update && apt-get install -y \
     libzip-dev libpng-dev \
     libjpeg62-turbo-dev \
     libfreetype6-dev \
-    libreoffice-headless \
+    libreoffice-core \
+    libreoffice-writer \
     fonts-dejavu \
+    && docker-php-ext-configure gd \
+        --with-freetype \
+        --with-jpeg \
     && docker-php-ext-install \
         gd \
         zip \
