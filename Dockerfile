@@ -7,7 +7,13 @@ WORKDIR /var/www/html
 
 RUN apt-get update && apt-get install -y \
     git unzip curl libzip-dev libpng-dev libxml2-dev libpq-dev \
+    libjpeg62-turbo-dev \
+    libfreetype6-dev \
+    && docker-php-ext-configure gd \
+        --with-freetype \
+        --with-jpeg \
     && docker-php-ext-install \
+        gd \
         pdo \
         pdo_pgsql \
         pgsql \
@@ -49,9 +55,13 @@ WORKDIR /var/www/html
 RUN apt-get update && apt-get install -y \
     nginx supervisor curl libpq-dev \
     libzip-dev libpng-dev \
+    libjpeg62-turbo-dev \
+    libfreetype6-dev \
     libreoffice-headless \
     fonts-dejavu \
     && docker-php-ext-install \
+        gd \
+        zip \
         pdo \
         pdo_pgsql \
         pgsql \
