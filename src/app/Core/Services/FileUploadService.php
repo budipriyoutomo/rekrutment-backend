@@ -16,7 +16,7 @@ class FileUploadService
 
     public function __construct(?string $disk = null)
     {
-        $this->disk = $disk ?? config('filesystems.default', 's3');
+        $this->disk = $disk ?? config('filesystems.upload_disk', 's3');
     }
 
     /**
@@ -42,6 +42,8 @@ class FileUploadService
             );
         } catch (\Throwable $e) {
             Log::error('UPLOAD ERROR', [
+                'disk' => $this->disk,
+                'directory' => $directory,
                 'message' => $e->getMessage()
             ]);
             throw $e;
@@ -248,6 +250,7 @@ class FileUploadService
     {
         return [
             'path' => $path,
+            'disk' => $this->disk,
             'file_name' => $file->getClientOriginalName(),
             'file_url' => $this->url($path),
             'mime_type' => $file->getMimeType(),

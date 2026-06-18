@@ -15,6 +15,8 @@ return [
 
     'default' => env('FILESYSTEM_DISK', 'local'),
 
+    'upload_disk' => env('APPLICATION_UPLOAD_DISK', 's3'),
+
     'bundle_disk' => env('APPLICATION_BUNDLE_DISK', 's3'),
 
     /*
