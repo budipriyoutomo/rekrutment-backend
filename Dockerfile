@@ -81,10 +81,12 @@ COPY --from=builder /var/www/html /var/www/html
 COPY docker/nginx.conf /etc/nginx/nginx.conf
 COPY docker/default.conf /etc/nginx/conf.d/default.conf
 COPY docker/supervisord.conf /etc/supervisor/conf.d/supervisord.conf
+COPY docker/entrypoint.sh /usr/local/bin/rekrutment-entrypoint
 
 # Permission
 RUN chown -R www-data:www-data /var/www/html \
-    && chmod -R 775 storage bootstrap/cache
+    && chmod -R 775 storage bootstrap/cache \
+    && chmod +x /usr/local/bin/rekrutment-entrypoint
 
 # Opcache
 RUN echo "opcache.enable=1" > /usr/local/etc/php/conf.d/opcache.ini \
@@ -94,4 +96,4 @@ RUN echo "opcache.enable=1" > /usr/local/etc/php/conf.d/opcache.ini \
 
 EXPOSE 80
 
-CMD ["/usr/bin/supervisord"]
+CMD ["/usr/local/bin/rekrutment-entrypoint"]
