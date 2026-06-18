@@ -9,11 +9,11 @@ use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\SerializesModels;
 use App\Domains\Application\Services\ApplicationDocumentService;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
+use Symfony\Component\Process\ExecutableFinder;
 use Symfony\Component\Process\Process;
 use Illuminate\Support\Str;
-// Menggunakan FPDI asli yang fully-compatible dengan Laravel 13 & PHP 8.4
-use questionnaires\fpdi\Fpdi; 
 
 class ProcessApplicationBundlingJob implements ShouldQueue
 {
@@ -119,16 +119,32 @@ class ProcessApplicationBundlingJob implements ShouldQueue
         // TAHAP 5: UPLOAD KEMBALI BUNDEL FINAL KE S3 & CLEANUP
         // =========================================================================
         $s3FinalKey = "final_bundel/rekrutmen_{$this->applicationId}.pdf";
-        Storage::disk('s3')->put($s3FinalKey, file_get_contents($outputFinalPdf));
+        $bundleDisk = config('filesystems.bundle_disk', 's3');
 
-        // Bersihkan berkas lokal
-        $this->cleanup([
-            $generatedDocxPath, 
-            $generatedPdfPath, 
-            $localS3Path, 
-            $finalAttachmentPdfPath, 
-            $outputFinalPdf
-        ]);
+        try {
+            $uploaded = Storage::disk($bundleDisk)->put($s3FinalKey, file_get_contents($outputFinalPdf), [
+                'visibility' => 'public',
+            ]);
+
+            if (!$uploaded) {
+                throw new \RuntimeException("Upload bundel final ke disk {$bundleDisk} gagal.");
+            }
+
+            Log::info('Application bundle uploaded', [
+                'application_id' => $this->applicationId,
+                'disk' => $bundleDisk,
+                'path' => $s3FinalKey,
+            ]);
+        } finally {
+            // Bersihkan berkas lokal, termasuk jika upload ke S3 gagal.
+            $this->cleanup([
+                $generatedDocxPath,
+                $generatedPdfPath,
+                $localS3Path,
+                $finalAttachmentPdfPath,
+                $outputFinalPdf,
+            ]);
+        }
     }
 
     /**
@@ -161,13 +177,51 @@ class ProcessApplicationBundlingJob implements ShouldQueue
 
     private function convertToPdf(string $filePath, string $outputDir): void
     {
-        $process = new Process(['libreoffice', '--headless', '--convert-to', 'pdf', '--outdir', $outputDir, $filePath]);
+        $binary = $this->resolveLibreOfficeBinary();
+
+        $process = new Process([$binary, '--headless', '--convert-to', 'pdf', '--outdir', $outputDir, $filePath]);
         $process->setTimeout(60);
         $process->run();
 
         if (!$process->isSuccessful()) {
+            Log::error('Application bundle PDF conversion failed', [
+                'binary' => $binary,
+                'file' => $filePath,
+                'error' => $process->getErrorOutput(),
+                'output' => $process->getOutput(),
+            ]);
+
             throw new \Exception("LibreOffice Gagal: " . $process->getErrorOutput());
         }
+    }
+
+    private function resolveLibreOfficeBinary(): string
+    {
+        $configuredBinary = env('LIBREOFFICE_BINARY');
+        if ($configuredBinary && is_executable($configuredBinary)) {
+            return $configuredBinary;
+        }
+
+        $finder = new ExecutableFinder();
+        foreach (['libreoffice', 'soffice'] as $name) {
+            $binary = $finder->find($name);
+            if ($binary) {
+                return $binary;
+            }
+        }
+
+        foreach ([
+            '/usr/bin/libreoffice',
+            '/usr/local/bin/libreoffice',
+            '/opt/homebrew/bin/libreoffice',
+            '/Applications/LibreOffice.app/Contents/MacOS/soffice',
+        ] as $candidate) {
+            if (is_executable($candidate)) {
+                return $candidate;
+            }
+        }
+
+        throw new \Exception('LibreOffice tidak ditemukan di server. Install LibreOffice atau set LIBREOFFICE_BINARY.');
     }
 
     private function cleanup(array $files): void

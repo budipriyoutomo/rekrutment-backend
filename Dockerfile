@@ -40,8 +40,9 @@ COPY src/ .
 RUN composer dump-autoload --optimize
 
 # Laravel optimization
-RUN php artisan config:cache \
-    && php artisan route:cache \
+# Do not cache config while building the image: runtime env values such as
+# FILESYSTEM_DISK and AWS_* must be read from the deployed container.
+RUN php artisan route:cache \
     && php artisan view:cache
 
 
