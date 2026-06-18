@@ -3,7 +3,7 @@
 namespace App\Domains\Application\Actions;
  
 use App\Domains\Application\Events\ApplicationBundlingRequested;
-use Illuminate\Support\Facades\DB;
+use App\Domains\Application\Models\Application;
 use InvalidArgumentException;
 
 class BundleApplicationDocumentAction
@@ -18,12 +18,27 @@ class BundleApplicationDocumentAction
     public function execute(string $applicationId): void
     {
         // Validasi awal di database Postgres untuk memastikan ID valid
-        $exists = DB::table('applications')->where('id', $applicationId)->exists();
+        $application = Application::find($applicationId);
 
-        if (!$exists) {
+        if (!$application) {
             throw new InvalidArgumentException("Data pelamar dengan ID {$applicationId} tidak ditemukan.");
         }
 
+        $documents = $application->documents ?? [];
+        $documents['bundle'] = [
+            'status' => 'processing',
+            'path' => null,
+            'file_url' => null,
+            'file_name' => "bundle_{$applicationId}.pdf",
+            'mime_type' => 'application/pdf',
+            'size' => null,
+            'message' => 'Bundle document sedang diproses.',
+            'generated_at' => null,
+        ];
+
+        $application->update([
+            'documents' => $documents,
+        ]);
         
         // Memicu event untuk menandakan bahwa proses bundling telah diminta
         event(new ApplicationBundlingRequested($applicationId));

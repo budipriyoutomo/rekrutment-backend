@@ -7,8 +7,8 @@ use Illuminate\Foundation\Queue\Queueable;
 use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\SerializesModels;
+use App\Domains\Application\Models\Application;
 use App\Domains\Application\Services\ApplicationDocumentService;
-use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
 use Symfony\Component\Process\ExecutableFinder;
@@ -28,8 +28,7 @@ class ProcessApplicationBundlingJob implements ShouldQueue
 
     public function handle(ApplicationDocumentService $documentService): void
     {
-        // Ambil data berdasarkan ID UID dari Postgres
-        $application = DB::table('applications')->find($this->applicationId);
+        $application = Application::with(['educations', 'experiences', 'certifications'])->find($this->applicationId);
         
         if (!$application) return;
 
@@ -40,88 +39,103 @@ class ProcessApplicationBundlingJob implements ShouldQueue
         }
 
         $uniqueId = Str::random(10);
-        $generatedDocxPath = $tempDir . '/cv_' . $this->applicationId . '_' . $uniqueId . '.docx';
-        $generatedPdfPath = $tempDir . '/cv_' . $this->applicationId . '_' . $uniqueId . '.pdf';
+        $generatedDocxPath = $tempDir . '/candidate_' . $this->applicationId . '_' . $uniqueId . '.docx';
+        $generatedPdfPath = $tempDir . '/candidate_' . $this->applicationId . '_' . $uniqueId . '.pdf';
+        $downloadedFiles = [];
 
-        // =========================================================================
-        // TAHAP 1: GENERATE WORD DARI DATA DATABASE
-        // =========================================================================
-        $documentService->generateApplicationDocx($application, $generatedDocxPath);
-
-
-        // =========================================================================
-        // TAHAP 2: KONVERSI HASIL GENERATE KE PDF (VIA LIBREOFFICE DOCKER)
-        // =========================================================================
-        $this->convertToPdf($generatedDocxPath, $tempDir);
+        try {
+            // =========================================================================
+            // TAHAP 1: GENERATE BIODATA KANDIDAT DARI DATABASE
+            // =========================================================================
+            $documentService->generateApplicationDocx($application, $generatedDocxPath);
 
 
-        // =========================================================================
-        // TAHAP 3: DOWNLOAD LAMPIRAN DARI S3 BERDASARKAN DATA JSONB DOKUMEN
-        // =========================================================================
-        $documentsData = is_string($application->documents) 
-            ? json_decode($application->documents, true) 
-            : (array) $application->documents;
+            // =========================================================================
+            // TAHAP 2: KONVERSI BIODATA KE PDF
+            // =========================================================================
+            $this->convertToPdf($generatedDocxPath, $tempDir);
 
-        $s3KeyAttachment = $documentsData['ijazah']['path'] ?? $documentsData['ktp']['path'] ?? null;
+            if (!file_exists($generatedPdfPath)) {
+                throw new \RuntimeException('PDF biodata kandidat tidak berhasil dibuat.');
+            }
 
-        // Siapkan array untuk menampung file-file PDF yang akan digabungkan
-        $pdfFilesToMerge = [];
-        
-        // Masukkan PDF utama (Biodata dari database) ke urutan pertama
-        if (file_exists($generatedPdfPath)) {
-            $pdfFilesToMerge[] = $generatedPdfPath;
-        }
+            // =========================================================================
+            // TAHAP 3: DOWNLOAD SEMUA DOKUMEN KANDIDAT
+            // =========================================================================
+            $documentsData = is_string($application->documents)
+                ? json_decode($application->documents, true)
+                : (array) ($application->documents ?? []);
 
-        $localS3Path = null;
-        $finalAttachmentPdfPath = null;
+            $filesToMerge = [[
+                'type' => 'pdf',
+                'path' => $generatedPdfPath,
+                'label' => 'Biodata Kandidat',
+            ]];
 
-        if ($s3KeyAttachment) {
-            $s3Disk = Storage::disk('s3');
-            
-            if ($s3Disk->exists($s3KeyAttachment)) {
-                $s3Filename = basename($s3KeyAttachment);
-                $s3Extension = strtolower(pathinfo($s3Filename, PATHINFO_EXTENSION));
-                
-                $localS3Path = $tempDir . "/s3_input_{$uniqueId}." . $s3Extension;
-                
-                // Ambil berkas lampiran dari S3
-                file_put_contents($localS3Path, $s3Disk->get($s3KeyAttachment));
+            foreach (['cv' => 'CV / Resume', 'foto' => 'Foto Diri', 'ktp' => 'Foto KTP', 'ijazah' => 'Scan Ijazah'] as $key => $label) {
+                $document = $documentsData[$key] ?? null;
+                $sourcePath = is_array($document) ? ($document['path'] ?? null) : $document;
 
-                if ($s3Extension === 'pdf') {
-                    $finalAttachmentPdfPath = $localS3Path;
-                } else {
-                    // Konversi gambar/word ke PDF menggunakan LibreOffice headless
-                    $this->convertToPdf($localS3Path, $tempDir);
-                    $finalAttachmentPdfPath = $tempDir . "/s3_input_{$uniqueId}.pdf";
+                if (!$sourcePath) {
+                    continue;
                 }
 
-                if (file_exists($finalAttachmentPdfPath)) {
-                    $pdfFilesToMerge[] = $finalAttachmentPdfPath;
+                $localPath = $this->downloadDocument($sourcePath, $tempDir, "{$key}_{$uniqueId}");
+                if (!$localPath) {
+                    Log::warning('Application bundle document missing', [
+                        'application_id' => $this->applicationId,
+                        'document_type' => $key,
+                        'path' => $sourcePath,
+                    ]);
+                    continue;
+                }
+
+                $downloadedFiles[] = $localPath;
+                $extension = strtolower(pathinfo($localPath, PATHINFO_EXTENSION));
+
+                if ($extension === 'pdf') {
+                    $filesToMerge[] = [
+                        'type' => 'pdf',
+                        'path' => $localPath,
+                        'label' => $label,
+                    ];
+                    continue;
+                }
+
+                if ($this->isImageExtension($extension)) {
+                    $filesToMerge[] = [
+                        'type' => 'image',
+                        'path' => $localPath,
+                        'label' => $label,
+                    ];
+                    continue;
+                }
+
+                if (in_array($extension, ['doc', 'docx'], true)) {
+                    $this->convertToPdf($localPath, $tempDir);
+                    $convertedPath = $tempDir . '/' . pathinfo($localPath, PATHINFO_FILENAME) . '.pdf';
+                    if (file_exists($convertedPath)) {
+                        $downloadedFiles[] = $convertedPath;
+                        $filesToMerge[] = [
+                            'type' => 'pdf',
+                            'path' => $convertedPath,
+                            'label' => $label,
+                        ];
+                    }
                 }
             }
-        }
 
-        // =========================================================================
-        // TAHAP 4: MERGE KEDUA PDF MENGGUNAKAN NATIVE FPDI (SANGAT STABIL)
-        // =========================================================================
-        $outputFinalPdf = $tempDir . "/bundel_rekrutmen_{$this->applicationId}_{$uniqueId}.pdf";
-        
-        try {
-            $this->mergePdfFiles($pdfFilesToMerge, $outputFinalPdf);
-        } catch (\Exception $e) {
-            // Bersihkan file sisa jika proses merge internal gagal
-            $this->cleanup([$generatedDocxPath, $generatedPdfPath, $localS3Path, $finalAttachmentPdfPath]);
-            throw new \Exception("Gagal menggabungkan halaman PDF via FPDI: " . $e->getMessage());
-        }
+            // =========================================================================
+            // TAHAP 4: MERGE BIODATA + CV + FOTO + KTP + IJAZAH
+            // =========================================================================
+            $outputFinalPdf = $tempDir . "/bundel_rekrutmen_{$this->applicationId}_{$uniqueId}.pdf";
+            $this->mergeDocuments($filesToMerge, $outputFinalPdf);
 
-
-        // =========================================================================
-        // TAHAP 5: UPLOAD KEMBALI BUNDEL FINAL KE S3 & CLEANUP
-        // =========================================================================
-        $s3FinalKey = "final_bundel/rekrutmen_{$this->applicationId}.pdf";
-        $bundleDisk = config('filesystems.bundle_disk', 's3');
-
-        try {
+            // =========================================================================
+            // TAHAP 5: UPLOAD BUNDEL FINAL DAN SIMPAN METADATA PREVIEW
+            // =========================================================================
+            $s3FinalKey = "final_bundel/rekrutmen_{$this->applicationId}.pdf";
+            $bundleDisk = config('filesystems.bundle_disk', 's3');
             $uploaded = Storage::disk($bundleDisk)->put($s3FinalKey, file_get_contents($outputFinalPdf), [
                 'visibility' => 'public',
             ]);
@@ -130,56 +144,147 @@ class ProcessApplicationBundlingJob implements ShouldQueue
                 throw new \RuntimeException("Upload bundel final ke disk {$bundleDisk} gagal.");
             }
 
+            $bundleUrl = $this->url($bundleDisk, $s3FinalKey);
+            $documentsData['bundle'] = [
+                'status' => 'ready',
+                'path' => $s3FinalKey,
+                'file_url' => $bundleUrl,
+                'file_name' => "bundel_rekrutmen_{$this->applicationId}.pdf",
+                'mime_type' => 'application/pdf',
+                'size' => filesize($outputFinalPdf),
+                'message' => 'Bundle document siap dipreview.',
+                'generated_at' => now()->toISOString(),
+            ];
+
+            $application->update([
+                'documents' => $documentsData,
+            ]);
+
             Log::info('Application bundle uploaded', [
                 'application_id' => $this->applicationId,
                 'disk' => $bundleDisk,
                 'path' => $s3FinalKey,
             ]);
+        } catch (\Throwable $e) {
+            $this->markBundleFailed($application, $e->getMessage());
+            throw $e;
         } finally {
-            // Bersihkan berkas lokal, termasuk jika upload ke S3 gagal.
             $this->cleanup([
                 $generatedDocxPath,
                 $generatedPdfPath,
-                $localS3Path,
-                $finalAttachmentPdfPath,
-                $outputFinalPdf,
+                $outputFinalPdf ?? null,
+                ...$downloadedFiles,
             ]);
         }
     }
 
-    /**
-     * Fungsi merger internal menggunakan library native FPDI
-     */
-    private function mergePdfFiles(array $files, string $outputPath): void
+    private function mergeDocuments(array $files, string $outputPath): void
     {
-        // Menggunakan class FPDI dari SetaSign
         $pdf = new \setasign\Fpdi\Fpdi();
+        $pdf->SetAutoPageBreak(true, 12);
 
-        foreach ($files as $file) {
-            // Hitung total halaman dari masing-masing file PDF secara dinamis
-            $pageCount = $pdf->setSourceFile($file);
+        foreach ($files as $fileData) {
+            if (($fileData['type'] ?? null) === 'image') {
+                $this->addImagePage($pdf, $fileData['path'], $fileData['label'] ?? 'Dokumen');
+                continue;
+            }
+
+            $pageCount = $pdf->setSourceFile($fileData['path']);
             for ($pageNo = 1; $pageNo <= $pageCount; $pageNo++) {
-                // Import halaman
                 $templateId = $pdf->importPage($pageNo);
-                // Dapatkan ukuran orientasi halaman asli (Potrait/Landscape)
                 $size = $pdf->getTemplateSize($templateId);
 
-                // Tambahkan halaman baru dengan ukuran orientasi yang sesuai
                 $pdf->AddPage($size['orientation'], [$size['width'], $size['height']]);
-                // Gambar ulang template PDF tersebut ke halaman baru
                 $pdf->useTemplate($templateId);
             }
         }
 
-        // Simpan hasil bundel final ke local path temporary sebelum di-upload ke S3
         $pdf->Output('F', $outputPath);
+    }
+
+    private function addImagePage(\setasign\Fpdi\Fpdi $pdf, string $imagePath, string $label): void
+    {
+        $size = getimagesize($imagePath);
+        if (!$size) {
+            return;
+        }
+
+        [$imageWidth, $imageHeight] = $size;
+        $pageWidth = 210;
+        $pageHeight = 297;
+        $margin = 15;
+        $titleHeight = 12;
+        $maxWidth = $pageWidth - ($margin * 2);
+        $maxHeight = $pageHeight - ($margin * 2) - $titleHeight;
+        $ratio = min($maxWidth / $imageWidth, $maxHeight / $imageHeight);
+        $displayWidth = $imageWidth * $ratio;
+        $displayHeight = $imageHeight * $ratio;
+        $x = ($pageWidth - $displayWidth) / 2;
+        $y = $margin + $titleHeight;
+
+        $pdf->AddPage('P', [$pageWidth, $pageHeight]);
+        $pdf->SetFont('Arial', 'B', 12);
+        $pdf->Cell(0, 8, $label, 0, 1, 'C');
+        $pdf->Image($imagePath, $x, $y, $displayWidth, $displayHeight);
+    }
+
+    private function downloadDocument(string $path, string $tempDir, string $baseName): ?string
+    {
+        $extension = strtolower(pathinfo(parse_url($path, PHP_URL_PATH) ?: $path, PATHINFO_EXTENSION)) ?: 'bin';
+        $localPath = "{$tempDir}/{$baseName}.{$extension}";
+        $diskNames = array_values(array_unique([
+            config('filesystems.upload_disk', 's3'),
+            config('filesystems.bundle_disk', 's3'),
+            's3',
+            'public',
+            'local',
+        ]));
+
+        foreach ($diskNames as $diskName) {
+            try {
+                $disk = Storage::disk($diskName);
+                if (!$disk->exists($path)) {
+                    continue;
+                }
+
+                file_put_contents($localPath, $disk->get($path));
+                return $localPath;
+            } catch (\Throwable $e) {
+                Log::warning('Application bundle document download failed on disk', [
+                    'application_id' => $this->applicationId,
+                    'disk' => $diskName,
+                    'path' => $path,
+                    'message' => $e->getMessage(),
+                ]);
+            }
+        }
+
+        return null;
+    }
+
+    private function isImageExtension(string $extension): bool
+    {
+        return in_array($extension, ['jpg', 'jpeg', 'png'], true);
     }
 
     private function convertToPdf(string $filePath, string $outputDir): void
     {
         $binary = $this->resolveLibreOfficeBinary();
+        $profileDir = storage_path('app/libreoffice-profile');
+        if (!is_dir($profileDir)) {
+            mkdir($profileDir, 0777, true);
+        }
 
-        $process = new Process([$binary, '--headless', '--convert-to', 'pdf', '--outdir', $outputDir, $filePath]);
+        $process = new Process([
+            $binary,
+            '-env:UserInstallation=file://' . $profileDir,
+            '--headless',
+            '--convert-to',
+            'pdf',
+            '--outdir',
+            $outputDir,
+            $filePath,
+        ]);
         $process->setTimeout(60);
         $process->run();
 
@@ -222,6 +327,35 @@ class ProcessApplicationBundlingJob implements ShouldQueue
         }
 
         throw new \Exception('LibreOffice tidak ditemukan di server. Install LibreOffice atau set LIBREOFFICE_BINARY.');
+    }
+
+    private function url(string $diskName, string $path): string
+    {
+        try {
+            return Storage::disk($diskName)->url($path);
+        } catch (\Throwable $e) {
+            $baseUrl = config("filesystems.disks.{$diskName}.url", '');
+            return rtrim($baseUrl, '/') . '/' . ltrim($path, '/');
+        }
+    }
+
+    private function markBundleFailed(Application $application, string $message): void
+    {
+        $documents = $application->documents ?? [];
+        $documents['bundle'] = [
+            'status' => 'failed',
+            'path' => null,
+            'file_url' => null,
+            'file_name' => "bundle_{$this->applicationId}.pdf",
+            'mime_type' => 'application/pdf',
+            'size' => null,
+            'message' => $message,
+            'generated_at' => null,
+        ];
+
+        $application->update([
+            'documents' => $documents,
+        ]);
     }
 
     private function cleanup(array $files): void

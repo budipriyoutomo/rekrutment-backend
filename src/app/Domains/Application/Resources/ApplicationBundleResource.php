@@ -90,6 +90,7 @@ class ApplicationBundleResource extends JsonResource
                 'foto' => $this->documents['foto'] ?? null,
                 'ktp' => $this->documents['ktp'] ?? null,
                 'ijazah' => $this->documents['ijazah'] ?? null,
+                'bundle' => $this->documents['bundle'] ?? null,
             ],
 
             // =========================

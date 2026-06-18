@@ -32,7 +32,7 @@ class SendProfileCompletionEmailAction
             'expires_at'     => now()->addDays(7),
         ]);
 
-        $completionUrl = rtrim(config('app.frontend_url'), '/') . '/profile-completion/' . $token;
+        $completionUrl = rtrim(config('app.profile_completion_base_url'), '/') . '/profile-completion/' . $token;
 
         Mail::to($email)->send(new ProfileCompletionMail($application, $token, $completionUrl));
 

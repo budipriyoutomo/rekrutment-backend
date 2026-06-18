@@ -191,6 +191,37 @@ class ApplicationController extends BaseApiController
         }
     }
 
+    public function bundleStatus(string $id)
+    {
+        $app = Application::findOrFail($id);
+        $bundle = $app->documents['bundle'] ?? null;
+
+        if (!$bundle) {
+            return $this->success([
+                'status' => 'not_requested',
+                'ready' => false,
+                'path' => null,
+                'file_url' => null,
+                'file_name' => null,
+                'mime_type' => 'application/pdf',
+                'size' => null,
+                'message' => 'Bundle document belum dibuat.',
+            ]);
+        }
+
+        return $this->success([
+            'status' => $bundle['status'] ?? 'processing',
+            'ready' => ($bundle['status'] ?? null) === 'ready',
+            'path' => $bundle['path'] ?? null,
+            'file_url' => $bundle['file_url'] ?? null,
+            'file_name' => $bundle['file_name'] ?? null,
+            'mime_type' => $bundle['mime_type'] ?? 'application/pdf',
+            'size' => $bundle['size'] ?? null,
+            'message' => $bundle['message'] ?? null,
+            'generated_at' => $bundle['generated_at'] ?? null,
+        ]);
+    }
+
     /**
      * Mapping type → directory
      */

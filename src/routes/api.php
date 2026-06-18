@@ -43,6 +43,7 @@ Route::prefix('applicants')->group(function () {
     Route::patch('/{id}/stage', [ApplicationController::class, 'updateStatus']);
     Route::post('/{id}/notes', [ApplicationController::class, 'addNote']);
     Route::get('/{id}/bundle', [ApplicationController::class, 'bundleDocuments']);
+    Route::get('/{id}/bundle/status', [ApplicationController::class, 'bundleStatus']);
     Route::post('/{id}/send-profile-completion', [ApplicationController::class, 'sendProfileCompletion']);
 });
 

@@ -15,6 +15,7 @@ class ApplicationDocumentService
         $parent = is_string($application->parent_info) ? json_decode($application->parent_info, true) : (array) $application->parent_info;
         $spouse = is_string($application->spouse_info) ? json_decode($application->spouse_info, true) : (array) $application->spouse_info;
         $additional = is_string($application->additional_info) ? json_decode($application->additional_info, true) : (array) $application->additional_info;
+        $documents = is_string($application->documents) ? json_decode($application->documents, true) : (array) ($application->documents ?? []);
 
         $phpWord = new PhpWord();
         $phpWord->setDefaultFontName('Arial');
@@ -95,6 +96,11 @@ class ApplicationDocumentService
         $this->addRow($table, "Pernah Bekerja di Sini?", strtoupper($additional['workedAtCompany'] ?? 'tidak'));
         $this->addRow($table, "Memiliki Kendaraan?", strtoupper($additional['hasVehicle'] ?? 'tidak'));
 
+        $this->addEducationSection($section, $application, $sectionTitleStyle);
+        $this->addExperienceSection($section, $application, $sectionTitleStyle);
+        $this->addCertificationSection($section, $application, $sectionTitleStyle);
+        $this->addDocumentChecklist($section, $documents, $sectionTitleStyle);
+
         // Target Output file .docx
         $objWriter = IOFactory::createWriter($phpWord, 'Word2007');
         $objWriter->save($savePath);
@@ -108,5 +114,120 @@ class ApplicationDocumentService
         $table->addRow();
         $table->addCell(2500, ['bgColor' => 'F9F9F9'])->addText($label, ['bold' => true, 'size' => 9]);
         $table->addCell(5500)->addText($value, ['size' => 9]);
+    }
+
+    private function addEducationSection($section, object $application, array $sectionTitleStyle): void
+    {
+        $educations = $this->readRelation($application, 'educations');
+
+        $section->addTextBreak(1);
+        $section->addText('5. RIWAYAT PENDIDIKAN', $sectionTitleStyle, ['spaceAfter' => 60]);
+
+        if ($educations === []) {
+            $section->addText('-', ['size' => 9]);
+            return;
+        }
+
+        $table = $section->addTable('MainTable');
+        foreach ($educations as $education) {
+            $this->addRow(
+                $table,
+                (string) ($education['level'] ?? 'Pendidikan'),
+                trim($this->value($education, 'schoolName', 'school_name') . ' - ' . $this->value($education, 'major') . ' (' . $this->value($education, 'yearStart', 'year_start') . ' - ' . $this->value($education, 'yearEnd', 'year_end') . ')')
+            );
+        }
+    }
+
+    private function addExperienceSection($section, object $application, array $sectionTitleStyle): void
+    {
+        $experiences = $this->readRelation($application, 'experiences');
+
+        $section->addTextBreak(1);
+        $section->addText('6. PENGALAMAN KERJA', $sectionTitleStyle, ['spaceAfter' => 60]);
+
+        if ($experiences === []) {
+            $section->addText('-', ['size' => 9]);
+            return;
+        }
+
+        $table = $section->addTable('MainTable');
+        foreach ($experiences as $experience) {
+            $this->addRow(
+                $table,
+                $this->value($experience, 'companyName', 'company_name', default: 'Perusahaan'),
+                trim($this->value($experience, 'jobPosition', 'job_position') . ' (' . $this->value($experience, 'yearStart', 'year_start') . ' - ' . $this->value($experience, 'yearEnd', 'year_end') . ') - ' . $this->value($experience, 'jobDescription', 'job_description'))
+            );
+        }
+    }
+
+    private function addCertificationSection($section, object $application, array $sectionTitleStyle): void
+    {
+        $certifications = $this->readRelation($application, 'certifications');
+
+        $section->addTextBreak(1);
+        $section->addText('7. SERTIFIKASI', $sectionTitleStyle, ['spaceAfter' => 60]);
+
+        if ($certifications === []) {
+            $section->addText('-', ['size' => 9]);
+            return;
+        }
+
+        $table = $section->addTable('MainTable');
+        foreach ($certifications as $certification) {
+            $this->addRow(
+                $table,
+                $this->value($certification, 'courseName', 'course_name', default: 'Sertifikasi'),
+                trim($this->value($certification, 'organization') . ' - ' . $this->value($certification, 'year') . ' (' . $this->value($certification, 'duration') . ')')
+            );
+        }
+    }
+
+    private function addDocumentChecklist($section, array $documents, array $sectionTitleStyle): void
+    {
+        $labels = [
+            'cv' => 'CV / Resume',
+            'foto' => 'Foto Diri',
+            'ktp' => 'Foto KTP',
+            'ijazah' => 'Scan Ijazah',
+        ];
+
+        $section->addTextBreak(1);
+        $section->addText('8. DOKUMEN TERLAMPIR', $sectionTitleStyle, ['spaceAfter' => 60]);
+
+        $table = $section->addTable('MainTable');
+        foreach ($labels as $key => $label) {
+            $document = $documents[$key] ?? null;
+            $fileName = is_array($document)
+                ? ($document['file_name'] ?? $document['path'] ?? 'Ada')
+                : ($document ?: '-');
+
+            $this->addRow($table, $label, $fileName ? (string) $fileName : '-');
+        }
+    }
+
+    private function readRelation(object $application, string $relation): array
+    {
+        if (!method_exists($application, 'relationLoaded') || !$application->relationLoaded($relation)) {
+            return [];
+        }
+
+        return $application->{$relation}
+            ->map(fn ($item) => $item->toArray())
+            ->all();
+    }
+
+    private function value(array $data, string $key, ?string $fallbackKey = null, string $default = '-'): string
+    {
+        $value = $data[$key] ?? ($fallbackKey ? ($data[$fallbackKey] ?? null) : null);
+
+        if ($value === null || $value === '') {
+            return $default;
+        }
+
+        if (is_array($value)) {
+            return implode(', ', array_filter($value));
+        }
+
+        return (string) $value;
     }
 }
