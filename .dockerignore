@@ -1,0 +1,10 @@
+src/.env
+src/.env.*
+src/.DS_Store
+src/node_modules
+src/vendor
+src/public/storage
+src/storage/logs/*.log
+src/storage/framework/cache/data/*
+src/storage/framework/sessions/*
+src/storage/framework/views/*
