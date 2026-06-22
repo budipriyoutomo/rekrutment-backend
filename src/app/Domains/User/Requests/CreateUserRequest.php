@@ -9,7 +9,7 @@ use Illuminate\Validation\Rules\Password;
 
 class CreateUserRequest extends BaseRequest
 {
-    public function rules(): array
+    protected function rulesForCreate(): array
     {
         return [
             'name'     => ['required', 'string', 'max:255'],
@@ -17,5 +17,10 @@ class CreateUserRequest extends BaseRequest
             'password' => ['required', Password::min(8)],
             'role'     => ['required', Rule::in(array_column(Role::cases(), 'value'))],
         ];
+    }
+
+    protected function rulesForUpdate(): array
+    {
+        return $this->rulesForCreate();
     }
 }

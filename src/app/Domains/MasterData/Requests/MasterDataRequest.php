@@ -8,7 +8,21 @@ use Illuminate\Validation\Rule;
 
 class MasterDataRequest extends BaseRequest
 {
-    public function rules(): array
+    protected function rulesForCreate(): array
+    {
+        return [
+            'type'       => ['required', Rule::enum(MasterDataType::class)],
+            'name'       => ['required', 'string', 'max:200'],
+            'code'       => [
+                'nullable', 'string', 'max:50',
+                Rule::unique('master_data')->where('type', $this->input('type')),
+            ],
+            'is_active'  => ['sometimes', 'boolean'],
+            'sort_order' => ['sometimes', 'integer', 'min:0', 'max:9999'],
+        ];
+    }
+
+    protected function rulesForUpdate(): array
     {
         $id = $this->route('id');
 

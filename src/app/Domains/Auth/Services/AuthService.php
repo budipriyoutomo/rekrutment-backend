@@ -88,6 +88,19 @@ class AuthService
     }
 
     /**
+     * Send password reset link (simple stub — extend with Notification/Mail as needed)
+     */
+    public function forgotPassword(string $email): array
+    {
+        // Cek apakah email terdaftar (tidak expose info ke luar)
+        User::where('email', $email)->first();
+
+        return [
+            'message' => 'Jika email terdaftar, instruksi reset password telah dikirim.',
+        ];
+    }
+
+    /**
      * Get authenticated user
      */
     public function me(): array

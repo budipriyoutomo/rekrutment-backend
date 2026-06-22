@@ -48,20 +48,24 @@ class EvaluationRequest extends BaseRequest
     {
         parent::prepareForValidation();
 
-        $this->merge([
-            'applicant_id' => $this->input('applicant_id', $this->input('applicantId')),
-            'applicant_name' => $this->input('applicant_name', $this->input('applicantName')),
-            'position' => $this->input('position'),
-            'evaluator' => $this->input('evaluator'),
-            'date' => $this->input('date'),
-            'communication_score' => $this->input('communication_score', $this->input('communicationScore')),
-            'technical_score' => $this->input('technical_score', $this->input('technicalScore')),
-            'experience_score' => $this->input('experience_score', $this->input('experienceScore')),
-            'culture_fit_score' => $this->input('culture_fit_score', $this->input('cultureFitScore')),
-            'recommendation' => $this->input('recommendation'),
-            'strengths' => $this->input('strengths'),
-            'improvements' => $this->input('improvements'),
-            'notes' => $this->input('notes'),
-        ]);
+        $camelMap = [
+            'applicantId'        => 'applicant_id',
+            'applicantName'      => 'applicant_name',
+            'communicationScore' => 'communication_score',
+            'technicalScore'     => 'technical_score',
+            'experienceScore'    => 'experience_score',
+            'cultureFitScore'    => 'culture_fit_score',
+        ];
+
+        $extras = [];
+        foreach ($camelMap as $camel => $snake) {
+            if ($this->has($camel)) {
+                $extras[$snake] = $this->input($camel);
+            }
+        }
+
+        if ($extras) {
+            $this->merge($extras);
+        }
     }
 }

@@ -9,7 +9,12 @@ use Illuminate\Validation\Rules\Password;
 
 class UpdateUserRequest extends BaseRequest
 {
-    public function rules(): array
+    protected function rulesForCreate(): array
+    {
+        return $this->rulesForUpdate();
+    }
+
+    protected function rulesForUpdate(): array
     {
         $id = $this->route('id');
 

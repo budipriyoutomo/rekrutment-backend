@@ -11,18 +11,20 @@ use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 */
 
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use PHPOpenSourceSaver\JWTAuth\Contracts\JWTSubject;
 
 class User extends Authenticatable implements JWTSubject
 {
-    /**
-     * Daftarkan kolom yang boleh diisi secara massal saat Register/Create.
-     */
+    use HasFactory;
+
     protected $fillable = [
         'name',
         'email',
         'password',
+        'role',
+        'is_active',
     ];
 
     /**

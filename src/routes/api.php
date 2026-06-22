@@ -7,6 +7,7 @@ use App\Http\Controllers\ApplicationController;
 use App\Http\Controllers\EvaluationController;
 use App\Http\Controllers\InterviewController;
 use App\Http\Controllers\InterviewerController;
+use App\Http\Controllers\JobRequestController;
 use App\Http\Controllers\ProfileCompletionController;
 use App\Http\Controllers\VacancyController;
 use App\Http\Controllers\MasterDataController;
@@ -22,6 +23,7 @@ Route::prefix('profile-completion')->group(function () {
 Route::prefix('auth')->group(function () {
     Route::post('register', [AuthController::class, 'register']);
     Route::post('login', [AuthController::class, 'login']);
+    Route::post('forgot-password', [AuthController::class, 'forgotPassword']);
 
     Route::middleware('auth:api')->group(function () {
         Route::get('me', [AuthController::class, 'me']);
@@ -92,6 +94,17 @@ Route::prefix('users')->group(function () {
     Route::get('/{id}', [UserController::class, 'show']);
     Route::put('/{id}', [UserController::class, 'update']);
     Route::delete('/{id}', [UserController::class, 'destroy']);
+});
+
+Route::prefix('job-requests')->group(function () {
+    Route::get('/', [JobRequestController::class, 'index']);
+    Route::post('/', [JobRequestController::class, 'store']);
+    Route::get('/{id}', [JobRequestController::class, 'show']);
+    Route::put('/{id}', [JobRequestController::class, 'update']);
+    Route::patch('/{id}', [JobRequestController::class, 'update']);
+    Route::delete('/{id}', [JobRequestController::class, 'destroy']);
+    Route::post('/{id}/approve', [JobRequestController::class, 'approve']);
+    Route::post('/{id}/reject', [JobRequestController::class, 'reject']);
 });
 
 Route::prefix('vacancies')->group(function () {
