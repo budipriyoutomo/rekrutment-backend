@@ -13,6 +13,8 @@ use App\Http\Controllers\VacancyController;
 use App\Http\Controllers\MasterDataController;
 use App\Http\Controllers\CompanySettingController;
 use App\Http\Controllers\UserController;
+use App\Http\Controllers\AnalyticsController;
+use App\Http\Controllers\SalarySlipController;
 
 // Rute publik untuk profile completion (diakses oleh kandidat via link email)
 Route::prefix('profile-completion')->group(function () {
@@ -105,6 +107,16 @@ Route::prefix('job-requests')->group(function () {
     Route::delete('/{id}', [JobRequestController::class, 'destroy']);
     Route::post('/{id}/approve', [JobRequestController::class, 'approve']);
     Route::post('/{id}/reject', [JobRequestController::class, 'reject']);
+});
+
+Route::get('analytics', [AnalyticsController::class, 'index']);
+
+Route::prefix('salary-slips')->group(function () {
+    Route::get('/', [SalarySlipController::class, 'index']);
+    Route::post('/', [SalarySlipController::class, 'store']);
+    Route::post('/import', [SalarySlipController::class, 'import']);
+    Route::post('/send', [SalarySlipController::class, 'send']);
+    Route::delete('/bulk', [SalarySlipController::class, 'bulkDelete']);
 });
 
 Route::prefix('vacancies')->group(function () {
