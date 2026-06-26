@@ -25,6 +25,13 @@ class BundleApplicationDocumentAction
         }
 
         $documents = $application->documents ?? [];
+        $existingBundle = $documents['bundle'] ?? null;
+
+        // If already processing or ready, do not re-trigger
+        if (in_array($existingBundle['status'] ?? null, ['processing', 'ready'], true)) {
+            return;
+        }
+
         $documents['bundle'] = [
             'status' => 'processing',
             'path' => null,
@@ -39,7 +46,7 @@ class BundleApplicationDocumentAction
         $application->update([
             'documents' => $documents,
         ]);
-        
+
         // Memicu event untuk menandakan bahwa proses bundling telah diminta
         event(new ApplicationBundlingRequested($applicationId));
     }

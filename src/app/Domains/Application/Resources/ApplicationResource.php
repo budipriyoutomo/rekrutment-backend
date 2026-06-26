@@ -78,6 +78,8 @@ class ApplicationResource extends JsonResource
                 'availableDate' => $this->additional_info['availableDate'] ?? null,
                 'jobSource' => $this->additional_info['jobSource'] ?? null,
                 'quickApply' => $this->additional_info['quickApply'] ?? null,
+                'age' => $this->additional_info['age'] ?? null,
+                'workLocation' => $this->additional_info['workLocation'] ?? null,
             ],
 
             // =========================
