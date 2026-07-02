@@ -15,7 +15,8 @@ return new class extends Migration
             $table->string('location');
             $table->enum('type', ['full-time', 'part-time', 'contract', 'internship'])->default('full-time');
             $table->enum('status', ['open', 'closed', 'draft'])->default('draft');
-            $table->string('salary')->nullable();
+            // Salary range disimpan sebagai JSON: {"min": <batas bawah>, "max": <batas atas>}
+            $table->json('salary')->nullable();
             $table->text('description');
             $table->json('requirements')->nullable();
             $table->date('posted_date')->nullable();

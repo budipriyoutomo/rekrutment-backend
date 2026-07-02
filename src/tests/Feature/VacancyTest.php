@@ -76,6 +76,27 @@ class VacancyTest extends TestCase
             ->assertStatus(422);
     }
 
+    public function test_store_persists_salary_range_as_json(): void
+    {
+        $response = $this->postJson('/api/vacancies', $this->vacancyData([
+            'salary' => ['min' => 25000000, 'max' => 40000000],
+        ]));
+
+        $response->assertStatus(200)
+            ->assertJsonPath('data.salary.min', 25000000)
+            ->assertJsonPath('data.salary.max', 40000000);
+
+        $vacancy = Vacancy::first();
+        $this->assertSame(['min' => 25000000, 'max' => 40000000], $vacancy->salary);
+    }
+
+    public function test_store_rejects_max_salary_below_min(): void
+    {
+        $this->postJson('/api/vacancies', $this->vacancyData([
+            'salary' => ['min' => 40000000, 'max' => 10000000],
+        ]))->assertStatus(422);
+    }
+
     // ------------------------------------------------------------------ show
 
     public function test_show_returns_vacancy(): void
