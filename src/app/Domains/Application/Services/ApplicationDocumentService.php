@@ -4,11 +4,17 @@ namespace App\Domains\Application\Services;
 
 use PhpOffice\PhpWord\PhpWord;
 use PhpOffice\PhpWord\IOFactory;
+use PhpOffice\PhpWord\Settings;
 
 class ApplicationDocumentService
 {
     public function generateApplicationDocx(object $application, string $savePath): void
     {
+        // Escape otomatis karakter XML (&, <, >) pada semua teks — tanpa ini,
+        // teks yang mengandung "&" menghasilkan document.xml rusak dan
+        // LibreOffice gagal membuka file saat konversi ke PDF.
+        Settings::setOutputEscapingEnabled(true);
+
         // Pastikan JSON di-decode menjadi array (jika belum otomatis di-cast oleh Model)
         $personal = is_string($application->personal_info) ? json_decode($application->personal_info, true) : (array) $application->personal_info;
         $contact = is_string($application->contact_info) ? json_decode($application->contact_info, true) : (array) $application->contact_info;

@@ -94,6 +94,51 @@ class ApplicationService extends BaseService
             ]);
         }
 
+        // 🔍 filter berdasarkan inputan quick apply (/apply)
+        if (!empty($filters['gender'])) {
+            $query->where('personal_info->gender', $filters['gender']);
+        }
+
+        if (!empty($filters['workLocation'])) {
+            $query->where('additional_info->workLocation', $filters['workLocation']);
+        }
+
+        if (!empty($filters['jobSource'])) {
+            $query->where('additional_info->jobSource', $filters['jobSource']);
+        }
+
+        if (!empty($filters['hasVehicle'])) {
+            $query->where('additional_info->hasVehicle', $filters['hasVehicle']);
+        }
+
+        if (!empty($filters['workedBefore'])) {
+            $query->where('additional_info->workedAtCompany', $filters['workedBefore']);
+        }
+
+        if (!empty($filters['domicile'])) {
+            $domicile = $filters['domicile'];
+
+            $query->where(function ($q) use ($domicile) {
+                $q->where('contact_info->currentAddress', 'ilike', "%$domicile%")
+                  ->orWhere('contact_info->homeAddress', 'ilike', "%$domicile%");
+            });
+        }
+
+        // usia disimpan sebagai string di JSON, ambil digitnya saja sebelum cast
+        if (!empty($filters['ageMin'])) {
+            $query->whereRaw(
+                "NULLIF(regexp_replace(additional_info->>'age', '\D', '', 'g'), '')::int >= ?",
+                [(int) $filters['ageMin']]
+            );
+        }
+
+        if (!empty($filters['ageMax'])) {
+            $query->whereRaw(
+                "NULLIF(regexp_replace(additional_info->>'age', '\D', '', 'g'), '')::int <= ?",
+                [(int) $filters['ageMax']]
+            );
+        }
+
         return $query
             ->latest()
             ->paginate($perPage);

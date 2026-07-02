@@ -4,13 +4,16 @@ namespace App\Domains\Interview\Services;
 
 use App\Core\Services\BaseService;
 use App\Domains\Application\Models\Application;
+use App\Domains\Interview\Actions\SendInterviewInvitationAction;
 use App\Domains\Interview\Models\Interview;
 use Illuminate\Pagination\LengthAwarePaginator;
 
 class InterviewService extends BaseService
 {
-    public function __construct(Interview $model)
-    {
+    public function __construct(
+        Interview $model,
+        private readonly SendInterviewInvitationAction $sendInvitationAction,
+    ) {
         parent::__construct($model);
     }
 
@@ -75,11 +78,22 @@ class InterviewService extends BaseService
             'status' => $data['status'] ?? 'scheduled',
             'room' => $data['room'] ?? null,
             'notes' => $data['notes'] ?? null,
-            'email_sent' => $sendEmail,
-            'email_sent_at' => $sendEmail ? now() : null,
+            'email_sent' => false,
+            'email_sent_at' => null,
         ]);
 
-        return $interview->load('applicant');
+        $interview->load('applicant');
+
+        // Kirim email undangan hanya jika HR mencentang "send invite".
+        // Flag email_sent mencerminkan hasil pengiriman yang sebenarnya.
+        if ($sendEmail && $this->sendInvitationAction->execute($interview)) {
+            $interview->update([
+                'email_sent' => true,
+                'email_sent_at' => now(),
+            ]);
+        }
+
+        return $interview->refresh()->load('applicant');
     }
 
     public function updateSchedule(string $id, array $data): Interview
@@ -104,7 +118,11 @@ class InterviewService extends BaseService
 
     public function sendInvitation(string $id): Interview
     {
-        $interview = Interview::findOrFail($id);
+        $interview = Interview::with('applicant')->findOrFail($id);
+
+        if (!$this->sendInvitationAction->execute($interview)) {
+            throw new \RuntimeException('Email undangan gagal dikirim. Periksa alamat email kandidat/interviewer dan konfigurasi SMTP.');
+        }
 
         $interview->update([
             'email_sent' => true,

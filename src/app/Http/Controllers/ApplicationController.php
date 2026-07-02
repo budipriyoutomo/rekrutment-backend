@@ -24,7 +24,21 @@ class ApplicationController extends BaseApiController
     public function index(Request $request, ApplicationService $service)
     {
         $data = $service->getList(
-            filters: $request->only(['status', 'stage', 'search', 'startDate', 'endDate']),
+            filters: $request->only([
+                'status',
+                'stage',
+                'search',
+                'startDate',
+                'endDate',
+                'gender',
+                'workLocation',
+                'jobSource',
+                'hasVehicle',
+                'workedBefore',
+                'domicile',
+                'ageMin',
+                'ageMax',
+            ]),
             perPage: $request->get('per_page', $request->get('limit', 10))
         );
 
