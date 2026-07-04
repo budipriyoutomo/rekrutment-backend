@@ -36,6 +36,28 @@ class SalarySlipService
         return SalarySlip::create($dto->toArray());
     }
 
+    /**
+     * Kembalikan set kombinasi "nik|periode" yang SUDAH ada di DB,
+     * dibatasi pada nik & periode yang muncul di file (agar query ringan).
+     *
+     * @param  string[]  $niks
+     * @param  string[]  $periodes
+     * @return array<string,bool> key = "nik|periode"
+     */
+    public function existingNikPeriodeKeys(array $niks, array $periodes): array
+    {
+        if (empty($niks) || empty($periodes)) {
+            return [];
+        }
+
+        return SalarySlip::query()
+            ->whereIn('nik', array_values(array_unique($niks)))
+            ->whereIn('periode', array_values(array_unique($periodes)))
+            ->get(['nik', 'periode'])
+            ->mapWithKeys(fn ($s) => ["{$s->nik}|{$s->periode}" => true])
+            ->all();
+    }
+
     public function bulkInsert(array $dtos): int
     {
         $rows = array_map(fn(SalarySlipDTO $dto) => array_merge($dto->toArray(), [

@@ -13,6 +13,7 @@
         "laravel/framework": "^13.0",
         "laravel/tinker": "^3.0",
         "league/flysystem-aws-s3-v3": "^3.32",
+        "maatwebsite/excel": "^3.1",
         "php-open-source-saver/jwt-auth": "^2.9",
         "phpoffice/phpword": "^1.4",
         "setasign/fpdf": "^1.9",
@@ -85,6 +86,9 @@
         "optimize-autoloader": true,
         "preferred-install": "dist",
         "sort-packages": true,
+        "platform": {
+            "php": "8.4.0"
+        },
         "allow-plugins": {
             "pestphp/pest-plugin": true,
             "php-http/discovery": true

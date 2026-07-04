@@ -15,6 +15,8 @@ use App\Http\Controllers\CompanySettingController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\AnalyticsController;
 use App\Http\Controllers\SalarySlipController;
+use App\Http\Controllers\MailAccountController;
+use App\Enums\Role;
 
 // Rute publik untuk profile completion (diakses oleh kandidat via link email)
 Route::prefix('profile-completion')->group(function () {
@@ -111,7 +113,22 @@ Route::prefix('job-requests')->group(function () {
 
 Route::get('analytics', [AnalyticsController::class, 'index']);
 
+// Akun email pengirim. Pembacaan (dropdown) terbuka, tetapi pengelolaan
+// kredensial dibatasi role admin/super_admin.
+Route::prefix('mail-accounts')->group(function () {
+    Route::get('/', [MailAccountController::class, 'index']);
+    Route::get('/{id}', [MailAccountController::class, 'show']);
+
+    Route::middleware('role:' . Role::ADMIN->value)->group(function () {
+        Route::post('/', [MailAccountController::class, 'store']);
+        Route::put('/{id}', [MailAccountController::class, 'update']);
+        Route::delete('/{id}', [MailAccountController::class, 'destroy']);
+    });
+});
+
 Route::prefix('salary-slips')->group(function () {
+    Route::get('/template', [SalarySlipController::class, 'template']);
+    Route::get('/{id}/pdf', [SalarySlipController::class, 'pdf']);
     Route::get('/', [SalarySlipController::class, 'index']);
     Route::post('/', [SalarySlipController::class, 'store']);
     Route::post('/import', [SalarySlipController::class, 'import']);
