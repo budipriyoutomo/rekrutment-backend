@@ -12,6 +12,7 @@ class MailAccountRequest extends BaseRequest
         return [
             'label'           => ['required', 'string', 'max:255'],
             'driver'          => ['required', Rule::in(['smtp', 'ses', 'mailgun'])],
+            'purpose'         => ['required', Rule::in(['recruitment', 'salary_slip'])],
             'from_email'      => ['required', 'email', 'max:255'],
             'from_name'       => ['required', 'string', 'max:255'],
             'smtp_host'       => ['nullable', 'string', 'max:255', 'required_if:driver,smtp'],
@@ -29,6 +30,7 @@ class MailAccountRequest extends BaseRequest
         return [
             'label'           => ['sometimes', 'string', 'max:255'],
             'driver'          => ['sometimes', Rule::in(['smtp', 'ses', 'mailgun'])],
+            'purpose'         => ['sometimes', Rule::in(['recruitment', 'salary_slip'])],
             'from_email'      => ['sometimes', 'email', 'max:255'],
             'from_name'       => ['sometimes', 'string', 'max:255'],
             'smtp_host'       => ['nullable', 'string', 'max:255'],

@@ -38,8 +38,18 @@ class PayslipDocumentBuilder
         ]);
 
         // ---- Kop ----
-        $section->addText('ALTIMA GROUP', ['bold' => true, 'size' => 12], ['alignment' => 'center', 'spaceAfter' => 0]);
-        $section->addText('SLIP GAJI', ['bold' => true, 'size' => 14], ['alignment' => 'center', 'spaceAfter' => 60]);
+        // Satu baris: "ALTIMA GROUP" rata kiri, "SLIP GAJI" tetap center di halaman.
+        // Kolom kiri & kanan sama lebar (W_SIDE) agar kolom tengah center pada halaman.
+        $wSide   = self::W_LABEL;
+        $wCenter = 2 * self::W_HALF - 2 * $wSide;
+        $kop = $this->centeredTable($section, ['cellMargin' => 0]);
+        $kop->addRow();
+        $kop->addCell($wSide, ['valign' => 'center'])
+            ->addText('ALTIMA GROUP', ['bold' => true, 'size' => 12], ['spaceAfter' => 0]);
+        $kop->addCell($wCenter, ['valign' => 'center'])
+            ->addText('SLIP GAJI', ['bold' => true, 'size' => 14], ['alignment' => 'center', 'spaceAfter' => 0]);
+        $kop->addCell($wSide);
+        $this->spacer($section);
 
         // ---- Info karyawan ----
         $info = $this->centeredTable($section, ['cellMargin' => 20]);

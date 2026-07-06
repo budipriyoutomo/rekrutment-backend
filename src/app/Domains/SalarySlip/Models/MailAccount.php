@@ -12,9 +12,19 @@ class MailAccount extends BaseModel
 
     protected $table = 'mail_accounts';
 
+    // Peruntukan akun email. Extensible untuk kategori lain di kemudian hari.
+    public const PURPOSE_RECRUITMENT = 'recruitment';
+    public const PURPOSE_SALARY_SLIP = 'salary_slip';
+
+    public const PURPOSES = [
+        self::PURPOSE_RECRUITMENT,
+        self::PURPOSE_SALARY_SLIP,
+    ];
+
     protected $fillable = [
         'label',
         'driver',
+        'purpose',
         'from_email',
         'from_name',
         'smtp_host',

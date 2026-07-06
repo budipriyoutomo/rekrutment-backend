@@ -99,6 +99,10 @@ class ApplicationService extends BaseService
             $query->where('personal_info->gender', $filters['gender']);
         }
 
+        if (!empty($filters['position'])) {
+            $query->where('additional_info->positionApplied', $filters['position']);
+        }
+
         if (!empty($filters['workLocation'])) {
             $query->where('additional_info->workLocation', $filters['workLocation']);
         }

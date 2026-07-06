@@ -33,6 +33,7 @@ class MailAccountTest extends TestCase
         return array_merge([
             'label'           => 'HR Team',
             'driver'          => 'smtp',
+            'purpose'         => 'salary_slip',
             'from_email'      => 'hr@altima.co.id',
             'from_name'       => 'HR Altima',
             'smtp_host'       => 'smtp.altima.co.id',
@@ -143,6 +144,66 @@ class MailAccountTest extends TestCase
 
         $this->assertFalse($a->fresh()->is_default);
         $this->assertSame(1, MailAccount::where('is_default', true)->count());
+    }
+
+    // ---------------------------------------------------------------------- purpose
+
+    public function test_default_is_scoped_per_purpose(): void
+    {
+        // Default rekrutmen tidak boleh mematikan default slip gaji, dan sebaliknya.
+        $slip = $this->makeAccount(['label' => 'Slip', 'purpose' => 'salary_slip', 'is_default' => true]);
+
+        $this->actingAsRole('admin')
+            ->postJson('/api/mail-accounts', $this->payload([
+                'label' => 'Rekrutmen', 'from_email' => 'rec@altima.co.id',
+                'purpose' => 'recruitment', 'is_default' => true,
+            ]))
+            ->assertStatus(200)
+            ->assertJsonPath('data.purpose', 'recruitment');
+
+        // Default slip gaji tetap aktif — beda purpose, tidak saling mematikan.
+        $this->assertTrue($slip->fresh()->is_default);
+        $this->assertSame(1, MailAccount::where('purpose', 'recruitment')->where('is_default', true)->count());
+        $this->assertSame(1, MailAccount::where('purpose', 'salary_slip')->where('is_default', true)->count());
+    }
+
+    public function test_purpose_required_on_create(): void
+    {
+        $payload = $this->payload();
+        unset($payload['purpose']);
+
+        $this->actingAsRole('admin')
+            ->postJson('/api/mail-accounts', $payload)
+            ->assertStatus(422)
+            ->assertJsonValidationErrors('purpose');
+    }
+
+    public function test_list_filters_by_purpose(): void
+    {
+        $this->makeAccount(['label' => 'Slip', 'purpose' => 'salary_slip']);
+        $this->makeAccount(['label' => 'Rekrutmen', 'from_email' => 'rec@altima.co.id', 'purpose' => 'recruitment']);
+
+        $this->getJson('/api/mail-accounts?purpose=salary_slip')
+            ->assertStatus(200)
+            ->assertJsonCount(1, 'data')
+            ->assertJsonPath('data.0.purpose', 'salary_slip');
+    }
+
+    public function test_env_default_included_only_when_requested(): void
+    {
+        $this->makeAccount(['label' => 'Rekrutmen', 'from_email' => 'rec@altima.co.id', 'purpose' => 'recruitment']);
+
+        // Tanpa include_env — hanya akun DB.
+        $this->getJson('/api/mail-accounts?purpose=recruitment')
+            ->assertStatus(200)
+            ->assertJsonCount(1, 'data');
+
+        // Dengan include_env — entri virtual .env disisipkan di depan (read-only).
+        $this->getJson('/api/mail-accounts?purpose=recruitment&include_env=true')
+            ->assertStatus(200)
+            ->assertJsonCount(2, 'data')
+            ->assertJsonPath('data.0.isEnvDefault', true)
+            ->assertJsonPath('data.0.id', 'env-recruitment');
     }
 
     // ------------------------------------------------------------------- resolver

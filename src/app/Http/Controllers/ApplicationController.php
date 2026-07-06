@@ -31,6 +31,7 @@ class ApplicationController extends BaseApiController
                 'startDate',
                 'endDate',
                 'gender',
+                'position',
                 'workLocation',
                 'jobSource',
                 'hasVehicle',

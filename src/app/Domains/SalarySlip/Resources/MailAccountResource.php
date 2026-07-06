@@ -16,6 +16,7 @@ class MailAccountResource extends JsonResource
             'id'             => $this->id,
             'label'          => $this->label,
             'driver'         => $this->driver,
+            'purpose'        => $this->purpose,
             'fromEmail'      => $this->from_email,
             'fromName'       => $this->from_name,
             'smtpHost'       => $this->smtp_host,
@@ -25,6 +26,8 @@ class MailAccountResource extends JsonResource
             'hasPassword'    => ! empty($this->smtp_password_encrypted),
             'isDefault'      => (bool) $this->is_default,
             'isActive'       => (bool) $this->is_active,
+            // Entri default dari konfigurasi .env (read-only, tidak bisa diedit/hapus).
+            'isEnvDefault'   => (bool) ($this->is_env_default ?? false),
             'createdAt'      => $this->created_at?->toIso8601String(),
         ];
     }

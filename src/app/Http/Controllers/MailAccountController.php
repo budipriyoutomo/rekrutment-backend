@@ -16,14 +16,23 @@ class MailAccountController extends BaseApiController
 
     public function index(Request $request): JsonResponse
     {
+        $purpose = $request->string('purpose')->toString() ?: null;
+
         $accounts = $this->service->list(
             $request->boolean('active'),
+            $purpose,
         );
 
-        return $this->success(
-            MailAccountResource::collection($accounts),
-            'Daftar akun email berhasil diambil',
-        );
+        $data = MailAccountResource::collection($accounts)->resolve($request);
+
+        // Sisipkan entri default rekrutmen dari .env bila diminta (untuk halaman
+        // pengaturan). Hanya relevan saat memandang purpose rekrutmen / semua.
+        if ($request->boolean('include_env')
+            && (! $purpose || $purpose === MailAccount::PURPOSE_RECRUITMENT)) {
+            array_unshift($data, $this->service->envRecruitmentDefault());
+        }
+
+        return $this->success($data, 'Daftar akun email berhasil diambil');
     }
 
     public function store(MailAccountRequest $request): JsonResponse
