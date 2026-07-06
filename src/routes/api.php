@@ -42,7 +42,9 @@ Route::prefix('applications')->group(function () {
     Route::get('/status/{id}', [ApplicationController::class, 'status']);
 });
 
-Route::prefix('applicants')->group(function () {
+// Dikonsumsi oleh menu Applicants, Candidates, Pipeline, Documents, dan
+// dropdown di halaman Interviews. Boleh diakses bila user punya salah satu izin.
+Route::prefix('applicants')->middleware('permission:applicants,candidates,pipeline,documents,interviews')->group(function () {
     Route::get('/', [ApplicationController::class, 'index']);
     Route::post('/', [ApplicationController::class, 'submit']);
     Route::get('/{id}', [ApplicationController::class, 'show']);
@@ -53,7 +55,7 @@ Route::prefix('applicants')->group(function () {
     Route::post('/{id}/send-profile-completion', [ApplicationController::class, 'sendProfileCompletion']);
 });
 
-Route::prefix('interviews')->group(function () {
+Route::prefix('interviews')->middleware('permission:interviews')->group(function () {
     Route::get('/', [InterviewController::class, 'index']);
     Route::post('/', [InterviewController::class, 'store']);
     Route::get('/{id}', [InterviewController::class, 'show']);
@@ -62,7 +64,7 @@ Route::prefix('interviews')->group(function () {
     Route::post('/{id}/send-invitation', [InterviewController::class, 'sendInvitation']);
 });
 
-Route::prefix('interviewers')->group(function () {
+Route::prefix('interviewers')->middleware('permission:interviewers')->group(function () {
     Route::get('/', [InterviewerController::class, 'index']);
     Route::post('/', [InterviewerController::class, 'store']);
     Route::get('/{id}', [InterviewerController::class, 'show']);
@@ -70,7 +72,7 @@ Route::prefix('interviewers')->group(function () {
     Route::delete('/{id}', [InterviewerController::class, 'destroy']);
 });
 
-Route::prefix('evaluations')->group(function () {
+Route::prefix('evaluations')->middleware('permission:evaluations')->group(function () {
     Route::get('/', [EvaluationController::class, 'index']);
     Route::post('/', [EvaluationController::class, 'store']);
     Route::get('/{id}', [EvaluationController::class, 'show']);
@@ -78,21 +80,28 @@ Route::prefix('evaluations')->group(function () {
     Route::delete('/{id}', [EvaluationController::class, 'destroy']);
 });
 
+// GET master-data terbuka: dipakai untuk dropdown di halaman publik (Quick Apply)
+// dan sidebar. Operasi tulis dibatasi izin menu Master Data.
 Route::prefix('master-data')->group(function () {
     Route::get('/types', [MasterDataController::class, 'types']);
     Route::get('/', [MasterDataController::class, 'index']);
-    Route::post('/', [MasterDataController::class, 'store']);
-    Route::put('/{id}', [MasterDataController::class, 'update']);
-    Route::delete('/{id}', [MasterDataController::class, 'destroy']);
-    Route::patch('/{id}/toggle', [MasterDataController::class, 'toggleActive']);
+
+    Route::middleware('permission:master-data')->group(function () {
+        Route::post('/', [MasterDataController::class, 'store']);
+        Route::put('/{id}', [MasterDataController::class, 'update']);
+        Route::delete('/{id}', [MasterDataController::class, 'destroy']);
+        Route::patch('/{id}/toggle', [MasterDataController::class, 'toggleActive']);
+    });
 });
 
+// GET company terbuka (dipakai lintas halaman); update dibatasi izin Settings.
 Route::prefix('settings')->group(function () {
     Route::get('/company', [CompanySettingController::class, 'index']);
-    Route::put('/company', [CompanySettingController::class, 'update']);
+    Route::put('/company', [CompanySettingController::class, 'update'])->middleware('permission:settings');
 });
 
-Route::prefix('users')->group(function () {
+// Manajemen user hanya untuk yang punya izin menu Settings (admin/super_admin bypass).
+Route::prefix('users')->middleware('permission:settings')->group(function () {
     Route::get('/', [UserController::class, 'index']);
     Route::post('/', [UserController::class, 'store']);
     Route::get('/{id}', [UserController::class, 'show']);
@@ -100,7 +109,7 @@ Route::prefix('users')->group(function () {
     Route::delete('/{id}', [UserController::class, 'destroy']);
 });
 
-Route::prefix('job-requests')->group(function () {
+Route::prefix('job-requests')->middleware('permission:job-requests')->group(function () {
     Route::get('/', [JobRequestController::class, 'index']);
     Route::post('/', [JobRequestController::class, 'store']);
     Route::get('/{id}', [JobRequestController::class, 'show']);
@@ -126,7 +135,7 @@ Route::prefix('mail-accounts')->group(function () {
     });
 });
 
-Route::prefix('salary-slips')->group(function () {
+Route::prefix('salary-slips')->middleware('permission:salary-slips')->group(function () {
     Route::get('/template', [SalarySlipController::class, 'template']);
     Route::get('/{id}/pdf', [SalarySlipController::class, 'pdf']);
     Route::get('/', [SalarySlipController::class, 'index']);
@@ -136,12 +145,17 @@ Route::prefix('salary-slips')->group(function () {
     Route::delete('/bulk', [SalarySlipController::class, 'bulkDelete']);
 });
 
+// GET vacancies terbuka: dipakai halaman publik (landing page daftar lowongan).
+// Operasi tulis dibatasi izin menu Vacancies.
 Route::prefix('vacancies')->group(function () {
     Route::get('/', [VacancyController::class, 'index']);
-    Route::post('/', [VacancyController::class, 'store']);
     Route::get('/{id}', [VacancyController::class, 'show']);
-    Route::put('/{id}', [VacancyController::class, 'update']);
-    Route::patch('/{id}', [VacancyController::class, 'update']);
-    Route::patch('/{id}/close', [VacancyController::class, 'close']);
-    Route::delete('/{id}', [VacancyController::class, 'destroy']);
+
+    Route::middleware('permission:vacancies')->group(function () {
+        Route::post('/', [VacancyController::class, 'store']);
+        Route::put('/{id}', [VacancyController::class, 'update']);
+        Route::patch('/{id}', [VacancyController::class, 'update']);
+        Route::patch('/{id}/close', [VacancyController::class, 'close']);
+        Route::delete('/{id}', [VacancyController::class, 'destroy']);
+    });
 });

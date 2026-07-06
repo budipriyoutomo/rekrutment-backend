@@ -24,6 +24,7 @@ class User extends Authenticatable implements JWTSubject
         'email',
         'password',
         'role',
+        'permissions',
         'is_active',
     ];
 
@@ -41,6 +42,7 @@ class User extends Authenticatable implements JWTSubject
     protected $casts = [
         'email_verified_at' => 'datetime',
         'password' => 'hashed', // Mengotomatiskan Hash::make() di Laravel 10/11
+        'permissions' => 'array',
     ];
 
     public function getJWTIdentifier()
