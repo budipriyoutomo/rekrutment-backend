@@ -67,10 +67,20 @@ class PayslipDocumentBuilder
             ['TUNJANGAN LAIN-LAIN', $this->money($slip->tunjangan_lain)],
             ['LEMBUR', $this->money($slip->lembur)],
             ['TAMBAHAN GAJI', $this->money($slip->tambahan_gaji)],
+        ];
+
+        // Keterangan tambahan gaji (teks bebas) tampil tepat di bawah nominalnya,
+        // hanya bila diisi agar tidak menambah baris kosong pada slip A5.
+        $keteranganTambahan = trim((string) ($slip->keterangan_tambahan_gaji ?? ''));
+        if ($keteranganTambahan !== '') {
+            $penerimaan[] = ['KETERANGAN TAMBAHAN GAJI', $keteranganTambahan];
+        }
+
+        $penerimaan = array_merge($penerimaan, [
             ['PH DIBAYAR', $this->money($slip->ph_dibayar)],
             ['REFUND SERAGAM', $this->money($slip->refund_seragam)],
             ['JUMLAH SERVICE CHARGE', $this->money($slip->jumlah_service_charge)],
-        ];
+        ]);
 
         $pemotongan = [
             ['HK', $this->days($slip->hk_hari)],

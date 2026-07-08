@@ -56,6 +56,7 @@ class SalarySlipSchemaTest extends TestCase
         $expected = [
             'batch_id', 'gaji_pokok', 'tunjangan_jabatan', 'tunjangan_makan',
             'tunjangan_transport', 'tunjangan_lain', 'lembur', 'tambahan_gaji',
+            'keterangan_tambahan_gaji',
             'ph_dibayar', 'refund_seragam', 'jumlah_service_charge', 'total_penerimaan',
             'hk_hari', 'alpha_hari', 'ijin_ap_hari', 'sakit_hari', 'cuti_hari',
             'total_pot_absen', 'bpjs_ketenagakerjaan', 'bpjs_kesehatan', 'pinjaman',

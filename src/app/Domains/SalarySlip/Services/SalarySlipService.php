@@ -13,6 +13,18 @@ class SalarySlipService
     {
         $query = SalarySlip::query()->latest();
 
+        // Partisi menu: 'unsent' = belum pernah terkirim (menu Salary Slips),
+        // 'sent' = sudah pernah terkirim (menu Report Salary Slip). Memakai
+        // sent_at agar slip yang sedang dikirim-ulang (status queued/processing)
+        // tetap berada di menu Report, tidak lompat balik ke Salary Slips.
+        if (!empty($filters['status'])) {
+            if ($filters['status'] === 'sent') {
+                $query->whereNotNull('sent_at');
+            } elseif ($filters['status'] === 'unsent') {
+                $query->whereNull('sent_at');
+            }
+        }
+
         if (!empty($filters['periode'])) {
             $query->where('periode', $filters['periode']);
         }

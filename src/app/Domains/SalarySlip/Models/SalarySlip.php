@@ -30,7 +30,8 @@ class SalarySlip extends BaseModel
         'nik', 'nama', 'jabatan', 'periode', 'cabang', 'perusahaan', 'email',
         // komponen penerimaan
         'gaji_pokok', 'tunjangan_jabatan', 'tunjangan_makan', 'tunjangan_transport',
-        'tunjangan_lain', 'lembur', 'tambahan_gaji', 'ph_dibayar', 'refund_seragam',
+        'tunjangan_lain', 'lembur', 'tambahan_gaji', 'keterangan_tambahan_gaji',
+        'ph_dibayar', 'refund_seragam',
         'jumlah_service_charge', 'total_penerimaan',
         // absensi
         'hk_hari', 'alpha_hari', 'ijin_ap_hari', 'sakit_hari', 'cuti_hari',

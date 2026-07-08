@@ -50,7 +50,7 @@ class SalarySlipController extends BaseApiController
     public function index(Request $request): JsonResponse
     {
         $data = $this->service->getList(
-            $request->only(['periode', 'cabang', 'search']),
+            $request->only(['periode', 'cabang', 'search', 'status']),
             (int) $request->get('per_page', 50),
         );
 
