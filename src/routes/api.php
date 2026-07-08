@@ -135,14 +135,22 @@ Route::prefix('mail-accounts')->group(function () {
     });
 });
 
-Route::prefix('salary-slips')->middleware('permission:salary-slips')->group(function () {
-    Route::get('/template', [SalarySlipController::class, 'template']);
-    Route::get('/{id}/pdf', [SalarySlipController::class, 'pdf']);
-    Route::get('/', [SalarySlipController::class, 'index']);
-    Route::post('/', [SalarySlipController::class, 'store']);
-    Route::post('/import', [SalarySlipController::class, 'import']);
-    Route::post('/send', [SalarySlipController::class, 'send']);
-    Route::delete('/bulk', [SalarySlipController::class, 'bulkDelete']);
+Route::prefix('salary-slips')->group(function () {
+    // Baca & kirim: boleh diakses izin menu "Salary Slips" ATAU "Report Salary Slip".
+    // Menu Report menampilkan slip yang sudah terkirim dan bisa melakukan resend.
+    Route::middleware('permission:salary-slips,salary-slip-reports')->group(function () {
+        Route::get('/template', [SalarySlipController::class, 'template']);
+        Route::get('/{id}/pdf', [SalarySlipController::class, 'pdf']);
+        Route::get('/', [SalarySlipController::class, 'index']);
+        Route::post('/send', [SalarySlipController::class, 'send']);
+    });
+
+    // Tulis (import, buat, hapus massal): hanya izin menu "Salary Slips".
+    Route::middleware('permission:salary-slips')->group(function () {
+        Route::post('/', [SalarySlipController::class, 'store']);
+        Route::post('/import', [SalarySlipController::class, 'import']);
+        Route::delete('/bulk', [SalarySlipController::class, 'bulkDelete']);
+    });
 });
 
 // GET vacancies terbuka: dipakai halaman publik (landing page daftar lowongan).

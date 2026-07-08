@@ -20,6 +20,7 @@ enum MenuPermission: string
     case JOB_REQUESTS = 'job-requests';
     case ANALYTICS    = 'analytics';
     case SALARY_SLIPS = 'salary-slips';
+    case SALARY_SLIP_REPORTS = 'salary-slip-reports';
     case MASTER_DATA  = 'master-data';
     case SETTINGS     = 'settings';
 
