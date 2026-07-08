@@ -94,6 +94,11 @@ RUN echo "opcache.enable=1" > /usr/local/etc/php/conf.d/opcache.ini \
     && echo "opcache.max_accelerated_files=10000" >> /usr/local/etc/php/conf.d/opcache.ini \
     && echo "opcache.validate_timestamps=0" >> /usr/local/etc/php/conf.d/opcache.ini
 
+# Batas upload PHP. Default upload_max_filesize=2M persis di batas app (2MB),
+# jadi foto PNG yang mepet 2MB bisa ketolak. Kasih headroom + samakan post_max_size.
+RUN echo "upload_max_filesize=10M" > /usr/local/etc/php/conf.d/uploads.ini \
+    && echo "post_max_size=12M" >> /usr/local/etc/php/conf.d/uploads.ini
+
 EXPOSE 80
 
 CMD ["/usr/local/bin/rekrutment-entrypoint"]
