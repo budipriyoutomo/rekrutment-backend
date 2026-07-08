@@ -1,1 +1,4 @@
-* * * * * www-data php /var/www/artisan schedule:run >> /dev/null 2>&1
+# CATATAN: scheduler sekarang dijalankan lewat Supervisor (program:scheduler
+# menggunakan `schedule:work`), jadi file cron ini TIDAK dipakai lagi.
+# Dipertahankan hanya sebagai referensi. Path yang benar: /var/www/html/artisan
+* * * * * www-data php /var/www/html/artisan schedule:run >> /dev/null 2>&1
