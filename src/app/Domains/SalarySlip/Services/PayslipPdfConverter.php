@@ -25,43 +25,78 @@ class PayslipPdfConverter
             mkdir($outputDir, 0777, true);
         }
 
-        $binary     = $this->resolveBinary();
-        $profileDir = storage_path('app/libreoffice-profile');
+        $binary = $this->resolveBinary();
+
+        // Profile UserInstallation UNIK per konversi. LibreOffice headless cuma
+        // boleh dipakai satu proses per profile; kalau profile dipakai bareng
+        // (mis. konversi CV/bundling jalan barengan lewat queue) proses kedua
+        // exit 0 tapi TIDAK menghasilkan file -> "File PDF ... tidak ditemukan".
+        // Profile ditaruh di dalam outputDir yang sudah unik per run, lalu dibersihkan.
+        $profileDir = $outputDir . DIRECTORY_SEPARATOR . 'lo-profile';
         if (! is_dir($profileDir)) {
             mkdir($profileDir, 0777, true);
         }
 
-        $process = new Process([
-            $binary,
-            '-env:UserInstallation=file://' . $profileDir,
-            '--headless',
-            '--convert-to',
-            'pdf',
-            '--outdir',
-            $outputDir,
-            $sourcePath,
-        ]);
-        $process->setTimeout(120);
-        $process->run();
-
-        if (! $process->isSuccessful()) {
-            Log::error('PAYSLIP PDF CONVERSION ERROR', [
-                'binary' => $binary,
-                'error'  => $process->getErrorOutput(),
-                'output' => $process->getOutput(),
+        try {
+            $process = new Process([
+                $binary,
+                '-env:UserInstallation=file://' . $profileDir,
+                '--headless',
+                '--convert-to',
+                'pdf',
+                '--outdir',
+                $outputDir,
+                $sourcePath,
             ]);
+            $process->setTimeout(120);
+            $process->run();
 
-            throw new \RuntimeException('Gagal mengonversi slip gaji ke PDF.');
+            $pdfPath = $outputDir . DIRECTORY_SEPARATOR
+                . pathinfo($sourcePath, PATHINFO_FILENAME) . '.pdf';
+
+            // LibreOffice sering exit 0 walau gagal menulis file, jadi keberadaan
+            // file PDF adalah sumber kebenaran, bukan cuma exit code.
+            if (! $process->isSuccessful() || ! is_file($pdfPath)) {
+                Log::error('PAYSLIP PDF CONVERSION ERROR', [
+                    'binary'      => $binary,
+                    'source'      => $sourcePath,
+                    'expected'    => $pdfPath,
+                    'exit_code'   => $process->getExitCode(),
+                    'outdir_list' => glob($outputDir . DIRECTORY_SEPARATOR . '*') ?: [],
+                    'error'       => $process->getErrorOutput(),
+                    'output'      => $process->getOutput(),
+                ]);
+
+                throw new \RuntimeException(
+                    $process->isSuccessful()
+                        ? 'File PDF hasil konversi tidak ditemukan.'
+                        : 'Gagal mengonversi slip gaji ke PDF.'
+                );
+            }
+
+            return $pdfPath;
+        } finally {
+            $this->removeDir($profileDir);
+        }
+    }
+
+    /** Hapus direktori profile LibreOffice sementara beserta isinya (rekursif). */
+    private function removeDir(string $dir): void
+    {
+        if (! is_dir($dir)) {
+            return;
         }
 
-        $pdfPath = $outputDir . DIRECTORY_SEPARATOR
-            . pathinfo($sourcePath, PATHINFO_FILENAME) . '.pdf';
+        $items = new \RecursiveIteratorIterator(
+            new \RecursiveDirectoryIterator($dir, \FilesystemIterator::SKIP_DOTS),
+            \RecursiveIteratorIterator::CHILD_FIRST
+        );
 
-        if (! is_file($pdfPath)) {
-            throw new \RuntimeException('File PDF hasil konversi tidak ditemukan.');
+        foreach ($items as $item) {
+            $item->isDir() ? @rmdir($item->getPathname()) : @unlink($item->getPathname());
         }
 
-        return $pdfPath;
+        @rmdir($dir);
     }
 
     public function resolveBinary(): string
