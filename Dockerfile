@@ -83,8 +83,9 @@ COPY docker/default.conf /etc/nginx/conf.d/default.conf
 COPY docker/supervisord.conf /etc/supervisor/conf.d/supervisord.conf
 COPY docker/entrypoint.sh /usr/local/bin/rekrutment-entrypoint
 
-# Permission
-RUN chown -R www-data:www-data /var/www/html \
+# Permission. /var/www dipakai sebagai HOME www-data (lihat supervisord.conf),
+# jadi harus writable — LibreOffice dkk butuh HOME yang bisa ditulis.
+RUN chown -R www-data:www-data /var/www \
     && chmod -R 775 storage bootstrap/cache \
     && chmod +x /usr/local/bin/rekrutment-entrypoint
 

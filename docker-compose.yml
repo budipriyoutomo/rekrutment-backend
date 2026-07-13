@@ -7,6 +7,10 @@ services:
     container_name: rekrutment-backend
     restart: unless-stopped
     working_dir: /var/www/html
+    # Beri worker waktu menyelesaikan job yang sedang jalan (generate PDF +
+    # kirim SMTP) sebelum SIGKILL. Harus >= stopwaitsecs di supervisord.conf,
+    # kalau tidak job mati di tengah dan slip nyangkut di status `processing`.
+    stop_grace_period: 2m
     env_file:
       - ./src/.env
     ports:
