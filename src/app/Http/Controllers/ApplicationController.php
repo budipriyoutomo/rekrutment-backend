@@ -10,7 +10,9 @@ use App\Domains\Application\Actions\BundleApplicationDocumentAction;
 use App\Core\Services\FileUploadService;
 use App\Domains\Application\Models\Application;
 use App\Domains\ProfileCompletion\Actions\SendProfileCompletionEmailAction;
+use App\Enums\PipelineStage;
 use Illuminate\Http\Request;
+use Illuminate\Validation\Rule;
 use App\Domains\Application\Services\ApplicationService;
 use App\Domains\Application\Resources\ApplicationResource;
 use App\Domains\Application\Resources\ApplicationBundleResource;
@@ -127,8 +129,7 @@ class ApplicationController extends BaseApiController
         $validated = $request->validate([
             'stage' => [
                 'required',
-                'in:applied,screening,profile_completion,interview,offer,hired,rejected,on_hold'
-
+                Rule::in(PipelineStage::values()),
             ]
         ]);
 

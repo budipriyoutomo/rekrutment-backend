@@ -5,6 +5,7 @@ namespace Tests\Feature;
 use App\Domains\SalarySlip\Exports\SalarySlipTemplateExport;
 use App\Domains\SalarySlip\Exports\Sheets\TemplateDataSheet;
 use App\Domains\SalarySlip\Support\SalarySlipColumns;
+use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Storage;
 use Maatwebsite\Excel\Facades\Excel;
 use Tests\TestCase;
@@ -14,6 +15,14 @@ use Tests\TestCase;
  */
 class SalarySlipTemplateTest extends TestCase
 {
+    use RefreshDatabase;
+
+    protected function setUp(): void
+    {
+        parent::setUp();
+        $this->actingAsAdmin();
+    }
+
     public function test_template_endpoint_returns_xlsx_download(): void
     {
         $response = $this->get('/api/salary-slips/template');

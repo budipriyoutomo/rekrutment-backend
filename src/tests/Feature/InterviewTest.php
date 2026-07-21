@@ -11,6 +11,12 @@ class InterviewTest extends TestCase
 {
     use RefreshDatabase;
 
+    protected function setUp(): void
+    {
+        parent::setUp();
+        $this->actingAsAdmin();
+    }
+
     private function makeApplication(): Application
     {
         return Application::create([

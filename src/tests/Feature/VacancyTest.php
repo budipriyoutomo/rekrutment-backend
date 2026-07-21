@@ -10,6 +10,12 @@ class VacancyTest extends TestCase
 {
     use RefreshDatabase;
 
+    protected function setUp(): void
+    {
+        parent::setUp();
+        $this->actingAsAdmin();
+    }
+
     private function vacancyData(array $override = []): array
     {
         return array_merge([

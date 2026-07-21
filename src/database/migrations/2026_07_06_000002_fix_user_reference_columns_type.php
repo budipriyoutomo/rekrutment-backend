@@ -28,6 +28,8 @@ return new class extends Migration
 
             foreach ($columns as $column) {
                 if (Schema::hasColumn($table, $column)) {
+                    $this->dropIndexesForColumn($table, $column);
+
                     Schema::table($table, function (Blueprint $t) use ($column) {
                         $t->dropColumn($column);
                     });
@@ -47,6 +49,26 @@ return new class extends Migration
         }
     }
 
+    /**
+     * SQLite menolak drop column selama masih ada index yang memakainya,
+     * sementara Postgres ikut menghapus index tersebut secara otomatis.
+     * Index dilepas eksplisit lebih dulu agar migrasi jalan di kedua driver.
+     */
+    private function dropIndexesForColumn(string $table, string $column): void
+    {
+        foreach (Schema::getIndexes($table) as $index) {
+            if ($index['primary'] ?? false) {
+                continue;
+            }
+
+            if (in_array($column, $index['columns'] ?? [], true)) {
+                Schema::table($table, function (Blueprint $t) use ($index) {
+                    $t->dropIndex($index['name']);
+                });
+            }
+        }
+    }
+
     public function down(): void
     {
         foreach ($this->targets as $table => $columns) {
@@ -56,6 +78,8 @@ return new class extends Migration
 
             foreach ($columns as $column) {
                 if (Schema::hasColumn($table, $column)) {
+                    $this->dropIndexesForColumn($table, $column);
+
                     Schema::table($table, function (Blueprint $t) use ($column) {
                         $t->dropColumn($column);
                     });

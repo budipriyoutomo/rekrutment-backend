@@ -10,6 +10,12 @@ class MasterDataTest extends TestCase
 {
     use RefreshDatabase;
 
+    protected function setUp(): void
+    {
+        parent::setUp();
+        $this->actingAsAdmin();
+    }
+
     private function masterDataPayload(array $override = []): array
     {
         return array_merge([

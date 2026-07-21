@@ -13,6 +13,12 @@ class SalarySlipPdfTest extends TestCase
 {
     use RefreshDatabase;
 
+    protected function setUp(): void
+    {
+        parent::setUp();
+        $this->actingAsAdmin();
+    }
+
     private function makeSlip(array $o = []): SalarySlip
     {
         return SalarySlip::create(array_merge([

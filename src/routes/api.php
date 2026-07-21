@@ -4,6 +4,8 @@ use Illuminate\Support\Facades\Route;
 
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\ApplicationController;
+use App\Http\Controllers\AssessmentController;
+use App\Http\Controllers\AssessmentTakeController;
 use App\Http\Controllers\EvaluationController;
 use App\Http\Controllers\InterviewController;
 use App\Http\Controllers\InterviewerController;
@@ -22,6 +24,13 @@ use App\Enums\Role;
 Route::prefix('profile-completion')->group(function () {
     Route::get('/{token}', [ProfileCompletionController::class, 'validateToken']);
     Route::post('/{token}/complete', [ProfileCompletionController::class, 'complete']);
+});
+
+// Rute publik untuk kandidat mengerjakan tes (diakses via link email, token = kredensial)
+Route::prefix('assessment')->group(function () {
+    Route::get('/{token}', [AssessmentTakeController::class, 'validateToken']);
+    Route::post('/{token}/start', [AssessmentTakeController::class, 'start']);
+    Route::post('/{token}/submit', [AssessmentTakeController::class, 'submit']);
 });
 
 Route::prefix('auth')->group(function () {
@@ -53,6 +62,22 @@ Route::prefix('applicants')->middleware('permission:applicants,candidates,pipeli
     Route::get('/{id}/bundle', [ApplicationController::class, 'bundleDocuments']);
     Route::get('/{id}/bundle/status', [ApplicationController::class, 'bundleStatus']);
     Route::post('/{id}/send-profile-completion', [ApplicationController::class, 'sendProfileCompletion']);
+});
+
+// Paket tes + penugasannya ke kandidat (sisi HR).
+Route::prefix('assessments')->middleware('permission:assessments')->group(function () {
+    Route::get('/', [AssessmentController::class, 'index']);
+    Route::post('/', [AssessmentController::class, 'store']);
+    Route::get('/{id}', [AssessmentController::class, 'show']);
+    Route::patch('/{id}', [AssessmentController::class, 'update']);
+    Route::delete('/{id}', [AssessmentController::class, 'destroy']);
+    Route::post('/{id}/assign', [AssessmentController::class, 'assign']);
+});
+
+// Hasil tes kandidat. Prefix terpisah agar tidak bentrok dengan assessments/{id}.
+Route::prefix('assessment-assignments')->middleware('permission:assessments')->group(function () {
+    Route::get('/', [AssessmentController::class, 'assignments']);
+    Route::get('/{id}', [AssessmentController::class, 'assignmentDetail']);
 });
 
 Route::prefix('interviews')->middleware('permission:interviews')->group(function () {

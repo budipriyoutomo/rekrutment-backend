@@ -10,6 +10,12 @@ class JobRequestTest extends TestCase
 {
     use RefreshDatabase;
 
+    protected function setUp(): void
+    {
+        parent::setUp();
+        $this->actingAsAdmin();
+    }
+
     private function jobRequestData(array $override = []): array
     {
         return array_merge([

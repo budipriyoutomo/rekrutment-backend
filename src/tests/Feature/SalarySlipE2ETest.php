@@ -30,6 +30,12 @@ class SalarySlipE2ETest extends TestCase
 {
     use RefreshDatabase;
 
+    protected function setUp(): void
+    {
+        parent::setUp();
+        $this->actingAsAdmin();
+    }
+
     private const HEADER = [
         'nik', 'nama', 'jabatan', 'periode', 'cabang', 'perusahaan', 'email',
         'gaji_pokok', 'total_penerimaan', 'total_potongan', 'take_home_pay',

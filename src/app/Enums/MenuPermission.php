@@ -12,6 +12,7 @@ enum MenuPermission: string
     case APPLICANTS   = 'applicants';
     case CANDIDATES   = 'candidates';
     case PIPELINE     = 'pipeline';
+    case ASSESSMENTS  = 'assessments';
     case INTERVIEWS   = 'interviews';
     case INTERVIEWERS = 'interviewers';
     case DOCUMENTS    = 'documents';

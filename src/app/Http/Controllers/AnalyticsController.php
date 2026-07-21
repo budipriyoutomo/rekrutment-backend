@@ -7,13 +7,14 @@ use App\Domains\Application\Models\Application;
 use App\Domains\Evaluation\Models\Evaluation;
 use App\Domains\Interview\Models\Interview;
 use App\Domains\Vacancy\Models\Vacancy;
+use App\Enums\PipelineStage;
 use Carbon\Carbon;
 
 class AnalyticsController extends BaseApiController
 {
     public function index()
     {
-        $stages = ['applied', 'screening', 'profile_completion', 'interview', 'offer', 'hired', 'rejected', 'on_hold'];
+        $stages = PipelineStage::values();
 
         $applicantsByStage = Application::selectRaw('stage, COUNT(*) as count')
             ->groupBy('stage')

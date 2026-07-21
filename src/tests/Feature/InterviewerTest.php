@@ -10,6 +10,12 @@ class InterviewerTest extends TestCase
 {
     use RefreshDatabase;
 
+    protected function setUp(): void
+    {
+        parent::setUp();
+        $this->actingAsAdmin();
+    }
+
     private function interviewerData(array $override = []): array
     {
         return array_merge([

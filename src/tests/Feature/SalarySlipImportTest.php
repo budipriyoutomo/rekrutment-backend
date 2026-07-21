@@ -17,6 +17,12 @@ class SalarySlipImportTest extends TestCase
 {
     use RefreshDatabase;
 
+    protected function setUp(): void
+    {
+        parent::setUp();
+        $this->actingAsAdmin();
+    }
+
     /** Kolom minimal (semua wajib + beberapa nominal) untuk file uji. */
     private const HEADER = [
         'nik', 'nama', 'jabatan', 'periode', 'cabang', 'perusahaan', 'email',
