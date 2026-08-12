@@ -76,6 +76,11 @@ class ApplicationService extends BaseService
             $query->where('stage', $stage);
         }
 
+        // 🔍 kebalikan filter stage — dipakai halaman Candidates yang menyembunyikan pelamar baru
+        if (!empty($filters['excludeStage'])) {
+            $query->where('stage', '!=', $filters['excludeStage']);
+        }
+
         // 🔍 search name / email
         if (!empty($filters['search'])) {
             $search = $filters['search'];

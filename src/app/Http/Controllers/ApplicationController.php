@@ -29,6 +29,7 @@ class ApplicationController extends BaseApiController
             filters: $request->only([
                 'status',
                 'stage',
+                'excludeStage',
                 'search',
                 'startDate',
                 'endDate',
@@ -45,8 +46,9 @@ class ApplicationController extends BaseApiController
             perPage: $request->get('per_page', $request->get('limit', 10))
         );
 
-        return $this->success(
-            ApplicationResource::collection($data)
+        return $this->successPaginated(
+            ApplicationResource::collection($data),
+            $data
         );
     }
 
