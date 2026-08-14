@@ -3,6 +3,8 @@
 namespace App\Domains\Vacancy\Requests;
 
 use App\Core\Http\Requests\BaseRequest;
+use App\Core\Support\CityPrefix;
+use Illuminate\Contracts\Validation\Validator;
 
 class VacancyRequest extends BaseRequest
 {
@@ -42,5 +44,33 @@ class VacancyRequest extends BaseRequest
             'posted_date'    => ['nullable', 'date'],
             'closing_date'   => ['nullable', 'date', 'after_or_equal:posted_date'],
         ];
+    }
+
+    public function withValidator(Validator $validator): void
+    {
+        $validator->after(fn (Validator $v) => $this->validateLocationCity($v));
+    }
+
+    /**
+     * Lokasi lowongan wajib sekota dengan posisinya (title). Pada update parsial
+     * yang hanya mengirim salah satu field, pengecekan dilewati karena tidak ada
+     * pasangan untuk dibandingkan — frontend selalu mengirim keduanya.
+     */
+    private function validateLocationCity(Validator $validator): void
+    {
+        $title = $this->input('title');
+        $location = $this->input('location');
+
+        if (! CityPrefix::mismatch($title, $location)) {
+            return;
+        }
+
+        $validator->errors()->add(
+            'location',
+            sprintf(
+                'Lokasi harus berada di kota yang sama dengan posisi (%s).',
+                CityPrefix::of($title)
+            )
+        );
     }
 }

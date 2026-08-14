@@ -103,6 +103,39 @@ class VacancyTest extends TestCase
         ]))->assertStatus(422);
     }
 
+    public function test_store_rejects_location_from_another_city(): void
+    {
+        $this->postJson('/api/vacancies', $this->vacancyData([
+            'title'    => 'Bandung - Cook',
+            'location' => 'Jakarta - HEAD OFFICE JAKARTA',
+        ]))
+            ->assertStatus(422)
+            ->assertJsonValidationErrors('location');
+    }
+
+    public function test_store_accepts_location_in_the_same_city(): void
+    {
+        $this->postJson('/api/vacancies', $this->vacancyData([
+            'title'    => 'Bandung - Cook',
+            'location' => 'Bandung - KARNIVOR - JL. RIAU',
+        ]))->assertStatus(200);
+    }
+
+    public function test_update_rejects_location_from_another_city(): void
+    {
+        $vacancy = $this->makeVacancy([
+            'title'    => 'Bandung - Cook',
+            'location' => 'Bandung - KARNIVOR - JL. RIAU',
+        ]);
+
+        $this->putJson("/api/vacancies/{$vacancy->id}", [
+            'title'    => 'Bandung - Cook',
+            'location' => 'Jakarta - HEAD OFFICE JAKARTA',
+        ])
+            ->assertStatus(422)
+            ->assertJsonValidationErrors('location');
+    }
+
     // ------------------------------------------------------------------ show
 
     public function test_show_returns_vacancy(): void
