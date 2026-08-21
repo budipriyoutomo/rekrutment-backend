@@ -185,6 +185,24 @@ class ApplicationService extends BaseService
 
     /**
      * ============================================
+     * BULK UPDATE STAGE
+     * ============================================
+     * Dipakai bulk action di halaman Applicants. Mengembalikan jumlah baris
+     * yang benar-benar berubah (id yang tidak ada diabaikan diam-diam).
+     */
+    public function bulkUpdateStatus(array $ids, string $stage): int
+    {
+        $ids = array_values(array_unique(array_filter($ids)));
+
+        if (empty($ids)) {
+            return 0;
+        }
+
+        return Application::whereIn('id', $ids)->update(['stage' => $stage]);
+    }
+
+    /**
+     * ============================================
      * ADD HR NOTE
      * ============================================
      */

@@ -56,6 +56,9 @@ Route::prefix('applications')->group(function () {
 Route::prefix('applicants')->middleware('permission:applicants,candidates,pipeline,documents,interviews')->group(function () {
     Route::get('/', [ApplicationController::class, 'index']);
     Route::post('/', [ApplicationController::class, 'submit']);
+    // Bulk action halaman Applicants. Harus di atas rute /{id} agar tidak
+    // ditangkap sebagai id.
+    Route::patch('/bulk-stage', [ApplicationController::class, 'bulkUpdateStatus']);
     Route::get('/{id}', [ApplicationController::class, 'show']);
     Route::patch('/{id}/stage', [ApplicationController::class, 'updateStatus']);
     Route::post('/{id}/notes', [ApplicationController::class, 'addNote']);

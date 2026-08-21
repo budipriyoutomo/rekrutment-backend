@@ -140,6 +140,25 @@ class ApplicationController extends BaseApiController
         return $this->success($result, 'Status berhasil diperbarui');
     }
 
+    public function bulkUpdateStatus(Request $request, ApplicationService $service)
+    {
+        $validated = $request->validate([
+            'ids'   => ['required', 'array', 'min:1'],
+            'ids.*' => ['required', 'string'],
+            'stage' => [
+                'required',
+                Rule::in(PipelineStage::values()),
+            ],
+        ]);
+
+        $updated = $service->bulkUpdateStatus($validated['ids'], $validated['stage']);
+
+        return $this->success(
+            ['updated' => $updated],
+            "{$updated} pelamar berhasil dipindahkan"
+        );
+    }
+
     public function addNote(string $id, Request $request, ApplicationService $service)
     {
         $validated = $request->validate([
