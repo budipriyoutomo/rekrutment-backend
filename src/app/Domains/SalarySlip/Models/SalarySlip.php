@@ -38,6 +38,7 @@ class SalarySlip extends BaseModel
         // potongan
         'total_pot_absen', 'bpjs_ketenagakerjaan', 'bpjs_kesehatan', 'pinjaman',
         'pph21', 'potongan_seragam', 'koreksi', 'total_potongan',
+        'keterangan_potongan',
         'take_home_pay',
         // info pembayaran
         'sistem_pembayaran', 'no_rekening', 'nama_bank', 'atas_nama',

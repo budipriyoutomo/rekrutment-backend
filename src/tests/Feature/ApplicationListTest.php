@@ -21,7 +21,7 @@ class ApplicationListTest extends TestCase
         foreach (range(1, $count) as $i) {
             Application::create([
                 'personal_info'   => ['fullName' => "Candidate {$i}"],
-                'contact_info'    => ['email' => "cand{$i}@example.com", 'phone' => '081'],
+                'contact_info'    => ['email' => "cand{$i}-{$stage}@example.com", 'phone' => '081'],
                 'additional_info' => ['positionApplied' => 'Frontend Dev'],
                 'stage'           => $stage,
             ]);

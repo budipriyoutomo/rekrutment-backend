@@ -47,6 +47,7 @@ class SalarySlipResource extends JsonResource
             'potonganSeragam'     => $this->potongan_seragam,
             'koreksi'             => $this->koreksi,
             'totalPotongan'       => $this->total_potongan,
+            'keteranganPotongan'  => $this->keterangan_potongan,
             'takeHomePay'         => $this->take_home_pay,
             // info pembayaran
             'sistemPembayaran' => $this->sistem_pembayaran,

@@ -41,8 +41,9 @@ class SalarySlipDTO
         public readonly int $koreksi = 0,
         public readonly int $total_potongan = 0,
         public readonly int $take_home_pay = 0,
-        // keterangan bebas untuk komponen tambahan gaji
+        // keterangan bebas untuk komponen tambahan gaji & sisi potongan
         public readonly ?string $keterangan_tambahan_gaji = null,
+        public readonly ?string $keterangan_potongan = null,
         // info pembayaran
         public readonly ?string $sistem_pembayaran = null,
         public readonly ?string $no_rekening = null,
@@ -63,7 +64,7 @@ class SalarySlipDTO
 
     private const STRING_FIELDS = [
         'nik', 'nama', 'jabatan', 'periode', 'cabang', 'perusahaan', 'email',
-        'keterangan_tambahan_gaji',
+        'keterangan_tambahan_gaji', 'keterangan_potongan',
         'sistem_pembayaran', 'no_rekening', 'nama_bank', 'atas_nama', 'batch_id',
     ];
 

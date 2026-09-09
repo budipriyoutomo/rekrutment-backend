@@ -79,6 +79,38 @@ class SalarySlipPdfTest extends TestCase
         $this->assertStringContainsString('BCA', $xml);
     }
 
+    public function test_docx_shows_keterangan_potongan_below_total_potongan(): void
+    {
+        $slip = $this->makeSlip(['keterangan_potongan' => 'Cicilan pinjaman koperasi']);
+        $tmp = tempnam(sys_get_temp_dir(), 'payslip') . '.docx';
+
+        app(PayslipDocumentBuilder::class)->build($slip, $tmp);
+        $xml = $this->readDocxText($tmp);
+        @unlink($tmp);
+
+        $this->assertStringContainsString('KETERANGAN POTONGAN', $xml);
+        $this->assertStringContainsString('Cicilan pinjaman koperasi', $xml);
+
+        // Urutan: label TOTAL POTONGAN muncul sebelum baris keterangannya
+        $this->assertLessThan(
+            strpos($xml, 'KETERANGAN POTONGAN'),
+            strpos($xml, 'TOTAL POTONGAN'),
+            'Baris KETERANGAN POTONGAN harus berada di bawah TOTAL POTONGAN',
+        );
+    }
+
+    public function test_docx_omits_keterangan_potongan_when_empty(): void
+    {
+        $slip = $this->makeSlip(); // keterangan_potongan null
+        $tmp = tempnam(sys_get_temp_dir(), 'payslip') . '.docx';
+
+        app(PayslipDocumentBuilder::class)->build($slip, $tmp);
+        $xml = $this->readDocxText($tmp);
+        @unlink($tmp);
+
+        $this->assertStringNotContainsString('KETERANGAN POTONGAN', $xml);
+    }
+
     public function test_docx_is_a5_landscape(): void
     {
         $slip = $this->makeSlip();
@@ -149,6 +181,27 @@ class SalarySlipPdfTest extends TestCase
         $pages = $fpdi->setSourceFile($path);
 
         $this->assertSame(1, $pages, 'Slip gaji harus muat dalam 1 halaman, tidak boleh melintas 2 halaman.');
+
+        @unlink($path);
+    }
+
+    public function test_generated_pdf_stays_one_page_with_both_keterangan_filled(): void
+    {
+        if (! app(PayslipPdfConverter::class)->isAvailable()) {
+            $this->markTestSkipped('LibreOffice tidak tersedia di environment ini.');
+        }
+
+        // Kedua baris keterangan menambah tinggi tabel — slip tetap wajib 1 halaman.
+        $slip = $this->makeSlip([
+            'keterangan_tambahan_gaji' => 'Bonus kehadiran penuh triwulan II',
+            'keterangan_potongan'      => 'Cicilan pinjaman koperasi ke-3 dari 12',
+        ]);
+        $path = app(GeneratePayslipPdfAction::class)->execute($slip);
+
+        $fpdi = new \setasign\Fpdi\Fpdi();
+        $pages = $fpdi->setSourceFile($path);
+
+        $this->assertSame(1, $pages, 'Slip dengan keterangan potongan harus tetap muat 1 halaman.');
 
         @unlink($path);
     }

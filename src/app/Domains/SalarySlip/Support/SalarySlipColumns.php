@@ -58,6 +58,7 @@ class SalarySlipColumns
         'potongan_seragam'     => ['Potongan Seragam', self::TYPE_MONEY, false, ''],
         'koreksi'              => ['Koreksi', self::TYPE_MONEY, false, ''],
         'total_potongan'       => ['Total Potongan', self::TYPE_MONEY, false, 'Divalidasi terhadap penjumlahan komponen potongan'],
+        'keterangan_potongan'  => ['Keterangan Potongan', self::TYPE_STRING, false, 'Keterangan/catatan untuk potongan (teks bebas)'],
         'take_home_pay'        => ['Take Home Pay', self::TYPE_MONEY, false, 'Divalidasi = total penerimaan - total potongan'],
         // --- info pembayaran ---
         'sistem_pembayaran' => ['Sistem Pembayaran', self::TYPE_STRING, false, 'mis. Transfer / Tunai'],
@@ -105,7 +106,8 @@ class SalarySlipColumns
             'hk_hari' => 22, 'alpha_hari' => 0, 'ijin_ap_hari' => 0, 'sakit_hari' => 0, 'cuti_hari' => 0,
             'total_pot_absen' => 0, 'bpjs_ketenagakerjaan' => 120000, 'bpjs_kesehatan' => 100000,
             'pinjaman' => 0, 'pph21' => 80000, 'potongan_seragam' => 0, 'koreksi' => 0,
-            'total_potongan' => 300000, 'take_home_pay' => 6300000,
+            'total_potongan' => 300000, 'keterangan_potongan' => 'Cicilan pinjaman koperasi',
+            'take_home_pay' => 6300000,
             'sistem_pembayaran' => 'Transfer', 'no_rekening' => '1234567890',
             'nama_bank' => 'BCA', 'atas_nama' => 'Budi Santoso',
         ];

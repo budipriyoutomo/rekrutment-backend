@@ -116,6 +116,15 @@ class PayslipDocumentBuilder
         $this->itemCells($table, 'TOTAL PENERIMAAN', $this->money($slip->total_penerimaan), true);
         $this->itemCells($table, 'TOTAL POTONGAN', $this->money($slip->total_potongan), true);
 
+        // Keterangan potongan (teks bebas) tampil tepat di bawah TOTAL POTONGAN,
+        // hanya bila diisi agar tidak menambah baris kosong pada slip A5.
+        $keteranganPotongan = trim((string) ($slip->keterangan_potongan ?? ''));
+        if ($keteranganPotongan !== '') {
+            $table->addRow();
+            $this->itemCells($table, '', '');
+            $this->itemCells($table, 'KETERANGAN POTONGAN', $keteranganPotongan);
+        }
+
         $this->spacer($section);
 
         // ---- Take Home Pay ----

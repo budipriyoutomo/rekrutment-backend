@@ -3,8 +3,10 @@
 namespace App\Domains\Application\Services;
 
 use App\Core\Services\BaseService;
+use Illuminate\Database\UniqueConstraintViolationException;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
+use Illuminate\Validation\ValidationException;
 
 use App\Domains\Application\Models\Application;
 
@@ -32,15 +34,15 @@ class ApplicationService extends BaseService
             'certifications' => [],
         ], $relations);
 
-        // 🔥 prevent duplicate (simple)
-        if (!empty($data['personal_info']['email'])) {
-            $exists = Application::where('personal_info->email', $data['personal_info']['email'])
-                ->latest()
-                ->first();
+        // 🔥 Cegah lamaran ganda dari orang yang sama. Email pelamar berada di
+        // contact_info (form lengkap maupun Quick Apply); personal_info dicek
+        // sebagai cadangan untuk data lama yang formatnya berbeda.
+        $email = $this->normalizeApplicantEmail(
+            $data['contact_info']['email'] ?? $data['personal_info']['email'] ?? null
+        );
 
-            if ($exists) {
-                return $exists;
-            }
+        if ($email !== null && $this->emailAlreadyApplied($email)) {
+            throw $this->duplicateApplicationException();
         }
 
         try {
@@ -55,10 +57,53 @@ class ApplicationService extends BaseService
                 return $app;
             });
 
+        } catch (UniqueConstraintViolationException $e) {
+            // Race: dua submit paralel lolos pengecekan di atas, unique index DB
+            // menolak yang kedua. Perlakukan sama seperti duplikat biasa.
+            throw $this->duplicateApplicationException();
+        } catch (ValidationException $e) {
+            throw $e;
         } catch (\Throwable $e) {
             report($e);
             throw new \Exception($e->getMessage());
         }
+    }
+
+    /** Normalisasi email pelamar: lowercase + trim, null bila kosong. */
+    private function normalizeApplicantEmail(?string $email): ?string
+    {
+        $email = strtolower(trim((string) $email));
+
+        return $email === '' ? null : $email;
+    }
+
+    /** Apakah email (sudah dinormalisasi) pernah dipakai melamar. */
+    private function emailAlreadyApplied(string $email): bool
+    {
+        $contact = $this->jsonEmailExpression('contact_info');
+        $personal = $this->jsonEmailExpression('personal_info');
+
+        return Application::query()
+            ->where(function ($q) use ($contact, $personal, $email) {
+                $q->whereRaw("lower(trim($contact)) = ?", [$email])
+                  ->orWhereRaw("lower(trim($personal)) = ?", [$email]);
+            })
+            ->exists();
+    }
+
+    /** Ekspresi SQL untuk mengambil `email` dari kolom JSON, per driver DB. */
+    private function jsonEmailExpression(string $column): string
+    {
+        return $this->model->getConnection()->getDriverName() === 'pgsql'
+            ? "$column->>'email'"
+            : "json_extract($column, '$.email')";
+    }
+
+    private function duplicateApplicationException(): ValidationException
+    {
+        return ValidationException::withMessages([
+            'contactInfo.email' => 'Email ini sudah pernah mengirim lamaran. Setiap pelamar hanya boleh mengirim satu lamaran.',
+        ]);
     }
 
     /**
