@@ -170,3 +170,17 @@ This project has domain-specific skills available. You MUST activate the relevan
 - To filter on a particular test name: `php artisan test --compact --filter=testName` (recommended after making a change to a related file).
 
 </laravel-boost-guidelines>
+
+# Konvensi Proyek (manual — di luar blok Laravel Boost, jangan dipindah ke dalam)
+
+Terakhir disinkronkan: 2026-10-17.
+
+- **Resource & tipe angka:** `BaseResource::formatArray()` TIDAK lagi mengubah string numerik menjadi number otomatis (merusak teks seperti nomor telepon `0812…`). Field numerik wajib di-cast eksplisit di resource masing-masing, mis. `(int) $this->communication_score`. Data telepon interviewer yang terlanjur kehilangan leading zero diperbaiki dengan `php artisan interviewers:fix-phones` (preview) lalu `--apply`.
+- **Endpoint publik bertoken** (`/assessment/{token}`, `/offer/{token}`, `/preboarding/{token}`): token 64 karakter adalah kredensial, tanpa auth. Action/service melempar `HttpException` 404 (token tak dikenal) / 409 (sudah direspon/dikirim) / 410 (kedaluwarsa/ditarik); controller publik offer & pre-boarding membungkusnya lewat helper `guarded()` menjadi `$this->error()` (assessment memakai `guard()` versinya sendiri). Resource publik terpisah dari resource HR dan tidak pernah memuat token, path file, atau catatan internal.
+- **Email kandidat/karyawan:** pakai mailer default (.env) dan `Mail::to()->queue(... ->onQueue('emails'))`; worker Supervisor memproses queue `emails,default`. Simpan model dulu sebelum mengantrekan (job memuat ulang model dari DB). Lampiran yang dirender mahal (PDF offer) dibuat di `attachments()` via `Attachment::fromData(fn () => ...)` agar dirender di worker.
+- **PDF dari HTML/Blade:** render Blade ke file `.html` lalu konversi dengan `PayslipPdfConverter` (LibreOffice headless). LibreOffice mengabaikan sebagian CSS tabel — gunakan atribut HTML (`border`, `cellpadding`, `bgcolor`, `align`). Tidak ada dompdf (keputusan user). Test yang butuh PDF asli di-skip bila `PayslipPdfConverter::isAvailable()` false.
+- **Dokumen sensitif** (pre-boarding: KTP, KK, buku tabungan): simpan dengan visibility `private` di `filesystems.upload_disk`, tanpa URL publik; HR mengunduh lewat endpoint terautentikasi yang men-stream dari disk.
+- **Job terjadwal** didaftarkan di `routes/console.php` (`Artisan::command` + `Schedule::command`), dijalankan `schedule:work` di Supervisor: `offers:expire` (00:10), `onboarding:welcome` (08:00).
+- **Izin menu baru** harus ditambahkan di dua tempat yang sama persis: enum `App\Enums\MenuPermission` dan `frontend/src/config/menuAccess.ts`. Endpoint baca yang dipakai profil kandidat boleh diberi izin gabungan (mis. `permission:offers,candidates,pipeline`), tulis tetap izin modulnya saja.
+- **Migrasi yang menambah FK ke `applications`:** di SQLite (test) gunakan kolom + index tanpa constraint — rebuild tabel SQLite merusak expression index `applications_contact_email_unique`. Lihat `2026_10_17_000001_add_vacancy_links_to_applications_and_vacancies.php`.
+- **Test:** `phpunit.xml` memakai `memory_limit=512M`; suite penuh melewati 128M di test export xlsx.

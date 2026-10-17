@@ -16,6 +16,7 @@ class SubmitApplicationRequest extends BaseRequest
             'contactInfo.phone' => ['required'],
             'education' => ['array'],
             'workExperience' => ['array'],
+            'vacancyId' => ['nullable', 'uuid'],
         ];
     }
 

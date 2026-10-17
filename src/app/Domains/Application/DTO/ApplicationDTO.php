@@ -15,6 +15,7 @@ class ApplicationDTO
         public readonly array $parentInfo,
         public readonly array $spouseInfo,
         public readonly array $additionalInfo,
+        public readonly ?string $vacancyId = null,
     ) {}
 
     public static function fromRequest(BaseRequest $request): self
@@ -28,6 +29,7 @@ class ApplicationDTO
             parentInfo: $request->input('parentInfo'),
             spouseInfo: $request->input('spouseInfo'),
             additionalInfo: $request->input('additionalInfo'),
+            vacancyId: $request->input('vacancyId'),
         );
     }
 

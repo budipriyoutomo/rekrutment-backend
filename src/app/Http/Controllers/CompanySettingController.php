@@ -16,6 +16,7 @@ class CompanySettingController extends BaseApiController
         'company_website',
         'company_logo_url',
         'company_tagline',
+        'employee_id_prefix',
     ];
 
     public function index()
@@ -40,6 +41,7 @@ class CompanySettingController extends BaseApiController
             'company_website'  => ['nullable', 'url', 'max:200'],
             'company_logo_url' => ['nullable', 'url', 'max:500'],
             'company_tagline'  => ['nullable', 'string', 'max:200'],
+            'employee_id_prefix' => ['nullable', 'string', 'max:10', 'regex:/^[A-Za-z0-9]+$/'],
         ]);
 
         foreach ($validated as $key => $value) {

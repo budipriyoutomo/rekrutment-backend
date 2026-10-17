@@ -9,6 +9,8 @@ use Illuminate\Pagination\LengthAwarePaginator;
 
 class EvaluationService extends BaseService
 {
+    public const RECOMMENDATIONS = ['strong_hire', 'hire', 'hold', 'reject'];
+
     public function __construct(Evaluation $model)
     {
         parent::__construct($model);
@@ -60,5 +62,51 @@ class EvaluationService extends BaseService
     public function updateEvaluation(string $id, array $data): Evaluation
     {
         return $this->update($id, $data);
+    }
+
+    /**
+     * Ringkasan seluruh evaluasi interview seorang kandidat, bahan keputusan HR
+     * lanjut ke offer atau tolak. Skor rata-rata dalam skala 1-5 (null bila belum
+     * ada evaluasi).
+     *
+     * @return array{count:int, averageScores:array<string,float|null>, recommendations:array<string,int>, evaluations:\Illuminate\Support\Collection}
+     */
+    public function summaryForApplicant(string $applicantId): array
+    {
+        Application::findOrFail($applicantId);
+
+        $evaluations = Evaluation::query()
+            ->where('applicant_id', $applicantId)
+            ->orderByDesc('date')
+            ->orderByDesc('created_at')
+            ->get();
+
+        $avg = fn (string $column) => $evaluations->isEmpty()
+            ? null
+            : round((float) $evaluations->avg($column), 1);
+
+        $averageScores = [
+            'communication' => $avg('communication_score'),
+            'technical'     => $avg('technical_score'),
+            'experience'    => $avg('experience_score'),
+            'cultureFit'    => $avg('culture_fit_score'),
+        ];
+        $averageScores['overall'] = $evaluations->isEmpty()
+            ? null
+            : round((float) $evaluations->avg(fn (Evaluation $e) => (
+                $e->communication_score + $e->technical_score + $e->experience_score + $e->culture_fit_score
+            ) / 4), 1);
+
+        $recommendations = array_fill_keys(self::RECOMMENDATIONS, 0);
+        foreach ($evaluations as $evaluation) {
+            $recommendations[$evaluation->recommendation]++;
+        }
+
+        return [
+            'count'           => $evaluations->count(),
+            'averageScores'   => $averageScores,
+            'recommendations' => $recommendations,
+            'evaluations'     => $evaluations,
+        ];
     }
 }

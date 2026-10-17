@@ -17,6 +17,8 @@ enum MenuPermission: string
     case INTERVIEWERS = 'interviewers';
     case DOCUMENTS    = 'documents';
     case EVALUATIONS  = 'evaluations';
+    case OFFERS       = 'offers';
+    case ONBOARDING   = 'onboarding';
     case VACANCIES    = 'vacancies';
     case JOB_REQUESTS = 'job-requests';
     case ANALYTICS    = 'analytics';

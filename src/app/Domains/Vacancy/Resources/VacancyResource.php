@@ -21,7 +21,10 @@ class VacancyResource extends JsonResource
             'requirements'   => $this->requirements ?? [],
             'postedDate'     => $this->posted_date?->format('Y-m-d'),
             'closingDate'    => $this->closing_date?->format('Y-m-d'),
-            'applicantCount' => 0,
+            'headcount'      => $this->headcount,
+            'jobRequestId'   => $this->job_request_id,
+            'applicantCount' => (int) ($this->applications_count ?? 0),
+            'hiredCount'     => (int) ($this->hired_count ?? 0),
             'createdAt'      => $this->created_at,
             'updatedAt'      => $this->updated_at,
         ];

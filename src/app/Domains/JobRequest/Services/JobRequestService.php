@@ -15,7 +15,7 @@ class JobRequestService extends BaseService
 
     public function getList(array $filters = [], int $perPage = 50): LengthAwarePaginator
     {
-        $query = JobRequest::query();
+        $query = JobRequest::query()->with('vacancy:id,job_request_id');
 
         if (!empty($filters['search'])) {
             $search = $filters['search'];
@@ -45,7 +45,7 @@ class JobRequestService extends BaseService
 
     public function getDetail(string $id): JobRequest
     {
-        return JobRequest::findOrFail($id);
+        return JobRequest::with('vacancy:id,job_request_id')->findOrFail($id);
     }
 
     public function createJobRequest(array $data): JobRequest

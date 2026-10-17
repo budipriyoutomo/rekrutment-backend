@@ -6,6 +6,8 @@ use App\Core\Http\Controllers\BaseApiController;
 use App\Domains\JobRequest\Requests\JobRequestRequest;
 use App\Domains\JobRequest\Resources\JobRequestResource;
 use App\Domains\JobRequest\Services\JobRequestService;
+use App\Domains\Vacancy\Resources\VacancyResource;
+use App\Domains\Vacancy\Services\VacancyService;
 use Illuminate\Http\Request;
 
 class JobRequestController extends BaseApiController
@@ -67,6 +69,14 @@ class JobRequestController extends BaseApiController
         return $this->success(
             new JobRequestResource($service->reject($id, $request->input('reviewer_notes'))),
             'Job request berhasil ditolak'
+        );
+    }
+
+    public function createVacancy(string $id, VacancyService $service)
+    {
+        return $this->success(
+            new VacancyResource($service->createFromJobRequest($id)),
+            'Lowongan draft berhasil dibuat dari job request'
         );
     }
 }

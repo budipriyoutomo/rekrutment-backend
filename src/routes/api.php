@@ -18,6 +18,12 @@ use App\Http\Controllers\UserController;
 use App\Http\Controllers\AnalyticsController;
 use App\Http\Controllers\SalarySlipController;
 use App\Http\Controllers\MailAccountController;
+use App\Http\Controllers\OfferController;
+use App\Http\Controllers\OfferResponseController;
+use App\Http\Controllers\PreboardingController;
+use App\Http\Controllers\PreboardingFormController;
+use App\Http\Controllers\EmployeeController;
+use App\Http\Controllers\OnboardingTemplateController;
 use App\Enums\Role;
 
 // Rute publik untuk profile completion (diakses oleh kandidat via link email)
@@ -31,6 +37,19 @@ Route::prefix('assessment')->group(function () {
     Route::get('/{token}', [AssessmentTakeController::class, 'validateToken']);
     Route::post('/{token}/start', [AssessmentTakeController::class, 'start']);
     Route::post('/{token}/submit', [AssessmentTakeController::class, 'submit']);
+});
+
+Route::prefix('offer')->group(function () {
+    Route::get('/{token}', [OfferResponseController::class, 'show']);
+    Route::get('/{token}/pdf', [OfferResponseController::class, 'pdf']);
+    Route::post('/{token}/accept', [OfferResponseController::class, 'accept']);
+    Route::post('/{token}/decline', [OfferResponseController::class, 'decline']);
+});
+
+Route::prefix('preboarding')->group(function () {
+    Route::get('/{token}', [PreboardingFormController::class, 'show']);
+    Route::post('/{token}/documents', [PreboardingFormController::class, 'upload']);
+    Route::post('/{token}/submit', [PreboardingFormController::class, 'submit']);
 });
 
 Route::prefix('auth')->group(function () {
@@ -61,6 +80,9 @@ Route::prefix('applicants')->middleware('permission:applicants,candidates,pipeli
     Route::patch('/bulk-stage', [ApplicationController::class, 'bulkUpdateStatus']);
     Route::get('/{id}', [ApplicationController::class, 'show']);
     Route::patch('/{id}/stage', [ApplicationController::class, 'updateStatus']);
+    Route::patch('/{id}/vacancy', [ApplicationController::class, 'assignVacancy']);
+    Route::post('/{id}/reject', [ApplicationController::class, 'reject']);
+    Route::get('/{id}/evaluation-summary', [ApplicationController::class, 'evaluationSummary']);
     Route::post('/{id}/notes', [ApplicationController::class, 'addNote']);
     Route::get('/{id}/bundle', [ApplicationController::class, 'bundleDocuments']);
     Route::get('/{id}/bundle/status', [ApplicationController::class, 'bundleStatus']);
@@ -81,6 +103,62 @@ Route::prefix('assessments')->middleware('permission:assessments')->group(functi
 Route::prefix('assessment-assignments')->middleware('permission:assessments')->group(function () {
     Route::get('/', [AssessmentController::class, 'assignments']);
     Route::get('/{id}', [AssessmentController::class, 'assignmentDetail']);
+});
+
+// Daftar offer juga dibaca dari profil kandidat (izin candidates/pipeline);
+// perubahan hanya untuk pemegang izin offers.
+Route::prefix('offers')->group(function () {
+    Route::middleware('permission:offers,candidates,pipeline')->group(function () {
+        Route::get('/', [OfferController::class, 'index']);
+        Route::get('/{id}', [OfferController::class, 'show']);
+        Route::get('/{id}/pdf', [OfferController::class, 'pdf']);
+    });
+
+    Route::middleware('permission:offers')->group(function () {
+        Route::post('/', [OfferController::class, 'store']);
+        Route::patch('/{id}', [OfferController::class, 'update']);
+        Route::delete('/{id}', [OfferController::class, 'destroy']);
+        Route::post('/{id}/send', [OfferController::class, 'send']);
+        Route::post('/{id}/withdraw', [OfferController::class, 'withdraw']);
+    });
+});
+
+// Status pre-boarding juga tampil di profil kandidat (izin candidates/pipeline);
+// verifikasi & dokumen hanya untuk pemegang izin onboarding.
+Route::prefix('preboardings')->group(function () {
+    Route::get('/', [PreboardingController::class, 'index'])->middleware('permission:onboarding,candidates,pipeline');
+
+    Route::middleware('permission:onboarding')->group(function () {
+        Route::post('/', [PreboardingController::class, 'store']);
+        Route::get('/{id}', [PreboardingController::class, 'show']);
+        Route::post('/{id}/resend', [PreboardingController::class, 'resend']);
+        Route::post('/{id}/request-revision', [PreboardingController::class, 'requestRevision']);
+        Route::get('/{id}/documents/{type}', [PreboardingController::class, 'downloadDocument']);
+        Route::post('/{id}/documents/{type}/review', [PreboardingController::class, 'reviewDocument']);
+    });
+});
+
+Route::prefix('employees')->group(function () {
+    Route::get('/', [EmployeeController::class, 'index'])->middleware('permission:onboarding,candidates,pipeline');
+
+    Route::middleware('permission:onboarding')->group(function () {
+        Route::post('/', [EmployeeController::class, 'store']);
+        Route::get('/{id}', [EmployeeController::class, 'show']);
+        Route::patch('/{id}', [EmployeeController::class, 'update']);
+        Route::post('/{id}/tasks', [EmployeeController::class, 'addTask']);
+    });
+});
+
+Route::prefix('onboarding-tasks')->middleware('permission:onboarding')->group(function () {
+    Route::patch('/{id}', [EmployeeController::class, 'updateTask']);
+    Route::delete('/{id}', [EmployeeController::class, 'deleteTask']);
+});
+
+Route::prefix('onboarding-templates')->middleware('permission:onboarding')->group(function () {
+    Route::get('/', [OnboardingTemplateController::class, 'index']);
+    Route::post('/', [OnboardingTemplateController::class, 'store']);
+    Route::patch('/{id}', [OnboardingTemplateController::class, 'update']);
+    Route::delete('/{id}', [OnboardingTemplateController::class, 'destroy']);
 });
 
 Route::prefix('interviews')->middleware('permission:interviews')->group(function () {
@@ -146,6 +224,7 @@ Route::prefix('job-requests')->middleware('permission:job-requests')->group(func
     Route::delete('/{id}', [JobRequestController::class, 'destroy']);
     Route::post('/{id}/approve', [JobRequestController::class, 'approve']);
     Route::post('/{id}/reject', [JobRequestController::class, 'reject']);
+    Route::post('/{id}/create-vacancy', [JobRequestController::class, 'createVacancy'])->middleware('permission:vacancies');
 });
 
 Route::get('analytics', [AnalyticsController::class, 'index']);

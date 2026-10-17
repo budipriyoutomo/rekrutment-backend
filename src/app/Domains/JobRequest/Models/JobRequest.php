@@ -3,6 +3,7 @@
 namespace App\Domains\JobRequest\Models;
 
 use App\Core\Models\BaseModel;
+use App\Domains\Vacancy\Models\Vacancy;
 
 class JobRequest extends BaseModel
 {
@@ -23,6 +24,11 @@ class JobRequest extends BaseModel
         'status',
         'reviewer_notes',
     ];
+
+    public function vacancy()
+    {
+        return $this->hasOne(Vacancy::class);
+    }
 
     protected function casts(): array
     {

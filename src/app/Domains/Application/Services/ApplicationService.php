@@ -9,6 +9,8 @@ use Illuminate\Support\Str;
 use Illuminate\Validation\ValidationException;
 
 use App\Domains\Application\Models\Application;
+use App\Domains\Vacancy\Services\VacancyService;
+use App\Enums\PipelineStage;
 
 class ApplicationService extends BaseService
 {
@@ -17,6 +19,7 @@ class ApplicationService extends BaseService
         private ApplicationExperienceService $experienceService,
         private ApplicationEducationService $educationService,
         private ApplicationCertificationService $certificationService,
+        private VacancyService $vacancyService,
     ) {
         parent::__construct($model);
     }
@@ -113,7 +116,14 @@ class ApplicationService extends BaseService
      */
     public function getList(array $filters = [], int $perPage = 10)
     {
-        $query = Application::query();
+        $query = Application::query()->with('vacancy:id,title,location,status');
+
+        // 🔍 filter lowongan; 'none' = lamaran yang belum terhubung ke lowongan
+        if (!empty($filters['vacancyId'])) {
+            $filters['vacancyId'] === 'none'
+                ? $query->whereNull('vacancy_id')
+                : $query->where('vacancy_id', $filters['vacancyId']);
+        }
 
         // 🔍 filter stage/status
         $stage = $filters['stage'] ?? $filters['status'] ?? null;
@@ -206,6 +216,7 @@ class ApplicationService extends BaseService
     public function getDetail(string $id): Application
     {
         return Application::with([
+            'vacancy:id,title,location,status',
             'educations',
             'experiences',
             'certifications'
@@ -225,6 +236,8 @@ class ApplicationService extends BaseService
             'stage' => $stage
         ]);
 
+        $this->closeFilledVacanciesIfHired($stage, [$app->vacancy_id]);
+
         return $app;
     }
 
@@ -243,7 +256,39 @@ class ApplicationService extends BaseService
             return 0;
         }
 
-        return Application::whereIn('id', $ids)->update(['stage' => $stage]);
+        $updated = Application::whereIn('id', $ids)->update(['stage' => $stage]);
+
+        $this->closeFilledVacanciesIfHired(
+            $stage,
+            Application::whereIn('id', $ids)->pluck('vacancy_id')->all()
+        );
+
+        return $updated;
+    }
+
+    /** Lowongan otomatis ditutup saat kuota headcount-nya terisi oleh pelamar hired. */
+    private function closeFilledVacanciesIfHired(string $stage, array $vacancyIds): void
+    {
+        if ($stage === PipelineStage::HIRED->value) {
+            $this->vacancyService->closeFilledVacancies($vacancyIds);
+        }
+    }
+
+    /**
+     * ============================================
+     * ASSIGN VACANCY
+     * ============================================
+     * HR menautkan/memindahkan lamaran ke lowongan (mis. lamaran lama yang tak
+     * tercocokkan otomatis). null = lepas dari lowongan.
+     */
+    public function assignVacancy(string $id, ?string $vacancyId): Application
+    {
+        $app = Application::findOrFail($id);
+        $app->update(['vacancy_id' => $vacancyId]);
+
+        $this->closeFilledVacanciesIfHired($app->stage, [$vacancyId]);
+
+        return $app->load('vacancy:id,title,location,status');
     }
 
     /**

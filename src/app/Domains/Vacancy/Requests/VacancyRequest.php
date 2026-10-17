@@ -24,6 +24,7 @@ class VacancyRequest extends BaseRequest
             'requirements.*' => ['string', 'max:255'],
             'posted_date'    => ['nullable', 'date'],
             'closing_date'   => ['nullable', 'date', 'after_or_equal:posted_date'],
+            'headcount'      => ['nullable', 'integer', 'min:1'],
         ];
     }
 
@@ -43,6 +44,7 @@ class VacancyRequest extends BaseRequest
             'requirements.*' => ['string', 'max:255'],
             'posted_date'    => ['nullable', 'date'],
             'closing_date'   => ['nullable', 'date', 'after_or_equal:posted_date'],
+            'headcount'      => ['nullable', 'integer', 'min:1'],
         ];
     }
 

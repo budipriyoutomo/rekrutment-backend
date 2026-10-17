@@ -4,6 +4,9 @@ namespace App\Domains\Application\Models;
 
 use App\Core\Models\BaseModel;
 use App\Domains\Interview\Models\Interview;
+use App\Domains\Offer\Models\Offer;
+use App\Domains\Preboarding\Models\Preboarding;
+use App\Domains\Vacancy\Models\Vacancy;
 
 class Application extends BaseModel
 {
@@ -17,6 +20,8 @@ class Application extends BaseModel
         'additional_info' => 'array',
         'documents' => 'array',
         'notes' => 'array',
+        'rejected_at' => 'datetime',
+        'rejection_notified_at' => 'datetime',
     ];
 
     public function educations()
@@ -32,6 +37,21 @@ class Application extends BaseModel
     public function certifications()
     {
         return $this->hasMany(ApplicationCertification::class);
+    }
+
+    public function vacancy()
+    {
+        return $this->belongsTo(Vacancy::class);
+    }
+
+    public function offers()
+    {
+        return $this->hasMany(Offer::class);
+    }
+
+    public function preboarding()
+    {
+        return $this->hasOne(Preboarding::class);
     }
 
     public function interviews()

@@ -15,6 +15,18 @@ class ApplicationResource extends JsonResource
             // =========================
             'id' => $this->id,
             'stage' => $this->stage,
+            'vacancyId' => $this->vacancy_id,
+            'vacancy' => $this->whenLoaded('vacancy', fn () => $this->vacancy ? [
+                'id' => $this->vacancy->id,
+                'title' => $this->vacancy->title,
+                'location' => $this->vacancy->location,
+                'status' => $this->vacancy->status,
+            ] : null),
+            'rejection' => $this->stage === 'rejected' ? [
+                'reason' => $this->rejection_reason,
+                'rejectedAt' => $this->rejected_at,
+                'emailNotifiedAt' => $this->rejection_notified_at,
+            ] : null,
             'profileCompletionStatus' => $this->profile_completion_status ?? 'undone',
             'createdAt' => $this->created_at,
             'updatedAt' => $this->updated_at,

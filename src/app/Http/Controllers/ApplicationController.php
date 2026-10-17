@@ -7,6 +7,9 @@ use App\Domains\Application\Requests\SubmitApplicationRequest;
 use App\Domains\Application\DTO\ApplicationDTO;
 use App\Domains\Application\Actions\SubmitApplicationAction;
 use App\Domains\Application\Actions\BundleApplicationDocumentAction;
+use App\Domains\Application\Actions\RejectApplicationAction;
+use App\Domains\Evaluation\Resources\EvaluationResource;
+use App\Domains\Evaluation\Services\EvaluationService;
 use App\Core\Services\FileUploadService;
 use App\Domains\Application\Models\Application;
 use App\Domains\ProfileCompletion\Actions\SendProfileCompletionEmailAction;
@@ -42,6 +45,7 @@ class ApplicationController extends BaseApiController
                 'domicile',
                 'ageMin',
                 'ageMax',
+                'vacancyId',
             ]),
             perPage: $request->get('per_page', $request->get('limit', 10))
         );
@@ -157,6 +161,49 @@ class ApplicationController extends BaseApiController
             ['updated' => $updated],
             "{$updated} pelamar berhasil dipindahkan"
         );
+    }
+
+    public function assignVacancy(string $id, Request $request, ApplicationService $service)
+    {
+        $validated = $request->validate([
+            'vacancy_id' => ['present', 'nullable', 'uuid', 'exists:vacancies,id'],
+        ]);
+
+        return $this->success(
+            new ApplicationResource($service->assignVacancy($id, $validated['vacancy_id'])),
+            'Lowongan pelamar berhasil diperbarui'
+        );
+    }
+
+    public function reject(string $id, Request $request, RejectApplicationAction $action)
+    {
+        $validated = $request->validate([
+            'reason'     => ['nullable', 'string', 'max:2000'],
+            'send_email' => ['sometimes', 'boolean'],
+        ]);
+
+        $result = $action->execute(
+            Application::findOrFail($id),
+            $validated['reason'] ?? null,
+            (bool) ($validated['send_email'] ?? true),
+        );
+
+        $message = $result['emailQueued']
+            ? 'Kandidat ditolak dan email penolakan sedang dikirim'
+            : 'Kandidat ditolak';
+
+        return $this->success([
+            'application' => new ApplicationResource($result['application']),
+            'emailQueued' => $result['emailQueued'],
+        ], $message);
+    }
+
+    public function evaluationSummary(string $id, EvaluationService $service)
+    {
+        $summary = $service->summaryForApplicant($id);
+        $summary['evaluations'] = EvaluationResource::collection($summary['evaluations']);
+
+        return $this->success($summary, 'Ringkasan evaluasi berhasil diambil');
     }
 
     public function addNote(string $id, Request $request, ApplicationService $service)

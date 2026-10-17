@@ -23,6 +23,7 @@ class JobRequestResource extends BaseResource
             'priority'       => $this->priority,
             'status'         => $this->status,
             'reviewerNotes'  => $this->reviewer_notes,
+            'vacancyId'      => $this->whenLoaded('vacancy', fn () => $this->vacancy?->id),
             'createdAt'      => $this->created_at,
             'updatedAt'      => $this->updated_at,
         ]);

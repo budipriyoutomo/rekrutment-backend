@@ -46,6 +46,16 @@ class InterviewerTest extends TestCase
             ->assertJsonCount(2, 'data');
     }
 
+    public function test_index_keeps_numeric_phone_as_string(): void
+    {
+        // Regresi: BaseResource dulu mengubah "08123456789" jadi 8123456789
+        $this->makeInterviewer();
+
+        $phone = $this->getJson('/api/interviewers')->json('data.0.phone');
+
+        $this->assertSame('08123456789', $phone);
+    }
+
     // ------------------------------------------------------------------ store
 
     public function test_store_creates_interviewer(): void
