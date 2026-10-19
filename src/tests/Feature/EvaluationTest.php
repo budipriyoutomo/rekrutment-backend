@@ -20,8 +20,8 @@ class EvaluationTest extends TestCase
     private function makeApplication(): Application
     {
         return Application::create([
-            'personal_info'   => ['fullName' => 'Candidate Name'],
-            'contact_info'    => ['email' => 'cand@example.com', 'phone' => '081'],
+            'personal_info' => ['fullName' => 'Candidate Name'],
+            'contact_info' => ['email' => 'cand@example.com', 'phone' => '081'],
             'additional_info' => ['positionApplied' => 'Frontend Dev'],
         ]);
     }
@@ -29,16 +29,16 @@ class EvaluationTest extends TestCase
     private function evalData(string $applicantId, array $override = []): array
     {
         return array_merge([
-            'applicant_id'       => $applicantId,
-            'applicant_name'     => 'Candidate Name',
-            'position'           => 'Frontend Dev',
-            'evaluator'          => 'HR Manager',
-            'date'               => now()->format('Y-m-d'),
+            'applicant_id' => $applicantId,
+            'applicant_name' => 'Candidate Name',
+            'position' => 'Frontend Dev',
+            'evaluator' => 'HR Manager',
+            'date' => now()->format('Y-m-d'),
             'communication_score' => 4,
-            'technical_score'    => 3,
-            'experience_score'   => 4,
-            'culture_fit_score'  => 5,
-            'recommendation'     => 'hire',
+            'technical_score' => 3,
+            'experience_score' => 4,
+            'culture_fit_score' => 5,
+            'recommendation' => 'hire',
         ], $override);
     }
 
@@ -105,7 +105,7 @@ class EvaluationTest extends TestCase
 
     public function test_show_returns_evaluation(): void
     {
-        $app  = $this->makeApplication();
+        $app = $this->makeApplication();
         $eval = $this->makeEvaluation($app->id);
 
         $this->getJson("/api/evaluations/{$eval->id}")
@@ -117,7 +117,7 @@ class EvaluationTest extends TestCase
 
     public function test_update_modifies_evaluation(): void
     {
-        $app  = $this->makeApplication();
+        $app = $this->makeApplication();
         $eval = $this->makeEvaluation($app->id);
 
         $this->patchJson("/api/evaluations/{$eval->id}", ['recommendation' => 'strong_hire'])
@@ -125,7 +125,7 @@ class EvaluationTest extends TestCase
             ->assertJsonPath('data.recommendation', 'strong_hire');
 
         $this->assertDatabaseHas('evaluations', [
-            'id'             => $eval->id,
+            'id' => $eval->id,
             'recommendation' => 'strong_hire',
         ]);
     }
@@ -134,7 +134,7 @@ class EvaluationTest extends TestCase
 
     public function test_destroy_deletes_evaluation(): void
     {
-        $app  = $this->makeApplication();
+        $app = $this->makeApplication();
         $eval = $this->makeEvaluation($app->id);
 
         $this->deleteJson("/api/evaluations/{$eval->id}")

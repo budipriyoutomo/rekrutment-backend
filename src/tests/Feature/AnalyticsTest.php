@@ -34,8 +34,8 @@ class AnalyticsTest extends TestCase
 
         $app = Application::create([
             'personal_info' => ['fullName' => "Kandidat {$n}"],
-            'contact_info'  => ['email' => "k{$n}@example.com"],
-            'stage'         => $stage,
+            'contact_info' => ['email' => "k{$n}@example.com"],
+            'stage' => $stage,
         ]);
 
         if ($createdAt) {
@@ -52,7 +52,7 @@ class AnalyticsTest extends TestCase
         $n++;
 
         return Offer::create(array_merge([
-            'number' => 'OFR/2026/10/' . str_pad((string) $n, 4, '0', STR_PAD_LEFT), 'application_id' => $app->id,
+            'number' => 'OFR/2026/10/'.str_pad((string) $n, 4, '0', STR_PAD_LEFT), 'application_id' => $app->id,
             'position' => 'Cook', 'employment_type' => 'full-time', 'base_salary' => 5000000,
             'start_date' => '2026-11-02', 'expires_at' => '2026-10-30', 'status' => $status,
             'sent_at' => $status === Offer::STATUS_DRAFT ? null : now(),
@@ -62,7 +62,7 @@ class AnalyticsTest extends TestCase
     private function employee(Application $app, array $override = []): Employee
     {
         return Employee::create(array_merge([
-            'employee_number' => 'EMP-' . Str::random(6), 'application_id' => $app->id, 'full_name' => 'X',
+            'employee_number' => 'EMP-'.Str::random(6), 'application_id' => $app->id, 'full_name' => 'X',
             'position' => 'Cook', 'start_date' => now()->toDateString(), 'status' => Employee::STATUS_ONBOARDING,
         ], $override));
     }
@@ -157,12 +157,12 @@ class AnalyticsTest extends TestCase
         OnboardingTask::create(['employee_id' => $soon->id, 'title' => 'Nanti', 'due_date' => now()->addDay()->toDateString()]);
 
         $this->getJson('/api/analytics')->assertJsonPath('data.onboarding', [
-            'preboarding_waiting'    => 2,
-            'preboarding_to_review'  => 1,
+            'preboarding_waiting' => 2,
+            'preboarding_to_review' => 1,
             'preboarding_to_convert' => 1,
-            'employees_onboarding'   => 2,
-            'starting_this_week'     => 1,
-            'overdue_tasks'          => 1,
+            'employees_onboarding' => 2,
+            'starting_this_week' => 1,
+            'overdue_tasks' => 1,
         ]);
         $this->assertNotNull($verified);
     }

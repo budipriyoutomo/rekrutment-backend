@@ -3,14 +3,13 @@
 namespace App\Domains\Application\Services;
 
 use App\Core\Services\BaseService;
+use App\Domains\Application\Models\Application;
+use App\Domains\Vacancy\Services\VacancyService;
+use App\Enums\PipelineStage;
 use Illuminate\Database\UniqueConstraintViolationException;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 use Illuminate\Validation\ValidationException;
-
-use App\Domains\Application\Models\Application;
-use App\Domains\Vacancy\Services\VacancyService;
-use App\Enums\PipelineStage;
 
 class ApplicationService extends BaseService
 {
@@ -89,7 +88,7 @@ class ApplicationService extends BaseService
         return Application::query()
             ->where(function ($q) use ($contact, $personal, $email) {
                 $q->whereRaw("lower(trim($contact)) = ?", [$email])
-                  ->orWhereRaw("lower(trim($personal)) = ?", [$email]);
+                    ->orWhereRaw("lower(trim($personal)) = ?", [$email]);
             })
             ->exists();
     }
@@ -119,7 +118,7 @@ class ApplicationService extends BaseService
         $query = Application::query()->with('vacancy:id,title,location,status');
 
         // 🔍 filter lowongan; 'none' = lamaran yang belum terhubung ke lowongan
-        if (!empty($filters['vacancyId'])) {
+        if (! empty($filters['vacancyId'])) {
             $filters['vacancyId'] === 'none'
                 ? $query->whereNull('vacancy_id')
                 : $query->where('vacancy_id', $filters['vacancyId']);
@@ -127,76 +126,76 @@ class ApplicationService extends BaseService
 
         // 🔍 filter stage/status
         $stage = $filters['stage'] ?? $filters['status'] ?? null;
-        if (!empty($stage)) {
+        if (! empty($stage)) {
             $query->where('stage', $stage);
         }
 
         // 🔍 kebalikan filter stage — dipakai halaman Candidates yang menyembunyikan pelamar baru
-        if (!empty($filters['excludeStage'])) {
+        if (! empty($filters['excludeStage'])) {
             $query->where('stage', '!=', $filters['excludeStage']);
         }
 
         // 🔍 search name / email
-        if (!empty($filters['search'])) {
+        if (! empty($filters['search'])) {
             $search = $filters['search'];
 
             $query->where(function ($q) use ($search) {
                 $q->where('personal_info->fullName', 'ilike', "%$search%")
-                  ->orWhere('contact_info->email', 'ilike', "%$search%");
+                    ->orWhere('contact_info->email', 'ilike', "%$search%");
             });
         }
 
         // 🔍 filter date range
-        if (!empty($filters['startDate']) && !empty($filters['endDate'])) {
+        if (! empty($filters['startDate']) && ! empty($filters['endDate'])) {
             $query->whereBetween('created_at', [
                 $filters['startDate'],
-                $filters['endDate']
+                $filters['endDate'],
             ]);
         }
 
         // 🔍 filter berdasarkan inputan quick apply (/apply)
-        if (!empty($filters['gender'])) {
+        if (! empty($filters['gender'])) {
             $query->where('personal_info->gender', $filters['gender']);
         }
 
-        if (!empty($filters['position'])) {
+        if (! empty($filters['position'])) {
             $query->where('additional_info->positionApplied', $filters['position']);
         }
 
-        if (!empty($filters['workLocation'])) {
+        if (! empty($filters['workLocation'])) {
             $query->where('additional_info->workLocation', $filters['workLocation']);
         }
 
-        if (!empty($filters['jobSource'])) {
+        if (! empty($filters['jobSource'])) {
             $query->where('additional_info->jobSource', $filters['jobSource']);
         }
 
-        if (!empty($filters['hasVehicle'])) {
+        if (! empty($filters['hasVehicle'])) {
             $query->where('additional_info->hasVehicle', $filters['hasVehicle']);
         }
 
-        if (!empty($filters['workedBefore'])) {
+        if (! empty($filters['workedBefore'])) {
             $query->where('additional_info->workedAtCompany', $filters['workedBefore']);
         }
 
-        if (!empty($filters['domicile'])) {
+        if (! empty($filters['domicile'])) {
             $domicile = $filters['domicile'];
 
             $query->where(function ($q) use ($domicile) {
                 $q->where('contact_info->currentAddress', 'ilike', "%$domicile%")
-                  ->orWhere('contact_info->homeAddress', 'ilike', "%$domicile%");
+                    ->orWhere('contact_info->homeAddress', 'ilike', "%$domicile%");
             });
         }
 
         // usia disimpan sebagai string di JSON, ambil digitnya saja sebelum cast
-        if (!empty($filters['ageMin'])) {
+        if (! empty($filters['ageMin'])) {
             $query->whereRaw(
                 "NULLIF(regexp_replace(additional_info->>'age', '\D', '', 'g'), '')::int >= ?",
                 [(int) $filters['ageMin']]
             );
         }
 
-        if (!empty($filters['ageMax'])) {
+        if (! empty($filters['ageMax'])) {
             $query->whereRaw(
                 "NULLIF(regexp_replace(additional_info->>'age', '\D', '', 'g'), '')::int <= ?",
                 [(int) $filters['ageMax']]
@@ -219,7 +218,7 @@ class ApplicationService extends BaseService
             'vacancy:id,title,location,status',
             'educations',
             'experiences',
-            'certifications'
+            'certifications',
         ])->findOrFail($id);
     }
 
@@ -233,7 +232,7 @@ class ApplicationService extends BaseService
         $app = Application::findOrFail($id);
 
         $app->update([
-            'stage' => $stage
+            'stage' => $stage,
         ]);
 
         $this->closeFilledVacanciesIfHired($stage, [$app->vacancy_id]);

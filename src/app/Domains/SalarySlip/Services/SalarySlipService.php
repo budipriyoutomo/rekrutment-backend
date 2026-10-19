@@ -6,6 +6,7 @@ use App\Domains\SalarySlip\DTO\SalarySlipDTO;
 use App\Domains\SalarySlip\Models\SalarySlip;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Collection;
+use Illuminate\Support\Str;
 
 class SalarySlipService
 {
@@ -17,7 +18,7 @@ class SalarySlipService
         // 'sent' = sudah pernah terkirim (menu Report Salary Slip). Memakai
         // sent_at agar slip yang sedang dikirim-ulang (status queued/processing)
         // tetap berada di menu Report, tidak lompat balik ke Salary Slips.
-        if (!empty($filters['status'])) {
+        if (! empty($filters['status'])) {
             if ($filters['status'] === 'sent') {
                 $query->whereNotNull('sent_at');
             } elseif ($filters['status'] === 'unsent') {
@@ -25,18 +26,18 @@ class SalarySlipService
             }
         }
 
-        if (!empty($filters['periode'])) {
+        if (! empty($filters['periode'])) {
             $query->where('periode', $filters['periode']);
         }
-        if (!empty($filters['cabang'])) {
-            $query->where('cabang', 'like', '%' . $filters['cabang'] . '%');
+        if (! empty($filters['cabang'])) {
+            $query->where('cabang', 'like', '%'.$filters['cabang'].'%');
         }
-        if (!empty($filters['search'])) {
+        if (! empty($filters['search'])) {
             $search = $filters['search'];
             $query->where(function ($q) use ($search) {
                 $q->where('nama', 'like', "%{$search}%")
-                  ->orWhere('nik', 'like', "%{$search}%")
-                  ->orWhere('email', 'like', "%{$search}%");
+                    ->orWhere('nik', 'like', "%{$search}%")
+                    ->orWhere('email', 'like', "%{$search}%");
             });
         }
 
@@ -72,8 +73,8 @@ class SalarySlipService
 
     public function bulkInsert(array $dtos): int
     {
-        $rows = array_map(fn(SalarySlipDTO $dto) => array_merge($dto->toArray(), [
-            'id'         => \Illuminate\Support\Str::uuid()->toString(),
+        $rows = array_map(fn (SalarySlipDTO $dto) => array_merge($dto->toArray(), [
+            'id' => Str::uuid()->toString(),
             'created_at' => now(),
             'updated_at' => now(),
         ]), $dtos);

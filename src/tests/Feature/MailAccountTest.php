@@ -31,17 +31,17 @@ class MailAccountTest extends TestCase
     private function payload(array $o = []): array
     {
         return array_merge([
-            'label'           => 'HR Team',
-            'driver'          => 'smtp',
-            'purpose'         => 'salary_slip',
-            'from_email'      => 'hr@altima.co.id',
-            'from_name'       => 'HR Altima',
-            'smtp_host'       => 'smtp.altima.co.id',
-            'smtp_port'       => 587,
-            'smtp_username'   => 'hr@altima.co.id',
-            'smtp_password'   => 'super-secret',
+            'label' => 'HR Team',
+            'driver' => 'smtp',
+            'purpose' => 'salary_slip',
+            'from_email' => 'hr@altima.co.id',
+            'from_name' => 'HR Altima',
+            'smtp_host' => 'smtp.altima.co.id',
+            'smtp_port' => 587,
+            'smtp_username' => 'hr@altima.co.id',
+            'smtp_password' => 'super-secret',
             'smtp_encryption' => 'tls',
-            'is_default'      => true,
+            'is_default' => true,
         ], $o);
     }
 
@@ -227,7 +227,7 @@ class MailAccountTest extends TestCase
         Mail::fake();
 
         // mock PDF agar tak butuh LibreOffice
-        $path = tempnam(sys_get_temp_dir(), 'slip') . '.pdf';
+        $path = tempnam(sys_get_temp_dir(), 'slip').'.pdf';
         file_put_contents($path, '%PDF-1.4');
         $this->mock(GeneratePayslipPdfAction::class, fn ($m) => $m->shouldReceive('execute')->andReturn($path));
 

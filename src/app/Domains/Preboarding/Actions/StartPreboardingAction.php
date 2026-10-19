@@ -20,11 +20,11 @@ class StartPreboardingAction
         $preboarding = Preboarding::firstOrCreate(
             ['application_id' => $application->id],
             [
-                'offer_id'         => $offer?->id,
-                'status'           => Preboarding::STATUS_PENDING,
-                'token'            => Str::random(64),
+                'offer_id' => $offer?->id,
+                'status' => Preboarding::STATUS_PENDING,
+                'token' => Str::random(64),
                 'token_expires_at' => now()->addDays(Preboarding::TOKEN_VALID_DAYS),
-                'documents'        => [],
+                'documents' => [],
             ]
         );
 
@@ -42,7 +42,7 @@ class StartPreboardingAction
 
         $preboarding->update([
             'token_expires_at' => now()->addDays(Preboarding::TOKEN_VALID_DAYS),
-            'sent_at'          => now(),
+            'sent_at' => now(),
         ]);
 
         if ($email = $preboarding->candidateEmail()) {

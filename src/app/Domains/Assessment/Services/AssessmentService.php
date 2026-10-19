@@ -34,8 +34,8 @@ class AssessmentService extends BaseService
             $query->where('is_active', (bool) $filters['is_active']);
         }
 
-        if (!empty($filters['search'])) {
-            $query->where('title', 'ilike', '%' . $filters['search'] . '%');
+        if (! empty($filters['search'])) {
+            $query->where('title', 'ilike', '%'.$filters['search'].'%');
         }
 
         return $query->orderByDesc('created_at')->paginate($perPage);
@@ -50,11 +50,11 @@ class AssessmentService extends BaseService
     {
         return DB::transaction(function () use ($data) {
             $assessment = Assessment::create([
-                'title'            => $data['title'],
-                'description'      => $data['description'] ?? null,
+                'title' => $data['title'],
+                'description' => $data['description'] ?? null,
                 'duration_minutes' => $data['duration_minutes'] ?? 30,
-                'passing_score'    => $data['passing_score'] ?? 70,
-                'is_active'        => $data['is_active'] ?? true,
+                'passing_score' => $data['passing_score'] ?? 70,
+                'is_active' => $data['is_active'] ?? true,
             ]);
 
             $this->syncQuestions($assessment, $data['questions'] ?? []);
@@ -69,11 +69,11 @@ class AssessmentService extends BaseService
             $assessment = Assessment::findOrFail($id);
 
             $assessment->update(array_filter([
-                'title'            => $data['title'] ?? null,
-                'description'      => $data['description'] ?? null,
+                'title' => $data['title'] ?? null,
+                'description' => $data['description'] ?? null,
                 'duration_minutes' => $data['duration_minutes'] ?? null,
-                'passing_score'    => $data['passing_score'] ?? null,
-                'is_active'        => $data['is_active'] ?? null,
+                'passing_score' => $data['passing_score'] ?? null,
+                'is_active' => $data['is_active'] ?? null,
             ], fn ($value) => $value !== null));
 
             // Soal hanya disentuh bila klien memang mengirim field-nya, agar
@@ -113,14 +113,14 @@ class AssessmentService extends BaseService
 
         foreach (array_values($questions) as $index => $question) {
             $payload = [
-                'question'       => $question['question'],
-                'options'        => $question['options'],
+                'question' => $question['question'],
+                'options' => $question['options'],
                 'correct_answer' => $question['correct_answer'],
-                'score'          => $question['score'] ?? 1,
-                'order'          => $question['order'] ?? $index,
+                'score' => $question['score'] ?? 1,
+                'order' => $question['order'] ?? $index,
             ];
 
-            $record = !empty($question['id'])
+            $record = ! empty($question['id'])
                 ? $assessment->questions()->whereKey($question['id'])->first()
                 : null;
 
@@ -144,10 +144,10 @@ class AssessmentService extends BaseService
 
     public function assignToApplicant(string $assessmentId, string $applicationId): AssessmentAssignment
     {
-        $assessment  = Assessment::with('questions')->findOrFail($assessmentId);
+        $assessment = Assessment::with('questions')->findOrFail($assessmentId);
         $application = Application::findOrFail($applicationId);
 
-        if (!$assessment->is_active) {
+        if (! $assessment->is_active) {
             throw new \RuntimeException('Paket tes tidak aktif dan tidak bisa dikirim ke kandidat.');
         }
 
@@ -170,15 +170,15 @@ class AssessmentService extends BaseService
     {
         $query = AssessmentAssignment::query()->with(['assessment', 'application']);
 
-        if (!empty($filters['status'])) {
+        if (! empty($filters['status'])) {
             $query->where('status', $filters['status']);
         }
 
-        if (!empty($filters['assessment_id'])) {
+        if (! empty($filters['assessment_id'])) {
             $query->where('assessment_id', $filters['assessment_id']);
         }
 
-        if (!empty($filters['application_id'])) {
+        if (! empty($filters['application_id'])) {
             $query->where('application_id', $filters['application_id']);
         }
 

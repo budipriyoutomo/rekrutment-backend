@@ -19,7 +19,7 @@ class UserController extends BaseApiController
         if ($search = $request->get('search')) {
             $query->where(function ($q) use ($search) {
                 $q->where('name', 'ilike', "%{$search}%")
-                  ->orWhere('email', 'ilike', "%{$search}%");
+                    ->orWhere('email', 'ilike', "%{$search}%");
             });
         }
 
@@ -53,7 +53,7 @@ class UserController extends BaseApiController
         $user = User::findOrFail($id);
         $data = $request->validated();
 
-        if (!empty($data['password'])) {
+        if (! empty($data['password'])) {
             $data['password'] = Hash::make($data['password']);
         } else {
             unset($data['password']);

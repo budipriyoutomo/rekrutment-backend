@@ -55,14 +55,23 @@ class SalarySlipImportTest extends TestCase
     {
         $data = array_map(fn ($r) => array_map(fn ($k) => $r[$k] ?? '', $header), $rows);
 
-        $export = new class($header, $data) implements FromArray, WithHeadings {
+        $export = new class($header, $data) implements FromArray, WithHeadings
+        {
             public function __construct(private array $h, private array $d) {}
-            public function headings(): array { return $this->h; }
-            public function array(): array { return $this->d; }
+
+            public function headings(): array
+            {
+                return $this->h;
+            }
+
+            public function array(): array
+            {
+                return $this->d;
+            }
         };
 
         $binary = Excel::raw($export, ExcelFormat::XLSX);
-        $tmp = tempnam(sys_get_temp_dir(), 'slip') . '.xlsx';
+        $tmp = tempnam(sys_get_temp_dir(), 'slip').'.xlsx';
         file_put_contents($tmp, $binary);
 
         return new UploadedFile($tmp, 'slip.xlsx', null, null, true);

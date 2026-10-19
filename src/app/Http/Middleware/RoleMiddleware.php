@@ -2,11 +2,13 @@
 
 namespace App\Http\Middleware;
 
+use App\Enums\Role;
 use Closure;
 use Illuminate\Http\Request;
+use PHPOpenSourceSaver\JWTAuth\Exceptions\JWTException;
+use PHPOpenSourceSaver\JWTAuth\Exceptions\TokenExpiredException;
 use PHPOpenSourceSaver\JWTAuth\Facades\JWTAuth;
 use Symfony\Component\HttpKernel\Exception\UnauthorizedHttpException;
-use App\Enums\Role;
 
 class RoleMiddleware
 {
@@ -17,9 +19,9 @@ class RoleMiddleware
             $payload = JWTAuth::parseToken()->getPayload();
 
             $userId = $payload->get('sub');
-            $role   = $payload->get('role');
+            $role = $payload->get('role');
 
-            if (!$userId) {
+            if (! $userId) {
                 throw new UnauthorizedHttpException('', 'Token invalid (no subject)');
             }
 
@@ -34,9 +36,9 @@ class RoleMiddleware
             }
 
             // ✅ Role check
-            if (!in_array($role, $roles)) {
+            if (! in_array($role, $roles)) {
                 return response()->json([
-                    'message' => 'Akses ditolak (role tidak sesuai)'
+                    'message' => 'Akses ditolak (role tidak sesuai)',
                 ], 403);
             }
 
@@ -44,20 +46,20 @@ class RoleMiddleware
             $request->attributes->set('auth_user_id', $userId);
             $request->attributes->set('auth_user_role', $role);
 
-        } catch (\PHPOpenSourceSaver\JWTAuth\Exceptions\TokenExpiredException $e) {
+        } catch (TokenExpiredException $e) {
             return response()->json([
-                'message' => 'Token expired'
+                'message' => 'Token expired',
             ], 401);
 
-        } catch (\PHPOpenSourceSaver\JWTAuth\Exceptions\JWTException $e) {
+        } catch (JWTException $e) {
             return response()->json([
-                'message' => 'Token invalid'
+                'message' => 'Token invalid',
             ], 401);
 
         } catch (\Exception $e) {
             return response()->json([
                 'message' => 'Unauthorized',
-                'error' => $e->getMessage()
+                'error' => $e->getMessage(),
             ], 401);
         }
 

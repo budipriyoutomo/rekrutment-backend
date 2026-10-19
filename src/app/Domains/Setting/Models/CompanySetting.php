@@ -6,10 +6,13 @@ use Illuminate\Database\Eloquent\Model;
 
 class CompanySetting extends Model
 {
-    protected $table      = 'company_settings';
+    protected $table = 'company_settings';
+
     protected $primaryKey = 'key';
-    public    $incrementing = false;
-    protected $keyType    = 'string';
+
+    public $incrementing = false;
+
+    protected $keyType = 'string';
 
     protected $fillable = ['key', 'value'];
 

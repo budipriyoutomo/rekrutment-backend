@@ -30,49 +30,49 @@ class OfferTest extends TestCase
     private function makeApplication(array $override = []): Application
     {
         return Application::create(array_merge([
-            'personal_info'   => ['fullName' => 'Siti Kandidat'],
-            'contact_info'    => ['email' => 'siti@example.com', 'phone' => '081'],
+            'personal_info' => ['fullName' => 'Siti Kandidat'],
+            'contact_info' => ['email' => 'siti@example.com', 'phone' => '081'],
             'additional_info' => ['positionApplied' => 'Bandung - Head Chef'],
-            'stage'           => 'offer',
+            'stage' => 'offer',
         ], $override));
     }
 
     private function offerPayload(Application $app, array $override = []): array
     {
         return array_merge([
-            'application_id'  => $app->id,
-            'position'        => 'Bandung - Head Chef',
-            'department'      => 'Kitchen',
-            'location'        => 'Bandung - RIAU',
+            'application_id' => $app->id,
+            'position' => 'Bandung - Head Chef',
+            'department' => 'Kitchen',
+            'location' => 'Bandung - RIAU',
             'employment_type' => 'contract',
-            'base_salary'     => 8500000,
-            'allowances'      => [['name' => 'Tunjangan Makan', 'amount' => 500000]],
-            'start_date'      => now()->addMonth()->toDateString(),
-            'expires_at'      => now()->addWeek()->toDateString(),
-            'terms'           => 'Masa percobaan 3 bulan.',
+            'base_salary' => 8500000,
+            'allowances' => [['name' => 'Tunjangan Makan', 'amount' => 500000]],
+            'start_date' => now()->addMonth()->toDateString(),
+            'expires_at' => now()->addWeek()->toDateString(),
+            'terms' => 'Masa percobaan 3 bulan.',
         ], $override);
     }
 
     private function makeOffer(Application $app, array $override = []): Offer
     {
         return Offer::create(array_merge([
-            'number'          => 'OFR/2026/10/' . str_pad((string) random_int(1, 9999), 4, '0', STR_PAD_LEFT),
-            'application_id'  => $app->id,
-            'position'        => 'Bandung - Head Chef',
+            'number' => 'OFR/2026/10/'.str_pad((string) random_int(1, 9999), 4, '0', STR_PAD_LEFT),
+            'application_id' => $app->id,
+            'position' => 'Bandung - Head Chef',
             'employment_type' => 'full-time',
-            'base_salary'     => 8500000,
-            'allowances'      => [['name' => 'Tunjangan Makan', 'amount' => 500000]],
-            'start_date'      => now()->addMonth()->toDateString(),
-            'expires_at'      => now()->addWeek()->toDateString(),
-            'status'          => Offer::STATUS_DRAFT,
+            'base_salary' => 8500000,
+            'allowances' => [['name' => 'Tunjangan Makan', 'amount' => 500000]],
+            'start_date' => now()->addMonth()->toDateString(),
+            'expires_at' => now()->addWeek()->toDateString(),
+            'status' => Offer::STATUS_DRAFT,
         ], $override));
     }
 
     private function sentOffer(Application $app, array $override = []): Offer
     {
         return $this->makeOffer($app, array_merge([
-            'status'  => Offer::STATUS_SENT,
-            'token'   => str_repeat('a', 64),
+            'status' => Offer::STATUS_SENT,
+            'token' => str_repeat('a', 64),
             'sent_at' => now(),
         ], $override));
     }
@@ -90,7 +90,7 @@ class OfferTest extends TestCase
         $this->postJson('/api/offers', $this->offerPayload($app))
             ->assertStatus(200)
             ->assertJsonPath('data.status', 'draft')
-            ->assertJsonPath('data.number', 'OFR/' . now()->format('Y/m') . '/0001')
+            ->assertJsonPath('data.number', 'OFR/'.now()->format('Y/m').'/0001')
             ->assertJsonPath('data.vacancyId', $vacancy->id)
             ->assertJsonPath('data.candidateName', 'Siti Kandidat')
             ->assertJsonPath('data.totalCompensation', 9000000)
@@ -98,7 +98,7 @@ class OfferTest extends TestCase
 
         $second = $this->makeApplication(['contact_info' => ['email' => 'b@example.com']]);
         $this->postJson('/api/offers', $this->offerPayload($second))
-            ->assertJsonPath('data.number', 'OFR/' . now()->format('Y/m') . '/0002');
+            ->assertJsonPath('data.number', 'OFR/'.now()->format('Y/m').'/0002');
     }
 
     public function test_create_requires_offer_stage(): void
@@ -127,8 +127,8 @@ class OfferTest extends TestCase
 
         $this->postJson('/api/offers', $this->offerPayload($app, [
             'base_salary' => -1,
-            'expires_at'  => now()->subDay()->toDateString(),
-            'allowances'  => [['name' => '', 'amount' => 10]],
+            'expires_at' => now()->subDay()->toDateString(),
+            'allowances' => [['name' => '', 'amount' => 10]],
         ]))
             ->assertStatus(422)
             ->assertJsonValidationErrors(['base_salary', 'expires_at', 'allowances.0.name']);
@@ -159,7 +159,7 @@ class OfferTest extends TestCase
         $this->makeOffer($app);
         $this->makeOffer($this->makeApplication([
             'personal_info' => ['fullName' => 'Budi Lain'],
-            'contact_info'  => ['email' => 'd@example.com'],
+            'contact_info' => ['email' => 'd@example.com'],
         ]));
 
         $this->getJson("/api/offers?applicationId={$app->id}")->assertJsonCount(2, 'data');
@@ -192,7 +192,7 @@ class OfferTest extends TestCase
         $offer->refresh();
         $this->assertSame(64, strlen($offer->token));
         $this->assertNotNull($offer->sent_at);
-        $this->assertStringEndsWith('/offer/' . $offer->token, $offer->publicUrl());
+        $this->assertStringEndsWith('/offer/'.$offer->token, $offer->publicUrl());
 
         Mail::assertQueued(OfferLetterMail::class, fn ($mail) => $mail->hasTo('siti@example.com'));
     }
@@ -227,7 +227,7 @@ class OfferTest extends TestCase
             ->assertStatus(200)
             ->assertJsonPath('data.status', 'withdrawn');
 
-        $this->postJson('/api/offer/' . $offer->token . '/accept')->assertStatus(410);
+        $this->postJson('/api/offer/'.$offer->token.'/accept')->assertStatus(410);
         $this->postJson("/api/offers/{$offer->id}/withdraw")->assertStatus(422);
     }
 
@@ -239,7 +239,7 @@ class OfferTest extends TestCase
         $offer = $this->sentOffer($this->makeApplication());
         auth()->logout();
 
-        $this->getJson('/api/offer/' . $offer->token)
+        $this->getJson('/api/offer/'.$offer->token)
             ->assertStatus(200)
             ->assertJsonPath('data.candidateName', 'Siti Kandidat')
             ->assertJsonPath('data.companyName', 'Altima Group')
@@ -250,7 +250,7 @@ class OfferTest extends TestCase
             ->assertJsonMissingPath('data.applicationId')
             ->assertJsonMissingPath('data.declineReason');
 
-        $this->getJson('/api/offer/' . str_repeat('z', 64))->assertStatus(404);
+        $this->getJson('/api/offer/'.str_repeat('z', 64))->assertStatus(404);
     }
 
     public function test_accept_hires_candidate_and_closes_filled_vacancy(): void
@@ -263,7 +263,7 @@ class OfferTest extends TestCase
         $offer = $this->sentOffer($app);
         auth()->logout();
 
-        $this->postJson('/api/offer/' . $offer->token . '/accept')
+        $this->postJson('/api/offer/'.$offer->token.'/accept')
             ->assertStatus(200)
             ->assertJsonPath('data.status', 'accepted');
 
@@ -271,8 +271,8 @@ class OfferTest extends TestCase
         $this->assertNotNull($offer->fresh()->responded_at);
         $this->assertSame('closed', $vacancy->fresh()->status);
 
-        $this->postJson('/api/offer/' . $offer->token . '/accept')->assertStatus(409);
-        $this->postJson('/api/offer/' . $offer->token . '/decline')->assertStatus(409);
+        $this->postJson('/api/offer/'.$offer->token.'/accept')->assertStatus(409);
+        $this->postJson('/api/offer/'.$offer->token.'/decline')->assertStatus(409);
     }
 
     public function test_decline_records_reason_and_keeps_stage(): void
@@ -281,7 +281,7 @@ class OfferTest extends TestCase
         $offer = $this->sentOffer($app);
         auth()->logout();
 
-        $this->postJson('/api/offer/' . $offer->token . '/decline', ['reason' => 'Gaji belum sesuai'])
+        $this->postJson('/api/offer/'.$offer->token.'/decline', ['reason' => 'Gaji belum sesuai'])
             ->assertStatus(200)
             ->assertJsonPath('data.status', 'declined');
 
@@ -297,7 +297,7 @@ class OfferTest extends TestCase
         $app = $this->makeApplication();
         $offer = $this->sentOffer($app, ['expires_at' => now()->subDay()->toDateString()]);
 
-        $this->postJson('/api/offer/' . $offer->token . '/accept')->assertStatus(410);
+        $this->postJson('/api/offer/'.$offer->token.'/accept')->assertStatus(410);
 
         $this->assertSame('expired', $offer->fresh()->status);
         $this->assertSame('offer', $app->fresh()->stage);
@@ -307,7 +307,7 @@ class OfferTest extends TestCase
     {
         $offer = $this->sentOffer($this->makeApplication(), ['expires_at' => now()->toDateString()]);
 
-        $this->postJson('/api/offer/' . $offer->token . '/accept')->assertStatus(200);
+        $this->postJson('/api/offer/'.$offer->token.'/accept')->assertStatus(200);
     }
 
     public function test_expire_command_marks_only_overdue_sent_offers(): void
@@ -333,7 +333,7 @@ class OfferTest extends TestCase
     {
         CompanySetting::set('company_name', 'Altima Group');
         $offer = $this->makeOffer($this->makeApplication(), [
-            'terms'      => "Masa percobaan 3 bulan.\n<script>x</script>",
+            'terms' => "Masa percobaan 3 bulan.\n<script>x</script>",
             'start_date' => '2026-11-01',
         ]);
 

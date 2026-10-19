@@ -10,7 +10,7 @@ trait HasUuid
     {
         static::creating(function ($model) {
 
-            if (!$model->getKey()) {
+            if (! $model->getKey()) {
                 $model->{$model->getKeyName()} = (string) Str::uuid();
             }
         });

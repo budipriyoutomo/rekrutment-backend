@@ -13,12 +13,12 @@ class ApplicationSubmitTest extends TestCase
     {
         return [
             'personalInfo' => ['fullName' => 'Budi Santoso'],
-            'contactInfo'  => ['email' => 'budi@example.com', 'phone' => '08123456789'],
-            'education'    => [],
+            'contactInfo' => ['email' => 'budi@example.com', 'phone' => '08123456789'],
+            'education' => [],
             'certifications' => [],
             'workExperience' => [],
-            'parentInfo'   => ['fatherName' => 'Slamet'],
-            'spouseInfo'   => ['spouseName' => ''],
+            'parentInfo' => ['fatherName' => 'Slamet'],
+            'spouseInfo' => ['spouseName' => ''],
             'additionalInfo' => $additionalInfo,
         ];
     }
@@ -27,7 +27,7 @@ class ApplicationSubmitTest extends TestCase
     {
         $this->postJson('/api/applications', $this->payload([
             'positionApplied' => 'Bandung - Cook',
-            'workLocation'    => 'Jakarta - HEAD OFFICE JAKARTA',
+            'workLocation' => 'Jakarta - HEAD OFFICE JAKARTA',
         ]))
             ->assertStatus(422)
             ->assertJsonValidationErrors('additionalInfo.workLocation');
@@ -37,7 +37,7 @@ class ApplicationSubmitTest extends TestCase
     {
         $this->postJson('/api/applications', $this->payload([
             'positionApplied' => 'Bandung - Cook',
-            'workLocation'    => 'Bandung - KARNIVOR - JL. RIAU',
+            'workLocation' => 'Bandung - KARNIVOR - JL. RIAU',
         ]))->assertStatus(200);
     }
 
@@ -45,7 +45,7 @@ class ApplicationSubmitTest extends TestCase
     {
         $this->postJson('/api/applications', $this->payload([
             'positionApplied' => 'Cook',
-            'workLocation'    => 'Jakarta - HEAD OFFICE JAKARTA',
+            'workLocation' => 'Jakarta - HEAD OFFICE JAKARTA',
         ]))->assertStatus(200);
     }
 

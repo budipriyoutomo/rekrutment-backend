@@ -14,15 +14,15 @@ class PublicQuestionResource extends BaseResource
     public function toArray($request): array
     {
         return $this->formatArray([
-            'id'       => $this->id,
+            'id' => $this->id,
             'question' => $this->question,
-            'options'  => collect($this->options ?? [])
+            'options' => collect($this->options ?? [])
                 ->map(fn ($option) => [
-                    'key'  => $option['key'] ?? null,
+                    'key' => $option['key'] ?? null,
                     'text' => $option['text'] ?? null,
                 ])
                 ->all(),
-            'order'    => (int) $this->order,
+            'order' => (int) $this->order,
         ]);
     }
 }

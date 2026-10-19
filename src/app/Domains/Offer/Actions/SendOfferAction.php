@@ -39,8 +39,8 @@ class SendOfferAction
 
         if ($offer->status === Offer::STATUS_DRAFT) {
             $offer->update([
-                'status'  => Offer::STATUS_SENT,
-                'token'   => Str::random(64),
+                'status' => Offer::STATUS_SENT,
+                'token' => Str::random(64),
                 'sent_at' => now(),
             ]);
         }

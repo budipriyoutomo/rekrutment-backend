@@ -33,37 +33,37 @@ class PreboardingTest extends TestCase
     private function makeApplication(array $override = []): Application
     {
         return Application::create(array_merge([
-            'personal_info'   => ['fullName' => 'Siti Kandidat'],
-            'contact_info'    => ['email' => 'siti@example.com', 'phone' => '081'],
+            'personal_info' => ['fullName' => 'Siti Kandidat'],
+            'contact_info' => ['email' => 'siti@example.com', 'phone' => '081'],
             'additional_info' => ['positionApplied' => 'Bandung - Head Chef'],
-            'stage'           => 'hired',
+            'stage' => 'hired',
         ], $override));
     }
 
     private function makePreboarding(array $override = [], ?Application $app = null): Preboarding
     {
         return Preboarding::create(array_merge([
-            'application_id'   => ($app ?? $this->makeApplication())->id,
-            'status'           => Preboarding::STATUS_PENDING,
-            'token'            => Str::random(64),
+            'application_id' => ($app ?? $this->makeApplication())->id,
+            'status' => Preboarding::STATUS_PENDING,
+            'token' => Str::random(64),
             'token_expires_at' => now()->addDays(30),
-            'documents'        => [],
+            'documents' => [],
         ], $override));
     }
 
     private function validData(array $override = []): array
     {
         return array_merge([
-            'bankName'                     => 'BCA',
-            'bankAccountNumber'            => '1234567890',
-            'bankAccountHolder'            => 'Siti Kandidat',
-            'npwp'                         => '12.345.678.9-012.345',
-            'bpjsKesehatan'                => '0001234567890',
-            'bpjsKetenagakerjaan'          => '12345678901',
-            'emergencyContactName'         => 'Ibu Siti',
+            'bankName' => 'BCA',
+            'bankAccountNumber' => '1234567890',
+            'bankAccountHolder' => 'Siti Kandidat',
+            'npwp' => '12.345.678.9-012.345',
+            'bpjsKesehatan' => '0001234567890',
+            'bpjsKetenagakerjaan' => '12345678901',
+            'emergencyContactName' => 'Ibu Siti',
             'emergencyContactRelationship' => 'Ibu',
-            'emergencyContactPhone'        => '08123456789',
-            'uniformSize'                  => 'M',
+            'emergencyContactPhone' => '08123456789',
+            'uniformSize' => 'M',
         ], $override);
     }
 
@@ -98,7 +98,7 @@ class PreboardingTest extends TestCase
             'expires_at' => now()->addWeek()->toDateString(), 'status' => Offer::STATUS_SENT, 'token' => str_repeat('a', 64),
         ]);
 
-        $this->postJson('/api/offer/' . $offer->token . '/accept')->assertStatus(200);
+        $this->postJson('/api/offer/'.$offer->token.'/accept')->assertStatus(200);
 
         $preboarding = Preboarding::where('application_id', $app->id)->firstOrFail();
         $this->assertSame('pending', $preboarding->status);
@@ -146,7 +146,7 @@ class PreboardingTest extends TestCase
     {
         $expired = $this->makePreboarding(['token_expires_at' => now()->subMinute()]);
 
-        $this->getJson('/api/preboarding/' . str_repeat('z', 64))->assertStatus(404);
+        $this->getJson('/api/preboarding/'.str_repeat('z', 64))->assertStatus(404);
         $this->getJson("/api/preboarding/{$expired->token}")->assertStatus(410);
     }
 
@@ -200,7 +200,7 @@ class PreboardingTest extends TestCase
 
         $this->postJson("/api/preboarding/{$preboarding->token}/submit", $this->validData([
             'bankAccountNumber' => '12ab',
-            'bpjsKesehatan'     => '123',
+            'bpjsKesehatan' => '123',
             'emergencyContactName' => '',
         ]))->assertStatus(422)->assertJsonValidationErrors(['bankAccountNumber', 'bpjsKesehatan', 'emergencyContactName']);
 

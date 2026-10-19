@@ -21,12 +21,12 @@ class OfferLetterPdf
         $offer->loadMissing('application');
 
         return view('pdf.offer-letter', [
-            'offer'   => $offer,
+            'offer' => $offer,
             'company' => [
-                'name'    => CompanySetting::get('company_name') ?: config('app.name'),
+                'name' => CompanySetting::get('company_name') ?: config('app.name'),
                 'address' => CompanySetting::get('company_address'),
-                'phone'   => CompanySetting::get('company_phone'),
-                'email'   => CompanySetting::get('company_email'),
+                'phone' => CompanySetting::get('company_phone'),
+                'email' => CompanySetting::get('company_email'),
             ],
         ])->render();
     }
@@ -34,16 +34,16 @@ class OfferLetterPdf
     /** Isi PDF (bytes). */
     public function render(Offer $offer): string
     {
-        $workDir = storage_path('app/tmp/offer-' . Str::uuid());
+        $workDir = storage_path('app/tmp/offer-'.Str::uuid());
         mkdir($workDir, 0777, true);
 
         try {
-            $htmlPath = $workDir . DIRECTORY_SEPARATOR . 'offer.html';
+            $htmlPath = $workDir.DIRECTORY_SEPARATOR.'offer.html';
             file_put_contents($htmlPath, $this->html($offer));
 
             return file_get_contents($this->converter->toPdf($htmlPath, $workDir));
         } finally {
-            foreach (glob($workDir . DIRECTORY_SEPARATOR . '*') ?: [] as $file) {
+            foreach (glob($workDir.DIRECTORY_SEPARATOR.'*') ?: [] as $file) {
                 @unlink($file);
             }
             @rmdir($workDir);

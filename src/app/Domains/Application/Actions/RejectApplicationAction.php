@@ -36,9 +36,9 @@ class RejectApplicationAction
         $emailQueued = false;
 
         $application->update([
-            'stage'                 => PipelineStage::REJECTED->value,
-            'rejection_reason'      => $reason !== null && trim($reason) !== '' ? trim($reason) : null,
-            'rejected_at'           => now(),
+            'stage' => PipelineStage::REJECTED->value,
+            'rejection_reason' => $reason !== null && trim($reason) !== '' ? trim($reason) : null,
+            'rejected_at' => now(),
             'rejection_notified_at' => null,
         ]);
 
@@ -52,7 +52,7 @@ class RejectApplicationAction
                 $emailQueued = true;
             } catch (\Throwable $e) {
                 // Penolakan tetap tersimpan; HR diberi tahu email tidak terkirim.
-                Log::error('Gagal mengantrekan email penolakan: ' . $e->getMessage(), [
+                Log::error('Gagal mengantrekan email penolakan: '.$e->getMessage(), [
                     'application_id' => $application->id,
                 ]);
             }

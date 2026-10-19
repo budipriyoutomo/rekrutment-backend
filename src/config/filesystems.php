@@ -64,8 +64,6 @@ return [
             'report' => true,
         ],
 
-        
-
     ],
 
     /*

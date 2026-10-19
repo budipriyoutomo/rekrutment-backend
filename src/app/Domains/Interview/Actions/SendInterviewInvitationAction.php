@@ -24,7 +24,7 @@ class SendInterviewInvitationAction
 
         // 1. Email ke kandidat
         $candidateEmail = $interview->applicant?->contact_info['email'] ?? null;
-        if (!empty($candidateEmail)) {
+        if (! empty($candidateEmail)) {
             $sentAny = $this->send(
                 $candidateEmail,
                 new InterviewInvitationMail($interview, $interview->applicant_name ?: 'Kandidat', 'candidate'),
@@ -38,7 +38,7 @@ class SendInterviewInvitationAction
 
         // 2. Email ke tiap interviewer (lookup email dari master data by nama)
         $names = array_filter((array) ($interview->interviewers ?? []));
-        if (!empty($names)) {
+        if (! empty($names)) {
             $interviewers = Interviewer::whereIn('name', $names)->get();
 
             foreach ($interviewers as $interviewer) {
@@ -47,6 +47,7 @@ class SendInterviewInvitationAction
                         'interview_id' => $interview->id,
                         'interviewer' => $interviewer->name,
                     ]);
+
                     continue;
                 }
 
@@ -65,11 +66,13 @@ class SendInterviewInvitationAction
     {
         try {
             Mail::to($email)->send($mail);
+
             return true;
         } catch (\Throwable $e) {
-            Log::error('Gagal mengirim email undangan interview: ' . $e->getMessage(), $context + [
+            Log::error('Gagal mengirim email undangan interview: '.$e->getMessage(), $context + [
                 'email' => $email,
             ]);
+
             return false;
         }
     }

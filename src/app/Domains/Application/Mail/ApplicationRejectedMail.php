@@ -25,7 +25,7 @@ class ApplicationRejectedMail extends Mailable
     public function envelope(): Envelope
     {
         return new Envelope(
-            subject: 'Informasi Hasil Seleksi – ' . $this->position(),
+            subject: 'Informasi Hasil Seleksi – '.$this->position(),
         );
     }
 
@@ -34,8 +34,8 @@ class ApplicationRejectedMail extends Mailable
         return new Content(
             view: 'emails.application-rejected',
             with: [
-                'name'        => $this->application->personal_info['fullName'] ?? 'Pelamar',
-                'position'    => $this->position(),
+                'name' => $this->application->personal_info['fullName'] ?? 'Pelamar',
+                'position' => $this->position(),
                 'companyName' => CompanySetting::get('company_name') ?: config('app.name'),
             ],
         );

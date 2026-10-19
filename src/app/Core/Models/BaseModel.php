@@ -2,13 +2,13 @@
 
 namespace App\Core\Models;
 
-use Illuminate\Database\Eloquent\Model;
-use App\Traits\HasUuid;
 use App\Traits\HasUserstamps;
+use App\Traits\HasUuid;
+use Illuminate\Database\Eloquent\Model;
 
 abstract class BaseModel extends Model
 {
-    use  HasUuid, HasUserstamps;
+    use HasUserstamps, HasUuid;
 
     protected $guarded = [];
 

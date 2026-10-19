@@ -2,10 +2,10 @@
 
 namespace App\Providers;
 
-use Illuminate\Support\ServiceProvider;
-use Illuminate\Support\Facades\Event;
 use App\Domains\Application\Events\ApplicationBundlingRequested;
 use App\Infrastructure\Listeners\DispatchApplicationBundlingJob;
+use Illuminate\Support\Facades\Event;
+use Illuminate\Support\ServiceProvider;
 
 class DomainEventServiceProvider extends ServiceProvider
 {

@@ -56,9 +56,9 @@ trait HasUserstamps
      */
     protected static function userstampHasColumn($model, string $column): bool
     {
-        $key = $model->getTable() . '.' . $column;
+        $key = $model->getTable().'.'.$column;
 
-        if (!array_key_exists($key, static::$userstampColumnCache)) {
+        if (! array_key_exists($key, static::$userstampColumnCache)) {
             static::$userstampColumnCache[$key] = Schema::hasColumn($model->getTable(), $column);
         }
 

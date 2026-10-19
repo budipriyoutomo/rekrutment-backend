@@ -12,10 +12,14 @@ namespace App\Domains\SalarySlip\Support;
 class SalarySlipColumns
 {
     public const TYPE_STRING = 'string';
-    public const TYPE_EMAIL  = 'email';
+
+    public const TYPE_EMAIL = 'email';
+
     public const TYPE_PERIOD = 'period'; // YYYY-MM
-    public const TYPE_MONEY  = 'money';  // integer polos, tanpa Rp/titik
-    public const TYPE_DAYS   = 'days';   // integer hari
+
+    public const TYPE_MONEY = 'money';  // integer polos, tanpa Rp/titik
+
+    public const TYPE_DAYS = 'days';   // integer hari
 
     /**
      * Urutan di sini = urutan kolom pada template.
@@ -23,48 +27,48 @@ class SalarySlipColumns
      */
     public const COLUMNS = [
         // --- identitas (wajib) ---
-        'nik'        => ['NIK', self::TYPE_STRING, true,  'Nomor Induk Karyawan'],
-        'nama'       => ['Nama Karyawan', self::TYPE_STRING, true, 'Nama lengkap karyawan'],
-        'jabatan'    => ['Jabatan', self::TYPE_STRING, true, ''],
-        'periode'    => ['Periode', self::TYPE_PERIOD, true, 'Format YYYY-MM, mis. 2026-06'],
-        'cabang'     => ['Cabang', self::TYPE_STRING, true, ''],
+        'nik' => ['NIK', self::TYPE_STRING, true,  'Nomor Induk Karyawan'],
+        'nama' => ['Nama Karyawan', self::TYPE_STRING, true, 'Nama lengkap karyawan'],
+        'jabatan' => ['Jabatan', self::TYPE_STRING, true, ''],
+        'periode' => ['Periode', self::TYPE_PERIOD, true, 'Format YYYY-MM, mis. 2026-06'],
+        'cabang' => ['Cabang', self::TYPE_STRING, true, ''],
         'perusahaan' => ['Nama Perusahaan', self::TYPE_STRING, true, ''],
-        'email'      => ['Email', self::TYPE_EMAIL, true, 'Email tujuan pengiriman slip, harus valid'],
+        'email' => ['Email', self::TYPE_EMAIL, true, 'Email tujuan pengiriman slip, harus valid'],
         // --- komponen penerimaan ---
-        'gaji_pokok'            => ['Gaji Pokok', self::TYPE_MONEY, false, 'Angka polos tanpa Rp/titik, mis. 5000000'],
-        'tunjangan_jabatan'     => ['Tunjangan Jabatan', self::TYPE_MONEY, false, ''],
-        'tunjangan_makan'       => ['Tunjangan Makan', self::TYPE_MONEY, false, ''],
-        'tunjangan_transport'   => ['Tunjangan Transport', self::TYPE_MONEY, false, ''],
-        'tunjangan_lain'        => ['Tunjangan Lain-lain', self::TYPE_MONEY, false, ''],
-        'lembur'                => ['Lembur', self::TYPE_MONEY, false, ''],
-        'tambahan_gaji'            => ['Tambahan Gaji', self::TYPE_MONEY, false, ''],
+        'gaji_pokok' => ['Gaji Pokok', self::TYPE_MONEY, false, 'Angka polos tanpa Rp/titik, mis. 5000000'],
+        'tunjangan_jabatan' => ['Tunjangan Jabatan', self::TYPE_MONEY, false, ''],
+        'tunjangan_makan' => ['Tunjangan Makan', self::TYPE_MONEY, false, ''],
+        'tunjangan_transport' => ['Tunjangan Transport', self::TYPE_MONEY, false, ''],
+        'tunjangan_lain' => ['Tunjangan Lain-lain', self::TYPE_MONEY, false, ''],
+        'lembur' => ['Lembur', self::TYPE_MONEY, false, ''],
+        'tambahan_gaji' => ['Tambahan Gaji', self::TYPE_MONEY, false, ''],
         'keterangan_tambahan_gaji' => ['Keterangan Tambahan Gaji', self::TYPE_STRING, false, 'Keterangan/catatan untuk Tambahan Gaji (teks bebas)'],
-        'ph_dibayar'            => ['PH Dibayar', self::TYPE_MONEY, false, ''],
-        'refund_seragam'        => ['Refund Seragam', self::TYPE_MONEY, false, ''],
+        'ph_dibayar' => ['PH Dibayar', self::TYPE_MONEY, false, ''],
+        'refund_seragam' => ['Refund Seragam', self::TYPE_MONEY, false, ''],
         'jumlah_service_charge' => ['Jumlah Service Charge', self::TYPE_MONEY, false, ''],
-        'total_penerimaan'      => ['Total Penerimaan', self::TYPE_MONEY, false, 'Divalidasi terhadap penjumlahan komponen penerimaan'],
+        'total_penerimaan' => ['Total Penerimaan', self::TYPE_MONEY, false, 'Divalidasi terhadap penjumlahan komponen penerimaan'],
         // --- absensi (hari) ---
-        'hk_hari'      => ['HK (Hari Kerja)', self::TYPE_DAYS, false, 'Jumlah hari'],
-        'alpha_hari'   => ['Alpha', self::TYPE_DAYS, false, 'Jumlah hari'],
+        'hk_hari' => ['HK (Hari Kerja)', self::TYPE_DAYS, false, 'Jumlah hari'],
+        'alpha_hari' => ['Alpha', self::TYPE_DAYS, false, 'Jumlah hari'],
         'ijin_ap_hari' => ['Ijin/AP', self::TYPE_DAYS, false, 'Jumlah hari'],
-        'sakit_hari'   => ['Sakit', self::TYPE_DAYS, false, 'Jumlah hari'],
-        'cuti_hari'    => ['Cuti', self::TYPE_DAYS, false, 'Jumlah hari'],
+        'sakit_hari' => ['Sakit', self::TYPE_DAYS, false, 'Jumlah hari'],
+        'cuti_hari' => ['Cuti', self::TYPE_DAYS, false, 'Jumlah hari'],
         // --- potongan ---
-        'total_pot_absen'      => ['Total Nilai Pot. Absen', self::TYPE_MONEY, false, ''],
+        'total_pot_absen' => ['Total Nilai Pot. Absen', self::TYPE_MONEY, false, ''],
         'bpjs_ketenagakerjaan' => ['BPJS Ketenagakerjaan', self::TYPE_MONEY, false, ''],
-        'bpjs_kesehatan'       => ['BPJS Kesehatan', self::TYPE_MONEY, false, ''],
-        'pinjaman'             => ['Pinjaman', self::TYPE_MONEY, false, ''],
-        'pph21'                => ['PPH21', self::TYPE_MONEY, false, ''],
-        'potongan_seragam'     => ['Potongan Seragam', self::TYPE_MONEY, false, ''],
-        'koreksi'              => ['Koreksi', self::TYPE_MONEY, false, ''],
-        'total_potongan'       => ['Total Potongan', self::TYPE_MONEY, false, 'Divalidasi terhadap penjumlahan komponen potongan'],
-        'keterangan_potongan'  => ['Keterangan Potongan', self::TYPE_STRING, false, 'Keterangan/catatan untuk potongan (teks bebas)'],
-        'take_home_pay'        => ['Take Home Pay', self::TYPE_MONEY, false, 'Divalidasi = total penerimaan - total potongan'],
+        'bpjs_kesehatan' => ['BPJS Kesehatan', self::TYPE_MONEY, false, ''],
+        'pinjaman' => ['Pinjaman', self::TYPE_MONEY, false, ''],
+        'pph21' => ['PPH21', self::TYPE_MONEY, false, ''],
+        'potongan_seragam' => ['Potongan Seragam', self::TYPE_MONEY, false, ''],
+        'koreksi' => ['Koreksi', self::TYPE_MONEY, false, ''],
+        'total_potongan' => ['Total Potongan', self::TYPE_MONEY, false, 'Divalidasi terhadap penjumlahan komponen potongan'],
+        'keterangan_potongan' => ['Keterangan Potongan', self::TYPE_STRING, false, 'Keterangan/catatan untuk potongan (teks bebas)'],
+        'take_home_pay' => ['Take Home Pay', self::TYPE_MONEY, false, 'Divalidasi = total penerimaan - total potongan'],
         // --- info pembayaran ---
         'sistem_pembayaran' => ['Sistem Pembayaran', self::TYPE_STRING, false, 'mis. Transfer / Tunai'],
-        'no_rekening'       => ['No. Rekening', self::TYPE_STRING, false, ''],
-        'nama_bank'         => ['Nama Bank', self::TYPE_STRING, false, ''],
-        'atas_nama'         => ['Atas Nama', self::TYPE_STRING, false, ''],
+        'no_rekening' => ['No. Rekening', self::TYPE_STRING, false, ''],
+        'nama_bank' => ['Nama Bank', self::TYPE_STRING, false, ''],
+        'atas_nama' => ['Atas Nama', self::TYPE_STRING, false, ''],
     ];
 
     /** @return string[] header snake_case sesuai urutan template */

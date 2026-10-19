@@ -12,13 +12,13 @@ class AssessmentQuestionResource extends BaseResource
     public function toArray($request): array
     {
         return $this->formatArray([
-            'id'            => $this->id,
-            'assessmentId'  => $this->assessment_id,
-            'question'      => $this->question,
-            'options'       => $this->options ?? [],
+            'id' => $this->id,
+            'assessmentId' => $this->assessment_id,
+            'question' => $this->question,
+            'options' => $this->options ?? [],
             'correctAnswer' => $this->correct_answer,
-            'score'         => (int) $this->score,
-            'order'         => (int) $this->order,
+            'score' => (int) $this->score,
+            'order' => (int) $this->order,
         ]);
     }
 }

@@ -33,15 +33,15 @@ class SendAssessmentInvitationAction
         // versi soal yang ini, sehingga HR mengedit paket tidak mengubah tes
         // yang sedang berjalan maupun hasil yang sudah tersimpan.
         $assignment = AssessmentAssignment::create([
-            'application_id'     => $application->id,
-            'assessment_id'      => $assessment->id,
-            'token'              => Str::random(64),
-            'status'             => 'sent',
-            'expires_at'         => now()->addDays($validDays),
+            'application_id' => $application->id,
+            'assessment_id' => $assessment->id,
+            'token' => Str::random(64),
+            'status' => 'sent',
+            'expires_at' => now()->addDays($validDays),
             'questions_snapshot' => $assessment->loadMissing('questions')->toQuestionsSnapshot(),
         ]);
 
-        $url = rtrim(config('app.frontend_url'), '/') . '/assessment/' . $assignment->token;
+        $url = rtrim(config('app.frontend_url'), '/').'/assessment/'.$assignment->token;
 
         Mail::to($email)->send(new AssessmentInvitationMail($application, $assessment, $url));
 

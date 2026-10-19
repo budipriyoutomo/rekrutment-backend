@@ -22,10 +22,10 @@ class ImportBatch extends BaseModel
     ];
 
     protected $casts = [
-        'errors'       => 'array',
-        'total_rows'   => 'integer',
+        'errors' => 'array',
+        'total_rows' => 'integer',
         'success_rows' => 'integer',
-        'failed_rows'  => 'integer',
+        'failed_rows' => 'integer',
     ];
 
     public function slips()

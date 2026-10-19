@@ -21,23 +21,23 @@ class InterviewService extends BaseService
     {
         $query = Interview::query()->with('applicant');
 
-        if (!empty($filters['status'])) {
+        if (! empty($filters['status'])) {
             $query->where('status', $filters['status']);
         }
 
-        if (!empty($filters['type'])) {
+        if (! empty($filters['type'])) {
             $query->where('type', $filters['type']);
         }
 
-        if (!empty($filters['date'])) {
+        if (! empty($filters['date'])) {
             $query->whereDate('date', $filters['date']);
         }
 
-        if (!empty($filters['startDate']) && !empty($filters['endDate'])) {
+        if (! empty($filters['startDate']) && ! empty($filters['endDate'])) {
             $query->whereBetween('date', [$filters['startDate'], $filters['endDate']]);
         }
 
-        if (!empty($filters['search'])) {
+        if (! empty($filters['search'])) {
             $search = $filters['search'];
 
             $query->where(function ($q) use ($search) {
@@ -120,7 +120,7 @@ class InterviewService extends BaseService
     {
         $interview = Interview::with('applicant')->findOrFail($id);
 
-        if (!$this->sendInvitationAction->execute($interview)) {
+        if (! $this->sendInvitationAction->execute($interview)) {
             throw new \RuntimeException('Email undangan gagal dikirim. Periksa alamat email kandidat/interviewer dan konfigurasi SMTP.');
         }
 

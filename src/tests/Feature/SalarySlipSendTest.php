@@ -8,6 +8,7 @@ use App\Domains\SalarySlip\Jobs\SendSalarySlipJob;
 use App\Domains\SalarySlip\Mail\SalarySlipMail;
 use App\Domains\SalarySlip\Models\SalarySlip;
 use App\Domains\SalarySlip\Models\SendJob;
+use App\Domains\SalarySlip\Services\MailAccountResolver;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Queue;
@@ -35,7 +36,7 @@ class SalarySlipSendTest extends TestCase
     /** Buat file PDF dummy & mock action generate agar tak butuh LibreOffice. */
     private function fakePdf(): string
     {
-        $path = tempnam(sys_get_temp_dir(), 'slip') . '.pdf';
+        $path = tempnam(sys_get_temp_dir(), 'slip').'.pdf';
         file_put_contents($path, '%PDF-1.4 dummy');
 
         $this->mock(GeneratePayslipPdfAction::class, function ($m) use ($path) {
@@ -50,7 +51,7 @@ class SalarySlipSendTest extends TestCase
         (new SendSalarySlipJob($slip->id, $sendJob->id, $resend))
             ->handle(
                 app(GeneratePayslipPdfAction::class),
-                app(\App\Domains\SalarySlip\Services\MailAccountResolver::class),
+                app(MailAccountResolver::class),
             );
     }
 
@@ -58,9 +59,9 @@ class SalarySlipSendTest extends TestCase
     {
         return SendJob::create([
             'salary_slip_id' => $slip->id,
-            'job_batch_id'   => 'batch-1',
-            'status'         => SendJob::STATUS_QUEUED,
-            'attempt'        => 0,
+            'job_batch_id' => 'batch-1',
+            'status' => SendJob::STATUS_QUEUED,
+            'attempt' => 0,
         ]);
     }
 
@@ -198,7 +199,7 @@ class SalarySlipSendTest extends TestCase
         $slip = $this->makeSlip();
 
         $this->postJson('/api/salary-slips/send', [
-            'ids'             => [$slip->id],
+            'ids' => [$slip->id],
             'mail_account_id' => 'hr-id',
         ])
             ->assertStatus(200)

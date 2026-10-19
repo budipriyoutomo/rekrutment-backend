@@ -49,13 +49,13 @@ class OnboardingTemplateController extends BaseApiController
         $presence = $partial ? 'sometimes' : 'required';
 
         $data = $request->validate([
-            'department'  => ['nullable', 'string', 'max:100'],
-            'title'       => [$presence, 'string', 'max:200'],
+            'department' => ['nullable', 'string', 'max:100'],
+            'title' => [$presence, 'string', 'max:200'],
             'description' => ['nullable', 'string', 'max:2000'],
-            'pic'         => ['nullable', 'string', 'max:100'],
+            'pic' => ['nullable', 'string', 'max:100'],
             'offset_days' => [$presence, 'integer', 'between:-90,180'],
-            'sort_order'  => ['sometimes', 'integer', 'min:0'],
-            'is_active'   => ['sometimes', 'boolean'],
+            'sort_order' => ['sometimes', 'integer', 'min:0'],
+            'is_active' => ['sometimes', 'boolean'],
         ]);
 
         if (array_key_exists('department', $data)) {

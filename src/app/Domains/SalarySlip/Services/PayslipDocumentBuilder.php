@@ -20,27 +20,29 @@ class PayslipDocumentBuilder
     // Lebar kolom (twips). Total per tabel = 2*(W_LABEL+W_VALUE) = 9600 (~169mm),
     // ter-center di area cetak A5 landscape sehingga sisi kiri & kanan seimbang.
     private const W_LABEL = 2600;
+
     private const W_VALUE = 2200;
-    private const W_HALF  = self::W_LABEL + self::W_VALUE; // 4800
+
+    private const W_HALF = self::W_LABEL + self::W_VALUE; // 4800
 
     public function build(SalarySlip $slip, string $savePath): void
     {
-        $phpWord = new PhpWord();
+        $phpWord = new PhpWord;
         $phpWord->setDefaultFontName('Arial');
         $phpWord->setDefaultFontSize(8);
 
         // A5 landscape (A5 = 148mm x 210mm; twips). Margin kiri = kanan (seimbang).
         $section = $phpWord->addSection([
             'orientation' => 'landscape',
-            'pageSizeW'   => 11906, // 210mm (sisi panjang)
-            'pageSizeH'   => 8391,  // 148mm (sisi pendek)
+            'pageSizeW' => 11906, // 210mm (sisi panjang)
+            'pageSizeH' => 8391,  // 148mm (sisi pendek)
             'marginTop' => 360, 'marginBottom' => 300, 'marginLeft' => 700, 'marginRight' => 700,
         ]);
 
         // ---- Kop ----
         // Satu baris: "ALTIMA GROUP" rata kiri, "SLIP GAJI" tetap center di halaman.
         // Kolom kiri & kanan sama lebar (W_SIDE) agar kolom tengah center pada halaman.
-        $wSide   = self::W_LABEL;
+        $wSide = self::W_LABEL;
         $wCenter = 2 * self::W_HALF - 2 * $wSide;
         $kop = $this->centeredTable($section, ['cellMargin' => 0]);
         $kop->addRow();
@@ -149,7 +151,7 @@ class PayslipDocumentBuilder
         $this->payLine($payCell, 'ATAS NAMA', $slip->atas_nama ?? '-');
 
         $signCell = $foot->addCell(self::W_HALF);
-        $signCell->addText('Jakarta, ' . now()->translatedFormat('d F Y'), [], ['alignment' => 'center']);
+        $signCell->addText('Jakarta, '.now()->translatedFormat('d F Y'), [], ['alignment' => 'center']);
         $signCell->addTextBreak(2);
         $signCell->addText('ADMINISTRATOR', ['bold' => true], ['alignment' => 'center']);
 
@@ -160,10 +162,10 @@ class PayslipDocumentBuilder
     private function centeredTable(Section $section, array $style): Table
     {
         return $section->addTable(array_merge([
-            'alignment'  => 'center',
-            'width'      => 2 * self::W_HALF,
-            'unit'       => 'dxa',
-            'layout'     => 'fixed',
+            'alignment' => 'center',
+            'width' => 2 * self::W_HALF,
+            'unit' => 'dxa',
+            'layout' => 'fixed',
         ], $style));
     }
 
@@ -177,14 +179,14 @@ class PayslipDocumentBuilder
     {
         $table->addRow();
         $table->addCell(self::W_LABEL)->addText($l1, ['bold' => true]);
-        $table->addCell(self::W_VALUE)->addText(': ' . ($v1 ?? '-'));
+        $table->addCell(self::W_VALUE)->addText(': '.($v1 ?? '-'));
         $table->addCell(self::W_LABEL)->addText($l2, ['bold' => true]);
-        $table->addCell(self::W_VALUE)->addText(': ' . ($v2 ?? '-'));
+        $table->addCell(self::W_VALUE)->addText(': '.($v2 ?? '-'));
     }
 
     private function payLine($cell, string $label, string $value): void
     {
-        $cell->addText($label . ' : ' . $value);
+        $cell->addText($label.' : '.$value);
     }
 
     private function headerCell(Table $table, string $title): void
@@ -202,11 +204,11 @@ class PayslipDocumentBuilder
 
     private function money(?int $value): string
     {
-        return 'Rp ' . number_format((int) $value, 2, ',', '.');
+        return 'Rp '.number_format((int) $value, 2, ',', '.');
     }
 
     private function days(?int $value): string
     {
-        return (int) $value . ' Hari';
+        return (int) $value.' Hari';
     }
 }

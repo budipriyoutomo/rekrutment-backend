@@ -13,7 +13,7 @@ class Assessment extends BaseModel
     {
         return array_merge(parent::casts(), [
             'duration_minutes' => 'integer',
-            'passing_score'    => 'integer',
+            'passing_score' => 'integer',
         ]);
     }
 
@@ -43,12 +43,12 @@ class Assessment extends BaseModel
     public function toQuestionsSnapshot(): array
     {
         return $this->questions->map(fn (AssessmentQuestion $q) => [
-            'id'             => $q->id,
-            'question'       => $q->question,
-            'options'        => $q->options ?? [],
+            'id' => $q->id,
+            'question' => $q->question,
+            'options' => $q->options ?? [],
             'correct_answer' => $q->correct_answer,
-            'score'          => (int) $q->score,
-            'order'          => (int) $q->order,
+            'score' => (int) $q->score,
+            'order' => (int) $q->order,
         ])->values()->all();
     }
 }

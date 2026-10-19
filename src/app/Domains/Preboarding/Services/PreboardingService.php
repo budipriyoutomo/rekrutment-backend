@@ -91,8 +91,8 @@ class PreboardingService
 
         $documents = $preboarding->documents;
         $documents[$type] = array_merge($doc, [
-            'status'      => $status,
-            'note'        => $status === Preboarding::DOC_REJECTED ? trim((string) $note) : null,
+            'status' => $status,
+            'note' => $status === Preboarding::DOC_REJECTED ? trim((string) $note) : null,
             'reviewed_at' => now()->toISOString(),
         ]);
         $preboarding->documents = $documents;

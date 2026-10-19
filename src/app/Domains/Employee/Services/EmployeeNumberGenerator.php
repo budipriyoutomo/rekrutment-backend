@@ -19,11 +19,11 @@ class EmployeeNumberGenerator
         $prefix = strtoupper(trim((string) CompanySetting::get('employee_id_prefix'))) ?: self::DEFAULT_PREFIX;
         $base = "{$prefix}-{$startDate->format('Y')}-";
 
-        $last = Employee::where('employee_number', 'like', $base . '%')
+        $last = Employee::where('employee_number', 'like', $base.'%')
             ->pluck('employee_number')
             ->map(fn (string $n) => (int) substr($n, strlen($base)))
             ->max() ?? 0;
 
-        return $base . str_pad((string) ($last + 1), 4, '0', STR_PAD_LEFT);
+        return $base.str_pad((string) ($last + 1), 4, '0', STR_PAD_LEFT);
     }
 }

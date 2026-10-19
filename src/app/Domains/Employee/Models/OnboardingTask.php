@@ -9,7 +9,7 @@ class OnboardingTask extends BaseModel
     protected $table = 'onboarding_tasks';
 
     protected $casts = [
-        'due_date'     => 'date:Y-m-d',
+        'due_date' => 'date:Y-m-d',
         'completed_at' => 'datetime',
     ];
 

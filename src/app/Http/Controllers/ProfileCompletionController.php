@@ -15,7 +15,7 @@ class ProfileCompletionController extends BaseApiController
     {
         $record = ProfileCompletionToken::where('token', $token)->first();
 
-        if (!$record) {
+        if (! $record) {
             return response()->json([
                 'success' => false,
                 'message' => 'Link tidak valid atau sudah tidak tersedia.',
@@ -39,12 +39,12 @@ class ProfileCompletionController extends BaseApiController
         $app = $record->application;
 
         return $this->success([
-            'application_id'             => $record->application_id,
-            'email'                      => $record->email,
-            'name'                       => $app?->personal_info['fullName'] ?? null,
-            'position'                   => $app?->additional_info['positionApplied'] ?? null,
-            'profile_completion_status'  => $app?->profile_completion_status ?? 'undone',
-            'expires_at'                 => $record->expires_at,
+            'application_id' => $record->application_id,
+            'email' => $record->email,
+            'name' => $app?->personal_info['fullName'] ?? null,
+            'position' => $app?->additional_info['positionApplied'] ?? null,
+            'profile_completion_status' => $app?->profile_completion_status ?? 'undone',
+            'expires_at' => $record->expires_at,
         ], 'Token valid');
     }
 
@@ -56,7 +56,7 @@ class ProfileCompletionController extends BaseApiController
     {
         $record = ProfileCompletionToken::where('token', $token)->first();
 
-        if (!$record) {
+        if (! $record) {
             return response()->json([
                 'success' => false,
                 'message' => 'Link tidak valid atau sudah tidak tersedia.',
@@ -83,7 +83,7 @@ class ProfileCompletionController extends BaseApiController
 
             return $this->success(null, 'Profile completion berhasil ditandai selesai.');
         } catch (\Throwable $e) {
-            Log::error('Gagal menyelesaikan profile completion: ' . $e->getMessage(), [
+            Log::error('Gagal menyelesaikan profile completion: '.$e->getMessage(), [
                 'token' => $token,
             ]);
 

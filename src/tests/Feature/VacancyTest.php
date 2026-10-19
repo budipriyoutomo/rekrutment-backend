@@ -19,11 +19,11 @@ class VacancyTest extends TestCase
     private function vacancyData(array $override = []): array
     {
         return array_merge([
-            'title'       => 'Software Engineer',
-            'department'  => 'Engineering',
-            'location'    => 'Jakarta',
-            'type'        => 'full-time',
-            'status'      => 'open',
+            'title' => 'Software Engineer',
+            'department' => 'Engineering',
+            'location' => 'Jakarta',
+            'type' => 'full-time',
+            'status' => 'open',
             'description' => 'Build great software.',
         ], $override);
     }
@@ -106,7 +106,7 @@ class VacancyTest extends TestCase
     public function test_store_rejects_location_from_another_city(): void
     {
         $this->postJson('/api/vacancies', $this->vacancyData([
-            'title'    => 'Bandung - Cook',
+            'title' => 'Bandung - Cook',
             'location' => 'Jakarta - HEAD OFFICE JAKARTA',
         ]))
             ->assertStatus(422)
@@ -116,7 +116,7 @@ class VacancyTest extends TestCase
     public function test_store_accepts_location_in_the_same_city(): void
     {
         $this->postJson('/api/vacancies', $this->vacancyData([
-            'title'    => 'Bandung - Cook',
+            'title' => 'Bandung - Cook',
             'location' => 'Bandung - KARNIVOR - JL. RIAU',
         ]))->assertStatus(200);
     }
@@ -124,12 +124,12 @@ class VacancyTest extends TestCase
     public function test_update_rejects_location_from_another_city(): void
     {
         $vacancy = $this->makeVacancy([
-            'title'    => 'Bandung - Cook',
+            'title' => 'Bandung - Cook',
             'location' => 'Bandung - KARNIVOR - JL. RIAU',
         ]);
 
         $this->putJson("/api/vacancies/{$vacancy->id}", [
-            'title'    => 'Bandung - Cook',
+            'title' => 'Bandung - Cook',
             'location' => 'Jakarta - HEAD OFFICE JAKARTA',
         ])
             ->assertStatus(422)

@@ -59,7 +59,7 @@ class Application extends BaseModel
         return $this->hasMany(Interview::class, 'applicant_id');
     }
 
-     /*
+    /*
     |--------------------------------------------------------------------------
     | HELPERS (OPTIONAL TAPI BAGUS)
     |--------------------------------------------------------------------------

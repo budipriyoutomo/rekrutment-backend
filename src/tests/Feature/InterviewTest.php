@@ -21,7 +21,7 @@ class InterviewTest extends TestCase
     {
         return Application::create([
             'personal_info' => ['fullName' => 'Test Candidate'],
-            'contact_info'  => ['email' => 'candidate@example.com', 'phone' => '081234567890'],
+            'contact_info' => ['email' => 'candidate@example.com', 'phone' => '081234567890'],
             'additional_info' => ['positionApplied' => 'Backend Developer'],
         ]);
     }
@@ -29,29 +29,29 @@ class InterviewTest extends TestCase
     private function interviewData(string $applicantId, array $override = []): array
     {
         return array_merge([
-            'applicantId'   => $applicantId,
+            'applicantId' => $applicantId,
             'applicantName' => 'Test Candidate',
-            'position'      => 'Backend Developer',
-            'date'          => now()->addDays(7)->format('Y-m-d'),
-            'time'          => '09:00',
-            'duration'      => '60 min',
-            'type'          => 'online',
-            'interviewers'  => ['Budi', 'Alice'],
+            'position' => 'Backend Developer',
+            'date' => now()->addDays(7)->format('Y-m-d'),
+            'time' => '09:00',
+            'duration' => '60 min',
+            'type' => 'online',
+            'interviewers' => ['Budi', 'Alice'],
         ], $override);
     }
 
     private function makeInterview(string $applicantId, array $override = []): Interview
     {
         return Interview::create(array_merge([
-            'applicant_id'   => $applicantId,
+            'applicant_id' => $applicantId,
             'applicant_name' => 'Test Candidate',
-            'position'       => 'Backend Developer',
-            'date'           => now()->addDays(7)->format('Y-m-d'),
-            'time'           => '09:00',
-            'duration'       => '60 min',
-            'type'           => 'online',
-            'interviewers'   => ['Budi', 'Alice'],
-            'status'         => 'scheduled',
+            'position' => 'Backend Developer',
+            'date' => now()->addDays(7)->format('Y-m-d'),
+            'time' => '09:00',
+            'duration' => '60 min',
+            'type' => 'online',
+            'interviewers' => ['Budi', 'Alice'],
+            'status' => 'scheduled',
         ], $override));
     }
 
@@ -102,7 +102,7 @@ class InterviewTest extends TestCase
 
     public function test_show_returns_interview(): void
     {
-        $app       = $this->makeApplication();
+        $app = $this->makeApplication();
         $interview = $this->makeInterview($app->id);
 
         $this->getJson("/api/interviews/{$interview->id}")
@@ -114,7 +114,7 @@ class InterviewTest extends TestCase
 
     public function test_update_modifies_interview(): void
     {
-        $app       = $this->makeApplication();
+        $app = $this->makeApplication();
         $interview = $this->makeInterview($app->id);
 
         $this->patchJson("/api/interviews/{$interview->id}", ['status' => 'completed'])
@@ -122,7 +122,7 @@ class InterviewTest extends TestCase
             ->assertJsonPath('data.status', 'completed');
 
         $this->assertDatabaseHas('interviews', [
-            'id'     => $interview->id,
+            'id' => $interview->id,
             'status' => 'completed',
         ]);
     }
@@ -131,7 +131,7 @@ class InterviewTest extends TestCase
 
     public function test_destroy_deletes_interview(): void
     {
-        $app       = $this->makeApplication();
+        $app = $this->makeApplication();
         $interview = $this->makeInterview($app->id);
 
         $this->deleteJson("/api/interviews/{$interview->id}")

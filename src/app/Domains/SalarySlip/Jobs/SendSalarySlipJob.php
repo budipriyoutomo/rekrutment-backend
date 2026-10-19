@@ -50,7 +50,7 @@ class SendSalarySlipJob implements ShouldQueue
         // Idempotency: sudah terkirim & bukan permintaan resend -> no-op.
         if ($slip->send_status === SalarySlip::STATUS_SENT && ! $this->resend) {
             $sendJob?->update([
-                'status'      => SendJob::STATUS_SUCCESS,
+                'status' => SendJob::STATUS_SUCCESS,
                 'finished_at' => now(),
             ]);
 
@@ -59,8 +59,8 @@ class SendSalarySlipJob implements ShouldQueue
 
         $slip->update(['send_status' => SalarySlip::STATUS_PROCESSING]);
         $sendJob?->update([
-            'status'     => SendJob::STATUS_PROCESSING,
-            'attempt'    => (int) ($sendJob->attempt ?? 0) + 1,
+            'status' => SendJob::STATUS_PROCESSING,
+            'attempt' => (int) ($sendJob->attempt ?? 0) + 1,
             'started_at' => $sendJob->started_at ?? now(),
         ]);
 
@@ -82,11 +82,11 @@ class SendSalarySlipJob implements ShouldQueue
 
         $slip->update([
             'send_status' => SalarySlip::STATUS_SENT,
-            'sent_at'     => now(),
-            'send_error'  => null,
+            'sent_at' => now(),
+            'send_error' => null,
         ]);
         $sendJob?->update([
-            'status'      => SendJob::STATUS_SUCCESS,
+            'status' => SendJob::STATUS_SUCCESS,
             'finished_at' => now(),
         ]);
     }
@@ -98,13 +98,13 @@ class SendSalarySlipJob implements ShouldQueue
     {
         SalarySlip::whereKey($this->salarySlipId)->update([
             'send_status' => SalarySlip::STATUS_FAILED,
-            'send_error'  => $e->getMessage(),
+            'send_error' => $e->getMessage(),
         ]);
 
         SendJob::whereKey($this->sendJobId)->update([
-            'status'        => SendJob::STATUS_FAILED,
+            'status' => SendJob::STATUS_FAILED,
             'error_message' => $e->getMessage(),
-            'finished_at'   => now(),
+            'finished_at' => now(),
         ]);
     }
 }

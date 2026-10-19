@@ -46,7 +46,7 @@ class PreboardingSubmissionService
         $path = Storage::disk($disk)->putFileAs(
             "preboarding/{$preboarding->application_id}",
             $file,
-            $type . '-' . Str::uuid() . '.' . strtolower($file->getClientOriginalExtension()),
+            $type.'-'.Str::uuid().'.'.strtolower($file->getClientOriginalExtension()),
             ['visibility' => 'private']
         );
 
@@ -61,13 +61,13 @@ class PreboardingSubmissionService
 
         $documents = $preboarding->documents ?? [];
         $documents[$type] = [
-            'path'        => $path,
-            'disk'        => $disk,
-            'file_name'   => $file->getClientOriginalName(),
-            'mime_type'   => $file->getMimeType(),
-            'size'        => $file->getSize(),
-            'status'      => Preboarding::DOC_PENDING,
-            'note'        => null,
+            'path' => $path,
+            'disk' => $disk,
+            'file_name' => $file->getClientOriginalName(),
+            'mime_type' => $file->getMimeType(),
+            'size' => $file->getSize(),
+            'status' => Preboarding::DOC_PENDING,
+            'note' => null,
             'uploaded_at' => now()->toISOString(),
             'reviewed_at' => null,
         ];
@@ -83,21 +83,21 @@ class PreboardingSubmissionService
 
         if ($missing = $preboarding->missingDocuments()) {
             throw ValidationException::withMessages([
-                'documents' => 'Dokumen belum lengkap: ' . collect($missing)
-                    ->map(fn ($t) => Preboarding::REQUIRED_DOCUMENTS[$t])->implode(', ') . '.',
+                'documents' => 'Dokumen belum lengkap: '.collect($missing)
+                    ->map(fn ($t) => Preboarding::REQUIRED_DOCUMENTS[$t])->implode(', ').'.',
             ]);
         }
 
         if ($rejected = $preboarding->rejectedDocuments()) {
             throw ValidationException::withMessages([
-                'documents' => 'Unggah ulang dokumen yang diminta HR: ' . collect($rejected)
-                    ->map(fn ($t) => Preboarding::REQUIRED_DOCUMENTS[$t] ?? $t)->implode(', ') . '.',
+                'documents' => 'Unggah ulang dokumen yang diminta HR: '.collect($rejected)
+                    ->map(fn ($t) => Preboarding::REQUIRED_DOCUMENTS[$t] ?? $t)->implode(', ').'.',
             ]);
         }
 
         $preboarding->update([
-            'data'         => $data,
-            'status'       => Preboarding::STATUS_SUBMITTED,
+            'data' => $data,
+            'status' => Preboarding::STATUS_SUBMITTED,
             'submitted_at' => now(),
         ]);
 

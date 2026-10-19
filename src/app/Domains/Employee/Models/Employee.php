@@ -10,15 +10,16 @@ use App\Domains\Preboarding\Models\Preboarding;
 class Employee extends BaseModel
 {
     public const STATUS_ONBOARDING = 'onboarding';
-    public const STATUS_ACTIVE     = 'active';
+
+    public const STATUS_ACTIVE = 'active';
 
     protected $table = 'employees';
 
     protected $casts = [
-        'personal_data'   => 'array',
-        'start_date'      => 'date:Y-m-d',
+        'personal_data' => 'array',
+        'start_date' => 'date:Y-m-d',
         'welcome_sent_at' => 'datetime',
-        'onboarded_at'    => 'datetime',
+        'onboarded_at' => 'datetime',
     ];
 
     public function application()

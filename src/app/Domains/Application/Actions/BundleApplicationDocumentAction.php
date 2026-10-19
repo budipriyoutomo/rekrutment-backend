@@ -1,7 +1,7 @@
 <?php
 
 namespace App\Domains\Application\Actions;
- 
+
 use App\Domains\Application\Events\ApplicationBundlingRequested;
 use App\Domains\Application\Models\Application;
 use InvalidArgumentException;
@@ -11,8 +11,8 @@ class BundleApplicationDocumentAction
     /**
      * Mengeksekusi validasi awal data dan memicu background job antrean.
      *
-     * @param string $applicationId UUID / ID dari aplikasi pelamar
-     * @return void
+     * @param  string  $applicationId  UUID / ID dari aplikasi pelamar
+     *
      * @throws InvalidArgumentException
      */
     public function execute(string $applicationId): void
@@ -20,7 +20,7 @@ class BundleApplicationDocumentAction
         // Validasi awal di database Postgres untuk memastikan ID valid
         $application = Application::find($applicationId);
 
-        if (!$application) {
+        if (! $application) {
             throw new InvalidArgumentException("Data pelamar dengan ID {$applicationId} tidak ditemukan.");
         }
 

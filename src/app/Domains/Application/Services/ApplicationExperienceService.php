@@ -35,7 +35,7 @@ class ApplicationExperienceService
             foreach ($items as $item) {
 
                 // UPDATE
-                if (!empty($item['id'])) {
+                if (! empty($item['id'])) {
                     $incomingIds[] = $item['id'];
 
                     ApplicationExperience::where('id', $item['id'])
@@ -53,7 +53,7 @@ class ApplicationExperienceService
             // DELETE yang tidak ada di payload
             $deleteIds = array_diff($existingIds, $incomingIds);
 
-            if (!empty($deleteIds)) {
+            if (! empty($deleteIds)) {
                 ApplicationExperience::whereIn('id', $deleteIds)->delete();
             }
         });
@@ -76,7 +76,7 @@ class ApplicationExperienceService
             'job_description' => $item['jobDescription'] ?? null,
 
             'restaurant_industry' => $item['restaurantIndustry'] ?? null,
-            
+
             'position_category' => $item['positionCategory'] ?? null,
 
             'responsibilities' => $item['responsibilities'] ?? [],
@@ -91,7 +91,7 @@ class ApplicationExperienceService
             'restaurant_type' => is_array($item['restaurantType'] ?? null)
                 ? $item['restaurantType']
                 : null,
-                
+
             'shifts' => $item['shifts'] ?? [],
 
             'team_size' => $item['teamSize'] ?? null,

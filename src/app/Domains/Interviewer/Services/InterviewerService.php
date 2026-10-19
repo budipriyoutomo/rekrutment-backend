@@ -17,7 +17,7 @@ class InterviewerService extends BaseService
     {
         $query = Interviewer::query();
 
-        if (!empty($filters['search'])) {
+        if (! empty($filters['search'])) {
             $search = $filters['search'];
             $query->where(function ($q) use ($search) {
                 $q->where('name', 'ilike', "%$search%")

@@ -8,10 +8,13 @@ use Illuminate\Support\Facades\DB;
 abstract class BaseAggregateService extends BaseService
 {
     protected string $itemModel;
+
     protected string $itemForeignKey;
 
     protected function afterCreate(Model $model): void {}
+
     protected function afterUpdate(Model $model): void {}
+
     protected function afterCommit(Model $model): void {}
 
     public function create(array $data): Model
@@ -27,7 +30,7 @@ abstract class BaseAggregateService extends BaseService
 
             $this->afterCreate($model);
 
-            DB::afterCommit(fn() => $this->afterCommit($model));
+            DB::afterCommit(fn () => $this->afterCommit($model));
 
             return $model;
         });
@@ -46,7 +49,7 @@ abstract class BaseAggregateService extends BaseService
 
             $this->afterUpdate($model);
 
-            DB::afterCommit(fn() => $this->afterCommit($model));
+            DB::afterCommit(fn () => $this->afterCommit($model));
 
             return $model;
         });
@@ -70,7 +73,7 @@ abstract class BaseAggregateService extends BaseService
         $incomingIds = [];
 
         foreach ($items as $item) {
-            if (!empty($item['id'])) {
+            if (! empty($item['id'])) {
                 $incomingIds[] = $item['id'];
                 $itemModel::find($item['id'])?->update($item);
             } else {
@@ -81,7 +84,7 @@ abstract class BaseAggregateService extends BaseService
 
         $deleteIds = array_diff($existingIds, $incomingIds);
 
-        if (!empty($deleteIds)) {
+        if (! empty($deleteIds)) {
             $itemModel::whereIn('id', $deleteIds)->delete();
         }
     }

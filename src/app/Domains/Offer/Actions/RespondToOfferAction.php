@@ -56,7 +56,7 @@ class RespondToOfferAction
 
         DB::transaction(function () use ($offer) {
             $offer->update([
-                'status'       => Offer::STATUS_ACCEPTED,
+                'status' => Offer::STATUS_ACCEPTED,
                 'responded_at' => now(),
             ]);
 
@@ -69,7 +69,7 @@ class RespondToOfferAction
         try {
             $this->startPreboarding->execute($offer->application, $offer);
         } catch (\Throwable $e) {
-            Log::error('Gagal memulai pre-boarding setelah offer diterima: ' . $e->getMessage(), [
+            Log::error('Gagal memulai pre-boarding setelah offer diterima: '.$e->getMessage(), [
                 'offer_id' => $offer->id,
             ]);
         }
@@ -82,8 +82,8 @@ class RespondToOfferAction
         $offer = $this->findRespondable($token);
 
         $offer->update([
-            'status'         => Offer::STATUS_DECLINED,
-            'responded_at'   => now(),
+            'status' => Offer::STATUS_DECLINED,
+            'responded_at' => now(),
             'decline_reason' => $reason !== null && trim($reason) !== '' ? trim($reason) : null,
         ]);
 

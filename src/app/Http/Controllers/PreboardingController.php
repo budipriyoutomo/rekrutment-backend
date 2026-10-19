@@ -47,7 +47,7 @@ class PreboardingController extends BaseApiController
 
         $validated = $request->validate([
             'status' => ['required', Rule::in([Preboarding::DOC_VALID, Preboarding::DOC_REJECTED])],
-            'note'   => ['required_if:status,' . Preboarding::DOC_REJECTED, 'nullable', 'string', 'max:500'],
+            'note' => ['required_if:status,'.Preboarding::DOC_REJECTED, 'nullable', 'string', 'max:500'],
         ], ['note.required_if' => 'Tulis alasan agar kandidat tahu apa yang harus diperbaiki.']);
 
         return $this->success(

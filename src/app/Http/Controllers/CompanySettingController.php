@@ -34,13 +34,13 @@ class CompanySettingController extends BaseApiController
     public function update(Request $request)
     {
         $validated = $request->validate([
-            'company_name'     => ['nullable', 'string', 'max:200'],
-            'company_email'    => ['nullable', 'email', 'max:200'],
-            'company_phone'    => ['nullable', 'string', 'max:50'],
-            'company_address'  => ['nullable', 'string', 'max:500'],
-            'company_website'  => ['nullable', 'url', 'max:200'],
+            'company_name' => ['nullable', 'string', 'max:200'],
+            'company_email' => ['nullable', 'email', 'max:200'],
+            'company_phone' => ['nullable', 'string', 'max:50'],
+            'company_address' => ['nullable', 'string', 'max:500'],
+            'company_website' => ['nullable', 'url', 'max:200'],
             'company_logo_url' => ['nullable', 'url', 'max:500'],
-            'company_tagline'  => ['nullable', 'string', 'max:200'],
+            'company_tagline' => ['nullable', 'string', 'max:200'],
             'employee_id_prefix' => ['nullable', 'string', 'max:10', 'regex:/^[A-Za-z0-9]+$/'],
         ]);
 

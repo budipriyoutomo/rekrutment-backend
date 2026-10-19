@@ -6,10 +6,10 @@ use App\Core\Http\Controllers\BaseApiController;
 use App\Domains\Application\Models\Application;
 use App\Domains\Employee\Models\Employee;
 use App\Domains\Employee\Models\OnboardingTask;
-use App\Domains\Offer\Models\Offer;
-use App\Domains\Preboarding\Models\Preboarding;
 use App\Domains\Evaluation\Models\Evaluation;
 use App\Domains\Interview\Models\Interview;
+use App\Domains\Offer\Models\Offer;
+use App\Domains\Preboarding\Models\Preboarding;
 use App\Domains\Vacancy\Models\Vacancy;
 use App\Enums\PipelineStage;
 use Carbon\Carbon;
@@ -39,13 +39,13 @@ class AnalyticsController extends BaseApiController
 
         $data = [
             'summary' => [
-                'total_applicants'     => Application::count(),
-                'open_vacancies'       => Vacancy::where('status', 'open')->count(),
+                'total_applicants' => Application::count(),
+                'open_vacancies' => Vacancy::where('status', 'open')->count(),
                 'scheduled_interviews' => Interview::where('status', 'scheduled')->count(),
-                'interviews_today'     => Interview::where('status', 'scheduled')
+                'interviews_today' => Interview::where('status', 'scheduled')
                     ->whereDate('date', $today)
                     ->count(),
-                'hired_this_month'     => Application::where('stage', 'hired')
+                'hired_this_month' => Application::where('stage', 'hired')
                     ->whereMonth('updated_at', Carbon::now()->month)
                     ->whereYear('updated_at', Carbon::now()->year)
                     ->count(),
@@ -53,20 +53,20 @@ class AnalyticsController extends BaseApiController
             ],
             'pipeline' => $stageCounts,
             'vacancies' => [
-                'open'   => Vacancy::where('status', 'open')->count(),
+                'open' => Vacancy::where('status', 'open')->count(),
                 'closed' => Vacancy::where('status', 'closed')->count(),
-                'draft'  => Vacancy::where('status', 'draft')->count(),
+                'draft' => Vacancy::where('status', 'draft')->count(),
             ],
             'interviews' => [
                 'scheduled' => Interview::where('status', 'scheduled')->count(),
                 'completed' => Interview::where('status', 'completed')->count(),
                 'cancelled' => Interview::where('status', 'cancelled')->count(),
-                'no_show'   => Interview::where('status', 'no_show')->count(),
+                'no_show' => Interview::where('status', 'no_show')->count(),
             ],
-            'offers'       => $this->offerStats(),
+            'offers' => $this->offerStats(),
             'time_to_hire' => $this->timeToHire(),
-            'funnel'       => $this->funnel(),
-            'onboarding'   => $this->onboardingStats(),
+            'funnel' => $this->funnel(),
+            'onboarding' => $this->onboardingStats(),
         ];
 
         return $this->success($data, 'Data analytics berhasil diambil');
@@ -109,9 +109,9 @@ class AnalyticsController extends BaseApiController
         }
 
         return [
-            'avg_days'    => round($days->avg(), 1),
+            'avg_days' => round($days->avg(), 1),
             'median_days' => $days->median(),
-            'samples'     => $days->count(),
+            'samples' => $days->count(),
         ];
     }
 
@@ -123,11 +123,11 @@ class AnalyticsController extends BaseApiController
     private function funnel(): array
     {
         return [
-            'applied'     => Application::count(),
+            'applied' => Application::count(),
             'interviewed' => Interview::distinct()->count('applicant_id'),
-            'offered'     => Offer::where('status', '!=', Offer::STATUS_DRAFT)->whereNotNull('sent_at')->distinct()->count('application_id'),
-            'accepted'    => Offer::where('status', Offer::STATUS_ACCEPTED)->distinct()->count('application_id'),
-            'onboarded'   => Employee::where('status', Employee::STATUS_ACTIVE)->count(),
+            'offered' => Offer::where('status', '!=', Offer::STATUS_DRAFT)->whereNotNull('sent_at')->distinct()->count('application_id'),
+            'accepted' => Offer::where('status', Offer::STATUS_ACCEPTED)->distinct()->count('application_id'),
+            'onboarded' => Employee::where('status', Employee::STATUS_ACTIVE)->count(),
         ];
     }
 
@@ -136,12 +136,12 @@ class AnalyticsController extends BaseApiController
         $today = Carbon::today();
 
         return [
-            'preboarding_waiting'   => Preboarding::whereIn('status', [Preboarding::STATUS_PENDING, Preboarding::STATUS_NEEDS_REVISION])->count(),
+            'preboarding_waiting' => Preboarding::whereIn('status', [Preboarding::STATUS_PENDING, Preboarding::STATUS_NEEDS_REVISION])->count(),
             'preboarding_to_review' => Preboarding::where('status', Preboarding::STATUS_SUBMITTED)->count(),
             'preboarding_to_convert' => Preboarding::where('status', Preboarding::STATUS_VERIFIED)->whereDoesntHave('employee')->count(),
-            'employees_onboarding'  => Employee::where('status', Employee::STATUS_ONBOARDING)->count(),
-            'starting_this_week'    => Employee::whereBetween('start_date', [$today->toDateString(), $today->copy()->addDays(6)->toDateString()])->count(),
-            'overdue_tasks'         => OnboardingTask::whereNull('completed_at')->whereDate('due_date', '<', $today->toDateString())->count(),
+            'employees_onboarding' => Employee::where('status', Employee::STATUS_ONBOARDING)->count(),
+            'starting_this_week' => Employee::whereBetween('start_date', [$today->toDateString(), $today->copy()->addDays(6)->toDateString()])->count(),
+            'overdue_tasks' => OnboardingTask::whereNull('completed_at')->whereDate('due_date', '<', $today->toDateString())->count(),
         ];
     }
 }

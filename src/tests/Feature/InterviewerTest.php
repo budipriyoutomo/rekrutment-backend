@@ -19,12 +19,12 @@ class InterviewerTest extends TestCase
     private function interviewerData(array $override = []): array
     {
         return array_merge([
-            'name'       => 'Budi Santoso',
-            'role'       => 'HR Manager',
+            'name' => 'Budi Santoso',
+            'role' => 'HR Manager',
             'department' => 'Human Resource',
-            'email'      => 'budi@example.com',
-            'phone'      => '08123456789',
-            'active'     => true,
+            'email' => 'budi@example.com',
+            'phone' => '08123456789',
+            'active' => true,
         ], $override);
     }
 

@@ -13,16 +13,16 @@ class PublicPreboardingResource extends JsonResource
     {
         return [
             'candidateName' => $this->candidateName(),
-            'companyName'   => CompanySetting::get('company_name') ?: config('app.name'),
-            'position'      => $this->position(),
-            'startDate'     => $this->offer?->start_date?->format('Y-m-d'),
-            'status'        => $this->status,
-            'editable'      => $this->isEditableByCandidate(),
-            'data'          => $this->data ?? (object) [],
-            'documents'     => collect(PreboardingResource::documentList($this->resource))
+            'companyName' => CompanySetting::get('company_name') ?: config('app.name'),
+            'position' => $this->position(),
+            'startDate' => $this->offer?->start_date?->format('Y-m-d'),
+            'status' => $this->status,
+            'editable' => $this->isEditableByCandidate(),
+            'data' => $this->data ?? (object) [],
+            'documents' => collect(PreboardingResource::documentList($this->resource))
                 ->map(fn (array $d) => collect($d)->only(['type', 'label', 'uploaded', 'fileName', 'status', 'note'])->all())
                 ->all(),
-            'expiresAt'     => $this->token_expires_at,
+            'expiresAt' => $this->token_expires_at,
         ];
     }
 }

@@ -34,7 +34,7 @@ class JobRequest extends BaseModel
     {
         return [
             'requirements' => 'array',
-            'headcount'    => 'integer',
+            'headcount' => 'integer',
         ];
     }
 }

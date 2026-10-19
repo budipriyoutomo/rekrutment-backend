@@ -14,7 +14,7 @@ use App\Domains\Assessment\Models\AssessmentQuestion;
 class AutoGradeAssessmentAction
 {
     /**
-     * @param array<string, string> $answers Peta question_id => key opsi, mis. ['<uuid>' => 'A']
+     * @param  array<string, string>  $answers  Peta question_id => key opsi, mis. ['<uuid>' => 'A']
      */
     public function execute(AssessmentAssignment $assignment, array $answers): AssessmentAssignment
     {
@@ -25,7 +25,7 @@ class AutoGradeAssessmentAction
         $questions = $assignment->effectiveQuestions();
 
         $totalWeight = 0;
-        $earned      = 0;
+        $earned = 0;
 
         foreach ($questions as $question) {
             $weight = (int) ($question['score'] ?? 0);
@@ -48,10 +48,10 @@ class AutoGradeAssessmentAction
             : 0.0;
 
         $assignment->update([
-            'answers'      => $answers,
-            'score'        => $score,
-            'passed'       => $score >= $assessment->passing_score,
-            'status'       => 'graded',
+            'answers' => $answers,
+            'score' => $score,
+            'passed' => $score >= $assessment->passing_score,
+            'status' => 'graded',
             'submitted_at' => now(),
         ]);
 

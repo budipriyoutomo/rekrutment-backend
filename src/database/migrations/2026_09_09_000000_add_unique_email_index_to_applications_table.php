@@ -31,7 +31,7 @@ return new class extends Migration
 
         if ($duplicates->isNotEmpty()) {
             Log::warning(
-                'Migrasi ' . self::INDEX . ' dilewati: masih ada email pelamar ganda. ' .
+                'Migrasi '.self::INDEX.' dilewati: masih ada email pelamar ganda. '.
                 'Bersihkan duplikat lalu jalankan migrate ulang.',
                 ['emails' => $duplicates->pluck('email')->all()]
             );
@@ -40,14 +40,14 @@ return new class extends Migration
         }
 
         DB::statement(
-            'CREATE UNIQUE INDEX ' . self::INDEX . ' ON applications ' .
+            'CREATE UNIQUE INDEX '.self::INDEX.' ON applications '.
             "(lower(trim($email))) WHERE $email IS NOT NULL AND trim($email) <> ''"
         );
     }
 
     public function down(): void
     {
-        DB::statement('DROP INDEX IF EXISTS ' . self::INDEX);
+        DB::statement('DROP INDEX IF EXISTS '.self::INDEX);
     }
 
     /** Ekspresi SQL untuk mengambil contact_info->email, per driver DB. */

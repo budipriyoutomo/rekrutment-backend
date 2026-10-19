@@ -29,26 +29,29 @@ class FixInterviewerPhones extends Command
 
         if ($rows->isEmpty()) {
             $this->info('Tidak ada nomor telepon yang perlu diperbaiki.');
+
             return self::SUCCESS;
         }
 
         $this->table(
             ['ID', 'Nama', 'Sekarang', 'Menjadi'],
-            $rows->map(fn ($i) => [$i->id, $i->name, $i->phone, '0' . $i->phone])->all()
+            $rows->map(fn ($i) => [$i->id, $i->name, $i->phone, '0'.$i->phone])->all()
         );
 
         if (! $this->option('apply')) {
             $this->warn("{$rows->count()} nomor akan diperbaiki. Jalankan ulang dengan --apply untuk menyimpan.");
+
             return self::SUCCESS;
         }
 
         DB::transaction(function () use ($rows) {
             foreach ($rows as $i) {
-                $i->update(['phone' => '0' . $i->phone]);
+                $i->update(['phone' => '0'.$i->phone]);
             }
         });
 
         $this->info("{$rows->count()} nomor telepon diperbaiki.");
+
         return self::SUCCESS;
     }
 }

@@ -110,9 +110,9 @@ class MasterDataSeeder extends Seeder
                 MasterData::firstOrCreate(
                     ['type' => $type, 'name' => $name],
                     [
-                        'id'         => Str::uuid(),
-                        'code'       => null,
-                        'is_active'  => true,
+                        'id' => Str::uuid(),
+                        'code' => null,
+                        'is_active' => true,
                         'sort_order' => $order,
                     ]
                 );

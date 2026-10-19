@@ -41,13 +41,13 @@ class SalarySlipTemplateTest extends TestCase
     public function test_data_sheet_headings_match_import_contract(): void
     {
         // Header di sheet Data harus persis = kontrak kolom import (snake_case)
-        $this->assertSame(SalarySlipColumns::keys(), (new TemplateDataSheet())->headings());
+        $this->assertSame(SalarySlipColumns::keys(), (new TemplateDataSheet)->headings());
     }
 
     public function test_generated_file_headers_and_example_round_trip(): void
     {
         Storage::fake('local');
-        Excel::store(new SalarySlipTemplateExport(), 'tpl.xlsx', 'local');
+        Excel::store(new SalarySlipTemplateExport, 'tpl.xlsx', 'local');
 
         $sheets = Excel::toArray(new class {}, Storage::disk('local')->path('tpl.xlsx'));
 

@@ -25,8 +25,8 @@ use Maatwebsite\Excel\Facades\Excel;
 class ImportSalarySlipsAction
 {
     public function __construct(
-        private SalarySlipService    $service,
-        private SalaryRowValidator   $validator,
+        private SalarySlipService $service,
+        private SalaryRowValidator $validator,
         private SalarySlipCalculator $calculator,
     ) {}
 
@@ -41,7 +41,7 @@ class ImportSalarySlipsAction
         $missing = array_diff(SalarySlipColumns::requiredKeys(), array_keys($headerMap));
         if (! empty($missing)) {
             throw ValidationException::withMessages([
-                'file' => 'Kolom wajib tidak ditemukan di header: ' . implode(', ', $missing),
+                'file' => 'Kolom wajib tidak ditemukan di header: '.implode(', ', $missing),
             ]);
         }
 
@@ -50,15 +50,15 @@ class ImportSalarySlipsAction
         // Pre-load duplikat dari DB (hanya untuk nik & periode yang muncul di file).
         $niks = $periodes = [];
         foreach ($dataRows as $r) {
-            $niks[]     = (string) ($r['nik'] ?? '');
+            $niks[] = (string) ($r['nik'] ?? '');
             $periodes[] = (string) ($r['periode'] ?? '');
         }
         $existing = $this->service->existingNikPeriodeKeys($niks, $periodes);
 
-        $errors   = [];
+        $errors = [];
         $warnings = [];
-        $dtos     = [];
-        $seen     = []; // "nik|periode" yang sudah diproses dalam file ini
+        $dtos = [];
+        $seen = []; // "nik|periode" yang sudah diproses dalam file ini
 
         foreach ($dataRows as $offset => $row) {
             $rowNum = $offset + 2; // +1 header, +1 karena 1-indexed
@@ -67,16 +67,18 @@ class ImportSalarySlipsAction
             $rowErrors = $this->validator->validate($row);
             if (! empty($rowErrors)) {
                 $errors[] = ['row' => $rowNum, 'messages' => $rowErrors];
+
                 continue;
             }
 
             // 2. Tolak duplikat (nik, periode) — DB & antar-baris
-            $key = trim((string) $row['nik']) . '|' . trim((string) $row['periode']);
+            $key = trim((string) $row['nik']).'|'.trim((string) $row['periode']);
             if (isset($existing[$key]) || isset($seen[$key])) {
                 $errors[] = [
-                    'row'      => $rowNum,
+                    'row' => $rowNum,
                     'messages' => ["Duplikat: NIK {$row['nik']} periode {$row['periode']} sudah ada, baris ditolak."],
                 ];
+
                 continue;
             }
             $seen[$key] = true;
@@ -93,22 +95,22 @@ class ImportSalarySlipsAction
         $successRows = empty($dtos) ? 0 : $this->service->bulkInsert($dtos);
 
         ImportBatch::create([
-            'id'           => $batchId,
-            'file_name'    => $file->getClientOriginalName() ?? 'import.xlsx',
-            'total_rows'   => count($dataRows),
+            'id' => $batchId,
+            'file_name' => $file->getClientOriginalName() ?? 'import.xlsx',
+            'total_rows' => count($dataRows),
             'success_rows' => $successRows,
-            'failed_rows'  => count($errors),
-            'errors'       => $errors,
-            'uploaded_by'  => Auth::id(),
+            'failed_rows' => count($errors),
+            'errors' => $errors,
+            'uploaded_by' => Auth::id(),
         ]);
 
         return [
-            'batch_id'     => $batchId,
-            'total_rows'   => count($dataRows),
+            'batch_id' => $batchId,
+            'total_rows' => count($dataRows),
             'success_rows' => $successRows,
-            'failed_rows'  => count($errors),
-            'errors'       => $errors,
-            'warnings'     => $warnings,
+            'failed_rows' => count($errors),
+            'errors' => $errors,
+            'warnings' => $warnings,
         ];
     }
 
@@ -120,7 +122,7 @@ class ImportSalarySlipsAction
     private function parse(UploadedFile $file): array
     {
         $sheets = Excel::toArray(new class {}, $file);
-        $sheet  = $sheets[0] ?? [];
+        $sheet = $sheets[0] ?? [];
 
         if (count($sheet) < 2) {
             throw ValidationException::withMessages([
@@ -138,7 +140,7 @@ class ImportSalarySlipsAction
             }
         }
 
-        $known    = SalarySlipColumns::keys();
+        $known = SalarySlipColumns::keys();
         $dataRows = [];
         foreach ($sheet as $cells) {
             // Lewati baris kosong total

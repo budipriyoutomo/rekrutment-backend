@@ -28,7 +28,7 @@ class ApplicationEducationService
 
             foreach ($items as $item) {
 
-                if (!empty($item['id'])) {
+                if (! empty($item['id'])) {
                     $incomingIds[] = $item['id'];
 
                     ApplicationEducation::where('id', $item['id'])
@@ -42,7 +42,7 @@ class ApplicationEducationService
 
             $deleteIds = array_diff($existingIds, $incomingIds);
 
-            if (!empty($deleteIds)) {
+            if (! empty($deleteIds)) {
                 ApplicationEducation::whereIn('id', $deleteIds)->delete();
             }
         });

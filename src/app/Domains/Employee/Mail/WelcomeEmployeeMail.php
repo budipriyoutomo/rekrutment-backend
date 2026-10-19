@@ -29,10 +29,10 @@ class WelcomeEmployeeMail extends Mailable
         return new Content(
             view: 'emails.welcome-employee',
             with: [
-                'companyName'  => CompanySetting::get('company_name') ?: config('app.name'),
-                'hrEmail'      => CompanySetting::get('company_email'),
-                'hrPhone'      => CompanySetting::get('company_phone'),
-                'startDate'    => $this->employee->start_date->locale('id')->translatedFormat('l, j F Y'),
+                'companyName' => CompanySetting::get('company_name') ?: config('app.name'),
+                'hrEmail' => CompanySetting::get('company_email'),
+                'hrPhone' => CompanySetting::get('company_phone'),
+                'startDate' => $this->employee->start_date->locale('id')->translatedFormat('l, j F Y'),
             ],
         );
     }

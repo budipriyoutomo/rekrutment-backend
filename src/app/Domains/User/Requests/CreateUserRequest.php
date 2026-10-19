@@ -13,11 +13,11 @@ class CreateUserRequest extends BaseRequest
     protected function rulesForCreate(): array
     {
         return [
-            'name'          => ['required', 'string', 'max:255'],
-            'email'         => ['required', 'email', 'max:255', 'unique:users,email'],
-            'password'      => ['required', Password::min(8)],
-            'role'          => ['required', Rule::in(array_column(Role::cases(), 'value'))],
-            'permissions'   => ['sometimes', 'nullable', 'array'],
+            'name' => ['required', 'string', 'max:255'],
+            'email' => ['required', 'email', 'max:255', 'unique:users,email'],
+            'password' => ['required', Password::min(8)],
+            'role' => ['required', Rule::in(array_column(Role::cases(), 'value'))],
+            'permissions' => ['sometimes', 'nullable', 'array'],
             'permissions.*' => [Rule::in(MenuPermission::values())],
         ];
     }

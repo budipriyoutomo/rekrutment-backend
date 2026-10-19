@@ -3,12 +3,12 @@
 namespace App\Http\Controllers;
 
 use App\Core\Http\Controllers\BaseApiController;
-use App\Domains\Auth\Requests\LoginRequest;
-use App\Domains\Auth\Requests\RegisterRequest;
-use App\Domains\Auth\DTO\LoginDTO;
-use App\Domains\Auth\DTO\RegisterDTO;
 use App\Domains\Auth\Actions\LoginAction;
 use App\Domains\Auth\Actions\RegisterAction;
+use App\Domains\Auth\DTO\LoginDTO;
+use App\Domains\Auth\DTO\RegisterDTO;
+use App\Domains\Auth\Requests\LoginRequest;
+use App\Domains\Auth\Requests\RegisterRequest;
 use App\Domains\Auth\Services\AuthService;
 use Illuminate\Http\Request;
 

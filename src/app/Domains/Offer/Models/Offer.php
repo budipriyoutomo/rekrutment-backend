@@ -8,11 +8,16 @@ use App\Domains\Vacancy\Models\Vacancy;
 
 class Offer extends BaseModel
 {
-    public const STATUS_DRAFT     = 'draft';
-    public const STATUS_SENT      = 'sent';
-    public const STATUS_ACCEPTED  = 'accepted';
-    public const STATUS_DECLINED  = 'declined';
-    public const STATUS_EXPIRED   = 'expired';
+    public const STATUS_DRAFT = 'draft';
+
+    public const STATUS_SENT = 'sent';
+
+    public const STATUS_ACCEPTED = 'accepted';
+
+    public const STATUS_DECLINED = 'declined';
+
+    public const STATUS_EXPIRED = 'expired';
+
     public const STATUS_WITHDRAWN = 'withdrawn';
 
     /** Status yang masih "hidup": satu kandidat hanya boleh punya satu offer seperti ini. */
@@ -23,11 +28,11 @@ class Offer extends BaseModel
     protected $hidden = ['token'];
 
     protected $casts = [
-        'allowances'   => 'array',
-        'base_salary'  => 'integer',
-        'start_date'   => 'date:Y-m-d',
-        'expires_at'   => 'date:Y-m-d',
-        'sent_at'      => 'datetime',
+        'allowances' => 'array',
+        'base_salary' => 'integer',
+        'start_date' => 'date:Y-m-d',
+        'expires_at' => 'date:Y-m-d',
+        'sent_at' => 'datetime',
         'responded_at' => 'datetime',
     ];
 
@@ -67,13 +72,13 @@ class Offer extends BaseModel
     public function publicUrl(): ?string
     {
         return $this->token
-            ? rtrim(config('app.frontend_url'), '/') . '/offer/' . $this->token
+            ? rtrim(config('app.frontend_url'), '/').'/offer/'.$this->token
             : null;
     }
 
     /** Nama file PDF yang aman, mis. "Offer_OFR-2026-10-0001.pdf". */
     public function pdfFileName(): string
     {
-        return 'Offer_' . str_replace('/', '-', $this->number) . '.pdf';
+        return 'Offer_'.str_replace('/', '-', $this->number).'.pdf';
     }
 }

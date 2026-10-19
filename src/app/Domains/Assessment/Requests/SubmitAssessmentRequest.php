@@ -11,7 +11,7 @@ class SubmitAssessmentRequest extends BaseRequest
         return [
             // Peta question_id => key opsi. Soal yang tidak dijawab boleh absen
             // dari peta ini dan otomatis dihitung salah.
-            'answers'   => ['present', 'array'],
+            'answers' => ['present', 'array'],
             'answers.*' => ['nullable', 'string', 'max:8'],
         ];
     }

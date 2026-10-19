@@ -7,6 +7,7 @@ use App\Domains\SalarySlip\Models\SalarySlip;
 use App\Domains\SalarySlip\Services\PayslipDocumentBuilder;
 use App\Domains\SalarySlip\Services\PayslipPdfConverter;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use setasign\Fpdi\Fpdi;
 use Tests\TestCase;
 
 class SalarySlipPdfTest extends TestCase
@@ -36,7 +37,7 @@ class SalarySlipPdfTest extends TestCase
     /** Baca isi teks word/document.xml dari sebuah file .docx */
     private function readDocxText(string $path): string
     {
-        $zip = new \ZipArchive();
+        $zip = new \ZipArchive;
         $this->assertTrue($zip->open($path) === true, 'Gagal membuka docx');
         $xml = $zip->getFromName('word/document.xml');
         $zip->close();
@@ -49,7 +50,7 @@ class SalarySlipPdfTest extends TestCase
     public function test_docx_contains_all_key_fields(): void
     {
         $slip = $this->makeSlip();
-        $tmp = tempnam(sys_get_temp_dir(), 'payslip') . '.docx';
+        $tmp = tempnam(sys_get_temp_dir(), 'payslip').'.docx';
 
         app(PayslipDocumentBuilder::class)->build($slip, $tmp);
 
@@ -82,7 +83,7 @@ class SalarySlipPdfTest extends TestCase
     public function test_docx_shows_keterangan_potongan_below_total_potongan(): void
     {
         $slip = $this->makeSlip(['keterangan_potongan' => 'Cicilan pinjaman koperasi']);
-        $tmp = tempnam(sys_get_temp_dir(), 'payslip') . '.docx';
+        $tmp = tempnam(sys_get_temp_dir(), 'payslip').'.docx';
 
         app(PayslipDocumentBuilder::class)->build($slip, $tmp);
         $xml = $this->readDocxText($tmp);
@@ -102,7 +103,7 @@ class SalarySlipPdfTest extends TestCase
     public function test_docx_omits_keterangan_potongan_when_empty(): void
     {
         $slip = $this->makeSlip(); // keterangan_potongan null
-        $tmp = tempnam(sys_get_temp_dir(), 'payslip') . '.docx';
+        $tmp = tempnam(sys_get_temp_dir(), 'payslip').'.docx';
 
         app(PayslipDocumentBuilder::class)->build($slip, $tmp);
         $xml = $this->readDocxText($tmp);
@@ -114,7 +115,7 @@ class SalarySlipPdfTest extends TestCase
     public function test_docx_is_a5_landscape(): void
     {
         $slip = $this->makeSlip();
-        $tmp = tempnam(sys_get_temp_dir(), 'payslip') . '.docx';
+        $tmp = tempnam(sys_get_temp_dir(), 'payslip').'.docx';
 
         app(PayslipDocumentBuilder::class)->build($slip, $tmp);
         $xml = $this->readDocxText($tmp);
@@ -177,7 +178,7 @@ class SalarySlipPdfTest extends TestCase
         $slip = $this->makeSlip();
         $path = app(GeneratePayslipPdfAction::class)->execute($slip);
 
-        $fpdi = new \setasign\Fpdi\Fpdi();
+        $fpdi = new Fpdi;
         $pages = $fpdi->setSourceFile($path);
 
         $this->assertSame(1, $pages, 'Slip gaji harus muat dalam 1 halaman, tidak boleh melintas 2 halaman.');
@@ -194,11 +195,11 @@ class SalarySlipPdfTest extends TestCase
         // Kedua baris keterangan menambah tinggi tabel — slip tetap wajib 1 halaman.
         $slip = $this->makeSlip([
             'keterangan_tambahan_gaji' => 'Bonus kehadiran penuh triwulan II',
-            'keterangan_potongan'      => 'Cicilan pinjaman koperasi ke-3 dari 12',
+            'keterangan_potongan' => 'Cicilan pinjaman koperasi ke-3 dari 12',
         ]);
         $path = app(GeneratePayslipPdfAction::class)->execute($slip);
 
-        $fpdi = new \setasign\Fpdi\Fpdi();
+        $fpdi = new Fpdi;
         $pages = $fpdi->setSourceFile($path);
 
         $this->assertSame(1, $pages, 'Slip dengan keterangan potongan harus tetap muat 1 halaman.');

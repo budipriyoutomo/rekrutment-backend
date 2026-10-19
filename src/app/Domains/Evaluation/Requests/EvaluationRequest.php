@@ -49,12 +49,12 @@ class EvaluationRequest extends BaseRequest
         parent::prepareForValidation();
 
         $camelMap = [
-            'applicantId'        => 'applicant_id',
-            'applicantName'      => 'applicant_name',
+            'applicantId' => 'applicant_id',
+            'applicantName' => 'applicant_name',
             'communicationScore' => 'communication_score',
-            'technicalScore'     => 'technical_score',
-            'experienceScore'    => 'experience_score',
-            'cultureFitScore'    => 'culture_fit_score',
+            'technicalScore' => 'technical_score',
+            'experienceScore' => 'experience_score',
+            'cultureFitScore' => 'culture_fit_score',
         ];
 
         $extras = [];

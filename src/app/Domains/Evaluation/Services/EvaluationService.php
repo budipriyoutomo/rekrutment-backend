@@ -6,6 +6,7 @@ use App\Core\Services\BaseService;
 use App\Domains\Application\Models\Application;
 use App\Domains\Evaluation\Models\Evaluation;
 use Illuminate\Pagination\LengthAwarePaginator;
+use Illuminate\Support\Collection;
 
 class EvaluationService extends BaseService
 {
@@ -20,7 +21,7 @@ class EvaluationService extends BaseService
     {
         $query = Evaluation::query();
 
-        if (!empty($filters['search'])) {
+        if (! empty($filters['search'])) {
             $search = $filters['search'];
             $query->where(function ($q) use ($search) {
                 $q->where('applicant_name', 'ilike', "%$search%")
@@ -29,11 +30,11 @@ class EvaluationService extends BaseService
             });
         }
 
-        if (!empty($filters['applicant_id'])) {
+        if (! empty($filters['applicant_id'])) {
             $query->where('applicant_id', $filters['applicant_id']);
         }
 
-        if (!empty($filters['recommendation'])) {
+        if (! empty($filters['recommendation'])) {
             $query->where('recommendation', $filters['recommendation']);
         }
 
@@ -69,7 +70,7 @@ class EvaluationService extends BaseService
      * lanjut ke offer atau tolak. Skor rata-rata dalam skala 1-5 (null bila belum
      * ada evaluasi).
      *
-     * @return array{count:int, averageScores:array<string,float|null>, recommendations:array<string,int>, evaluations:\Illuminate\Support\Collection}
+     * @return array{count:int, averageScores:array<string,float|null>, recommendations:array<string,int>, evaluations:Collection}
      */
     public function summaryForApplicant(string $applicantId): array
     {
@@ -87,9 +88,9 @@ class EvaluationService extends BaseService
 
         $averageScores = [
             'communication' => $avg('communication_score'),
-            'technical'     => $avg('technical_score'),
-            'experience'    => $avg('experience_score'),
-            'cultureFit'    => $avg('culture_fit_score'),
+            'technical' => $avg('technical_score'),
+            'experience' => $avg('experience_score'),
+            'cultureFit' => $avg('culture_fit_score'),
         ];
         $averageScores['overall'] = $evaluations->isEmpty()
             ? null
@@ -103,10 +104,10 @@ class EvaluationService extends BaseService
         }
 
         return [
-            'count'           => $evaluations->count(),
-            'averageScores'   => $averageScores,
+            'count' => $evaluations->count(),
+            'averageScores' => $averageScores,
             'recommendations' => $recommendations,
-            'evaluations'     => $evaluations,
+            'evaluations' => $evaluations,
         ];
     }
 }

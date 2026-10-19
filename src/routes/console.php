@@ -1,8 +1,8 @@
 <?php
 
-use Illuminate\Foundation\Inspiring;
 use App\Domains\Employee\Services\EmployeeService;
 use App\Domains\Offer\Services\OfferService;
+use Illuminate\Foundation\Inspiring;
 use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\Schedule;
 

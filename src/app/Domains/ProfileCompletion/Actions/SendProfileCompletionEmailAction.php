@@ -27,12 +27,12 @@ class SendProfileCompletionEmailAction
 
         $record = ProfileCompletionToken::create([
             'application_id' => $application->id,
-            'email'          => $email,
-            'token'          => $token,
-            'expires_at'     => now()->addDays(7),
+            'email' => $email,
+            'token' => $token,
+            'expires_at' => now()->addDays(7),
         ]);
 
-        $completionUrl = rtrim(config('app.profile_completion_base_url'), '/') . '/profile-completion/' . $token;
+        $completionUrl = rtrim(config('app.profile_completion_base_url'), '/').'/profile-completion/'.$token;
 
         Mail::to($email)->send(new ProfileCompletionMail($application, $token, $completionUrl));
 

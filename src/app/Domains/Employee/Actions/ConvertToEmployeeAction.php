@@ -53,29 +53,29 @@ class ConvertToEmployeeAction
 
             $employee = Employee::create([
                 'employee_number' => $employeeNumber ?? $this->numbers->next($start),
-                'application_id'  => $application->id,
-                'preboarding_id'  => $preboarding->id,
-                'offer_id'        => $offer?->id,
-                'full_name'       => $application->personal_info['fullName'] ?? 'Karyawan',
-                'email'           => $application->contact_info['email'] ?? null,
-                'phone'           => $application->contact_info['phone'] ?? null,
-                'position'        => $preboarding->position() ?? '-',
-                'department'      => $department,
-                'location'        => $offer?->location ?? $application->vacancy?->location,
+                'application_id' => $application->id,
+                'preboarding_id' => $preboarding->id,
+                'offer_id' => $offer?->id,
+                'full_name' => $application->personal_info['fullName'] ?? 'Karyawan',
+                'email' => $application->contact_info['email'] ?? null,
+                'phone' => $application->contact_info['phone'] ?? null,
+                'position' => $preboarding->position() ?? '-',
+                'department' => $department,
+                'location' => $offer?->location ?? $application->vacancy?->location,
                 'employment_type' => $offer?->employment_type ?? $application->vacancy?->type ?? 'full-time',
-                'start_date'      => $start->toDateString(),
-                'personal_data'   => $preboarding->data,
-                'status'          => Employee::STATUS_ONBOARDING,
+                'start_date' => $start->toDateString(),
+                'personal_data' => $preboarding->data,
+                'status' => Employee::STATUS_ONBOARDING,
             ]);
 
             OnboardingTaskTemplate::query()->applicableTo($department)->get()
                 ->each(fn (OnboardingTaskTemplate $t, int $i) => $employee->tasks()->create([
                     'template_id' => $t->id,
-                    'title'       => $t->title,
+                    'title' => $t->title,
                     'description' => $t->description,
-                    'pic'         => $t->pic,
-                    'due_date'    => $start->copy()->addDays($t->offset_days)->toDateString(),
-                    'sort_order'  => $i,
+                    'pic' => $t->pic,
+                    'due_date' => $start->copy()->addDays($t->offset_days)->toDateString(),
+                    'sort_order' => $i,
                 ]));
 
             return $employee->load('tasks');

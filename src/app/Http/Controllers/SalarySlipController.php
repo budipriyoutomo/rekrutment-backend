@@ -6,9 +6,9 @@ use App\Core\Http\Controllers\BaseApiController;
 use App\Domains\SalarySlip\Actions\GeneratePayslipPdfAction;
 use App\Domains\SalarySlip\Actions\ImportSalarySlipsAction;
 use App\Domains\SalarySlip\Actions\SendSalarySlipAction;
-use App\Domains\SalarySlip\Models\SalarySlip;
 use App\Domains\SalarySlip\DTO\SalarySlipDTO;
 use App\Domains\SalarySlip\Exports\SalarySlipTemplateExport;
+use App\Domains\SalarySlip\Models\SalarySlip;
 use App\Domains\SalarySlip\Requests\ImportSalarySlipRequest;
 use App\Domains\SalarySlip\Requests\StoreSalarySlipRequest;
 use App\Domains\SalarySlip\Resources\SalarySlipResource;
@@ -21,16 +21,16 @@ use Symfony\Component\HttpFoundation\BinaryFileResponse;
 class SalarySlipController extends BaseApiController
 {
     public function __construct(
-        private SalarySlipService       $service,
+        private SalarySlipService $service,
         private ImportSalarySlipsAction $importAction,
-        private SendSalarySlipAction    $sendAction,
+        private SendSalarySlipAction $sendAction,
         private GeneratePayslipPdfAction $pdfAction,
     ) {}
 
     public function template(): BinaryFileResponse
     {
         return Excel::download(
-            new SalarySlipTemplateExport(),
+            new SalarySlipTemplateExport,
             'template_salary_slip.xlsx',
         );
     }
@@ -55,9 +55,9 @@ class SalarySlipController extends BaseApiController
         );
 
         return $this->success([
-            'data'  => SalarySlipResource::collection($data->items()),
+            'data' => SalarySlipResource::collection($data->items()),
             'total' => $data->total(),
-            'page'  => $data->currentPage(),
+            'page' => $data->currentPage(),
             'last_page' => $data->lastPage(),
         ], 'Data slip gaji berhasil diambil');
     }
@@ -83,7 +83,7 @@ class SalarySlipController extends BaseApiController
     {
         $ids = $request->input('ids', []);
 
-        if (empty($ids) || !is_array($ids)) {
+        if (empty($ids) || ! is_array($ids)) {
             return $this->error('Parameter ids wajib diisi dan harus berupa array.', 422);
         }
 
@@ -103,7 +103,7 @@ class SalarySlipController extends BaseApiController
     {
         $ids = $request->input('ids', []);
 
-        if (empty($ids) || !is_array($ids)) {
+        if (empty($ids) || ! is_array($ids)) {
             return $this->error('Parameter ids wajib diisi dan harus berupa array.', 422);
         }
 

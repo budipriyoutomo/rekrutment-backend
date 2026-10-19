@@ -19,10 +19,10 @@ class ApplicationBulkStageTest extends TestCase
     private function makeApplicant(string $name, string $stage = 'applied'): Application
     {
         return Application::create([
-            'personal_info'   => ['fullName' => $name],
-            'contact_info'    => ['email' => strtolower($name) . '@example.com', 'phone' => '081'],
+            'personal_info' => ['fullName' => $name],
+            'contact_info' => ['email' => strtolower($name).'@example.com', 'phone' => '081'],
             'additional_info' => ['positionApplied' => 'Frontend Dev'],
-            'stage'           => $stage,
+            'stage' => $stage,
         ]);
     }
 
@@ -33,7 +33,7 @@ class ApplicationBulkStageTest extends TestCase
         $c = $this->makeApplicant('Citra');
 
         $this->patchJson('/api/applicants/bulk-stage', [
-            'ids'   => [$a->id, $b->id],
+            'ids' => [$a->id, $b->id],
             'stage' => 'screening',
         ])
             ->assertStatus(200)
@@ -49,7 +49,7 @@ class ApplicationBulkStageTest extends TestCase
         $a = $this->makeApplicant('Andi');
 
         $this->patchJson('/api/applicants/bulk-stage', [
-            'ids'   => [$a->id],
+            'ids' => [$a->id],
             'stage' => 'rejected',
         ])->assertStatus(200);
 
@@ -61,7 +61,7 @@ class ApplicationBulkStageTest extends TestCase
         $a = $this->makeApplicant('Andi');
 
         $this->patchJson('/api/applicants/bulk-stage', [
-            'ids'   => [$a->id, '00000000-0000-0000-0000-000000000000'],
+            'ids' => [$a->id, '00000000-0000-0000-0000-000000000000'],
             'stage' => 'screening',
         ])
             ->assertStatus(200)
@@ -71,7 +71,7 @@ class ApplicationBulkStageTest extends TestCase
     public function test_bulk_stage_rejects_empty_ids(): void
     {
         $this->patchJson('/api/applicants/bulk-stage', [
-            'ids'   => [],
+            'ids' => [],
             'stage' => 'screening',
         ])->assertStatus(422);
     }
@@ -81,7 +81,7 @@ class ApplicationBulkStageTest extends TestCase
         $a = $this->makeApplicant('Andi');
 
         $this->patchJson('/api/applicants/bulk-stage', [
-            'ids'   => [$a->id],
+            'ids' => [$a->id],
             'stage' => 'bukan-stage',
         ])->assertStatus(422);
     }

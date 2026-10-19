@@ -9,21 +9,26 @@ use App\Domains\Offer\Models\Offer;
 
 class Preboarding extends BaseModel
 {
-    public const STATUS_PENDING        = 'pending';
-    public const STATUS_SUBMITTED      = 'submitted';
-    public const STATUS_NEEDS_REVISION = 'needs_revision';
-    public const STATUS_VERIFIED       = 'verified';
+    public const STATUS_PENDING = 'pending';
 
-    public const DOC_PENDING  = 'pending';
-    public const DOC_VALID    = 'valid';
+    public const STATUS_SUBMITTED = 'submitted';
+
+    public const STATUS_NEEDS_REVISION = 'needs_revision';
+
+    public const STATUS_VERIFIED = 'verified';
+
+    public const DOC_PENDING = 'pending';
+
+    public const DOC_VALID = 'valid';
+
     public const DOC_REJECTED = 'rejected';
 
     /** Dokumen wajib beserta labelnya. */
     public const REQUIRED_DOCUMENTS = [
-        'ktp'           => 'KTP',
-        'kk'            => 'Kartu Keluarga',
-        'ijazah'        => 'Ijazah Terakhir',
-        'foto'          => 'Pas Foto',
+        'ktp' => 'KTP',
+        'kk' => 'Kartu Keluarga',
+        'ijazah' => 'Ijazah Terakhir',
+        'foto' => 'Pas Foto',
         'buku_tabungan' => 'Buku Tabungan (halaman depan)',
     ];
 
@@ -37,12 +42,12 @@ class Preboarding extends BaseModel
     protected $hidden = ['token'];
 
     protected $casts = [
-        'data'             => 'array',
-        'documents'        => 'array',
+        'data' => 'array',
+        'documents' => 'array',
         'token_expires_at' => 'datetime',
-        'sent_at'          => 'datetime',
-        'submitted_at'     => 'datetime',
-        'verified_at'      => 'datetime',
+        'sent_at' => 'datetime',
+        'submitted_at' => 'datetime',
+        'verified_at' => 'datetime',
     ];
 
     public function application()
@@ -117,7 +122,7 @@ class Preboarding extends BaseModel
 
     public function publicUrl(): string
     {
-        return rtrim(config('app.frontend_url'), '/') . '/preboarding/' . $this->token;
+        return rtrim(config('app.frontend_url'), '/').'/preboarding/'.$this->token;
     }
 
     /** Posisi & tanggal mulai diambil dari offer yang diterima (bila ada). */

@@ -34,27 +34,27 @@ class EmployeeOnboardingTest extends TestCase
         $n++;
 
         $app = Application::create(array_merge([
-            'personal_info'   => ['fullName' => "Siti Kandidat {$n}"],
-            'contact_info'    => ['email' => "siti{$n}@example.com", 'phone' => '0812'],
+            'personal_info' => ['fullName' => "Siti Kandidat {$n}"],
+            'contact_info' => ['email' => "siti{$n}@example.com", 'phone' => '0812'],
             'additional_info' => ['positionApplied' => 'Bandung - Head Chef'],
-            'stage'           => 'hired',
+            'stage' => 'hired',
         ], $appOverride));
 
         $offer = Offer::create(array_merge([
-            'number' => "OFR/2026/10/" . str_pad((string) $n, 4, '0', STR_PAD_LEFT), 'application_id' => $app->id,
+            'number' => 'OFR/2026/10/'.str_pad((string) $n, 4, '0', STR_PAD_LEFT), 'application_id' => $app->id,
             'position' => 'Bandung - Head Chef', 'department' => 'Kitchen', 'location' => 'Bandung - RIAU',
             'employment_type' => 'contract', 'base_salary' => 8500000, 'start_date' => '2026-11-02',
             'expires_at' => now()->addWeek()->toDateString(), 'status' => Offer::STATUS_ACCEPTED,
         ], $offerOverride));
 
         return Preboarding::create([
-            'application_id'   => $app->id,
-            'offer_id'         => $offer->id,
-            'status'           => Preboarding::STATUS_VERIFIED,
-            'token'            => Str::random(64),
+            'application_id' => $app->id,
+            'offer_id' => $offer->id,
+            'status' => Preboarding::STATUS_VERIFIED,
+            'token' => Str::random(64),
             'token_expires_at' => now()->addDays(30),
-            'data'             => ['bankName' => 'BCA', 'bankAccountNumber' => '1234567890'],
-            'documents'        => [],
+            'data' => ['bankName' => 'BCA', 'bankAccountNumber' => '1234567890'],
+            'documents' => [],
         ]);
     }
 

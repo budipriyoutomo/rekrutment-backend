@@ -20,11 +20,11 @@ class UpdateUserRequest extends BaseRequest
         $id = $this->route('id');
 
         return [
-            'name'          => ['sometimes', 'string', 'max:255'],
-            'email'         => ['sometimes', 'email', 'max:255', Rule::unique('users', 'email')->ignore($id)],
-            'password'      => ['sometimes', 'nullable', Password::min(8)],
-            'role'          => ['sometimes', Rule::in(array_column(Role::cases(), 'value'))],
-            'permissions'   => ['sometimes', 'nullable', 'array'],
+            'name' => ['sometimes', 'string', 'max:255'],
+            'email' => ['sometimes', 'email', 'max:255', Rule::unique('users', 'email')->ignore($id)],
+            'password' => ['sometimes', 'nullable', Password::min(8)],
+            'role' => ['sometimes', Rule::in(array_column(Role::cases(), 'value'))],
+            'permissions' => ['sometimes', 'nullable', 'array'],
             'permissions.*' => [Rule::in(MenuPermission::values())],
         ];
     }

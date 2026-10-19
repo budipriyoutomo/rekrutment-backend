@@ -2,8 +2,8 @@
 
 namespace App\Domains\Application\Services;
 
-use PhpOffice\PhpWord\PhpWord;
 use PhpOffice\PhpWord\IOFactory;
+use PhpOffice\PhpWord\PhpWord;
 use PhpOffice\PhpWord\Settings;
 
 class ApplicationDocumentService
@@ -23,13 +23,13 @@ class ApplicationDocumentService
         $additional = is_string($application->additional_info) ? json_decode($application->additional_info, true) : (array) $application->additional_info;
         $documents = is_string($application->documents) ? json_decode($application->documents, true) : (array) ($application->documents ?? []);
 
-        $phpWord = new PhpWord();
+        $phpWord = new PhpWord;
         $phpWord->setDefaultFontName('Arial');
         $phpWord->setDefaultFontSize(10);
 
         // Setup halaman (Margin standard)
         $section = $phpWord->addSection([
-            'marginTop' => 1200, 'marginBottom' => 1200, 'marginLeft' => 1200, 'marginRight' => 1200
+            'marginTop' => 1200, 'marginBottom' => 1200, 'marginLeft' => 1200, 'marginRight' => 1200,
         ]);
 
         // Style untuk Judul Section
@@ -40,52 +40,52 @@ class ApplicationDocumentService
         // =========================================================================
         // JUDUL UTAMA
         // =========================================================================
-        $section->addText("BIODATA PELAMAR (APPLICATION FORM)", ['bold' => true, 'size' => 14], ['alignment' => 'center', 'spaceAfter' => 200]);
-        $section->addText("ID Pelamar: " . $application->id, ['italic' => true, 'size' => 9], ['spaceAfter' => 300]);
+        $section->addText('BIODATA PELAMAR (APPLICATION FORM)', ['bold' => true, 'size' => 14], ['alignment' => 'center', 'spaceAfter' => 200]);
+        $section->addText('ID Pelamar: '.$application->id, ['italic' => true, 'size' => 9], ['spaceAfter' => 300]);
 
         // =========================================================================
         // 1. PERSONAL INFO
         // =========================================================================
-        $section->addText("1. INFORMASI PRIBADI", $sectionTitleStyle, ['spaceAfter' => 60]);
+        $section->addText('1. INFORMASI PRIBADI', $sectionTitleStyle, ['spaceAfter' => 60]);
         $table = $section->addTable('MainTable');
-        $this->addRow($table, "Nama Lengkap", $personal['fullName'] ?? '-');
-        $this->addRow($table, "Jenis Kelamin", ($personal['gender'] ?? '-') === 'L' ? 'Laki-Laki' : 'Perempuan');
-        $this->addRow($table, "Agama", $personal['religion'] ?? '-');
-        $this->addRow($table, "Tempat, Tanggal Lahir", ($personal['placeOfBirth'] ?? '-') . ', ' . ($personal['dateOfBirth'] ?? '-'));
-        $this->addRow($table, "Status Pernikahan", $personal['maritalStatus'] ?? '-');
-        $this->addRow($table, "No. KTP / NIK", $personal['idNumber'] ?? '-');
-        $this->addRow($table, "No. Kartu Keluarga", $personal['familyCardNumber'] ?? '-');
-        $this->addRow($table, "NPWP", $personal['npwp'] ?? '-');
+        $this->addRow($table, 'Nama Lengkap', $personal['fullName'] ?? '-');
+        $this->addRow($table, 'Jenis Kelamin', ($personal['gender'] ?? '-') === 'L' ? 'Laki-Laki' : 'Perempuan');
+        $this->addRow($table, 'Agama', $personal['religion'] ?? '-');
+        $this->addRow($table, 'Tempat, Tanggal Lahir', ($personal['placeOfBirth'] ?? '-').', '.($personal['dateOfBirth'] ?? '-'));
+        $this->addRow($table, 'Status Pernikahan', $personal['maritalStatus'] ?? '-');
+        $this->addRow($table, 'No. KTP / NIK', $personal['idNumber'] ?? '-');
+        $this->addRow($table, 'No. Kartu Keluarga', $personal['familyCardNumber'] ?? '-');
+        $this->addRow($table, 'NPWP', $personal['npwp'] ?? '-');
 
         $section->addTextBreak(1);
 
         // =========================================================================
         // 2. CONTACT INFO
         // =========================================================================
-        $section->addText("2. KONTAK DAN ALAMAT", $sectionTitleStyle, ['spaceAfter' => 60]);
+        $section->addText('2. KONTAK DAN ALAMAT', $sectionTitleStyle, ['spaceAfter' => 60]);
         $table = $section->addTable('MainTable');
-        $this->addRow($table, "Email", $contact['email'] ?? '-');
-        $this->addRow($table, "No. Handphone", $contact['phone'] ?? '-');
-        $this->addRow($table, "Media Sosial", $contact['socialMedia'] ?? '-');
-        $this->addRow($table, "Alamat Rumah (KTP)", $contact['homeAddress'] ?? '-');
-        $this->addRow($table, "Kode Pos", $contact['postalCode'] ?? '-');
+        $this->addRow($table, 'Email', $contact['email'] ?? '-');
+        $this->addRow($table, 'No. Handphone', $contact['phone'] ?? '-');
+        $this->addRow($table, 'Media Sosial', $contact['socialMedia'] ?? '-');
+        $this->addRow($table, 'Alamat Rumah (KTP)', $contact['homeAddress'] ?? '-');
+        $this->addRow($table, 'Kode Pos', $contact['postalCode'] ?? '-');
 
         $section->addTextBreak(1);
 
         // =========================================================================
         // 3. PARENT INFO
         // =========================================================================
-        $section->addText("3. DATA ORANG TUA / KELUARGA", $sectionTitleStyle, ['spaceAfter' => 60]);
+        $section->addText('3. DATA ORANG TUA / KELUARGA', $sectionTitleStyle, ['spaceAfter' => 60]);
         $table = $section->addTable('MainTable');
-        $this->addRow($table, "Nama Ayah / Ibu", ($parent['fatherName'] ?? '-') . ' / ' . ($parent['motherName'] ?? '-'));
-        $this->addRow($table, "Pekerjaan Ayah / Ibu", ($parent['fatherJob'] ?? '-') . ' / ' . ($parent['motherJob'] ?? '-'));
-        $this->addRow($table, "Anak Ke / Dari", ($parent['childOrder'] ?? '-') . ' dari ' . ($parent['numberOfSiblings'] ?? '-') . ' bersaudara');
-        $this->addRow($table, "Status Orang Tua", $parent['parentStatus'] ?? '-');
+        $this->addRow($table, 'Nama Ayah / Ibu', ($parent['fatherName'] ?? '-').' / '.($parent['motherName'] ?? '-'));
+        $this->addRow($table, 'Pekerjaan Ayah / Ibu', ($parent['fatherJob'] ?? '-').' / '.($parent['motherJob'] ?? '-'));
+        $this->addRow($table, 'Anak Ke / Dari', ($parent['childOrder'] ?? '-').' dari '.($parent['numberOfSiblings'] ?? '-').' bersaudara');
+        $this->addRow($table, 'Status Orang Tua', $parent['parentStatus'] ?? '-');
 
         // Jika statusnya menikah (punya pasangan), tampilkan data spouse
         if (($personal['maritalStatus'] ?? '') !== 'lajang') {
-            $this->addRow($table, "Nama Suami/Istri", $spouse['spouseName'] ?? '-');
-            $this->addRow($table, "Pekerjaan Pasangan", $spouse['spouseJob'] ?? '-');
+            $this->addRow($table, 'Nama Suami/Istri', $spouse['spouseName'] ?? '-');
+            $this->addRow($table, 'Pekerjaan Pasangan', $spouse['spouseJob'] ?? '-');
         }
 
         $section->addTextBreak(1);
@@ -93,14 +93,14 @@ class ApplicationDocumentService
         // =========================================================================
         // 4. ADDITIONAL INFO
         // =========================================================================
-        $section->addText("4. INFORMASI TAMBAHAN & KUALIFIKASI", $sectionTitleStyle, ['spaceAfter' => 60]);
+        $section->addText('4. INFORMASI TAMBAHAN & KUALIFIKASI', $sectionTitleStyle, ['spaceAfter' => 60]);
         $table = $section->addTable('MainTable');
-        $this->addRow($table, "Posisi Yang Dilamar", $additional['positionApplied'] ?? '-');
-        $this->addRow($table, "Ekspektasi Gaji", "Rp " . number_format((int)($additional['expectedSalary'] ?? 0), 0, ',', '.'));
-        $this->addRow($table, "Tanggal Siap Tersedia", $additional['availableDate'] ?? '-');
-        $this->addRow($table, "Fresh Graduate", strtoupper($additional['freshGraduate'] ?? 'tidak'));
-        $this->addRow($table, "Pernah Bekerja di Sini?", strtoupper($additional['workedAtCompany'] ?? 'tidak'));
-        $this->addRow($table, "Memiliki Kendaraan?", strtoupper($additional['hasVehicle'] ?? 'tidak'));
+        $this->addRow($table, 'Posisi Yang Dilamar', $additional['positionApplied'] ?? '-');
+        $this->addRow($table, 'Ekspektasi Gaji', 'Rp '.number_format((int) ($additional['expectedSalary'] ?? 0), 0, ',', '.'));
+        $this->addRow($table, 'Tanggal Siap Tersedia', $additional['availableDate'] ?? '-');
+        $this->addRow($table, 'Fresh Graduate', strtoupper($additional['freshGraduate'] ?? 'tidak'));
+        $this->addRow($table, 'Pernah Bekerja di Sini?', strtoupper($additional['workedAtCompany'] ?? 'tidak'));
+        $this->addRow($table, 'Memiliki Kendaraan?', strtoupper($additional['hasVehicle'] ?? 'tidak'));
 
         $this->addEducationSection($section, $application, $sectionTitleStyle);
         $this->addExperienceSection($section, $application, $sectionTitleStyle);
@@ -131,6 +131,7 @@ class ApplicationDocumentService
 
         if ($educations === []) {
             $section->addText('-', ['size' => 9]);
+
             return;
         }
 
@@ -139,7 +140,7 @@ class ApplicationDocumentService
             $this->addRow(
                 $table,
                 (string) ($education['level'] ?? 'Pendidikan'),
-                trim($this->value($education, 'schoolName', 'school_name') . ' - ' . $this->value($education, 'major') . ' (' . $this->value($education, 'yearStart', 'year_start') . ' - ' . $this->value($education, 'yearEnd', 'year_end') . ')')
+                trim($this->value($education, 'schoolName', 'school_name').' - '.$this->value($education, 'major').' ('.$this->value($education, 'yearStart', 'year_start').' - '.$this->value($education, 'yearEnd', 'year_end').')')
             );
         }
     }
@@ -153,6 +154,7 @@ class ApplicationDocumentService
 
         if ($experiences === []) {
             $section->addText('-', ['size' => 9]);
+
             return;
         }
 
@@ -161,7 +163,7 @@ class ApplicationDocumentService
             $this->addRow(
                 $table,
                 $this->value($experience, 'companyName', 'company_name', default: 'Perusahaan'),
-                trim($this->value($experience, 'jobPosition', 'job_position') . ' (' . $this->value($experience, 'yearStart', 'year_start') . ' - ' . $this->value($experience, 'yearEnd', 'year_end') . ') - ' . $this->value($experience, 'jobDescription', 'job_description'))
+                trim($this->value($experience, 'jobPosition', 'job_position').' ('.$this->value($experience, 'yearStart', 'year_start').' - '.$this->value($experience, 'yearEnd', 'year_end').') - '.$this->value($experience, 'jobDescription', 'job_description'))
             );
         }
     }
@@ -175,6 +177,7 @@ class ApplicationDocumentService
 
         if ($certifications === []) {
             $section->addText('-', ['size' => 9]);
+
             return;
         }
 
@@ -183,7 +186,7 @@ class ApplicationDocumentService
             $this->addRow(
                 $table,
                 $this->value($certification, 'courseName', 'course_name', default: 'Sertifikasi'),
-                trim($this->value($certification, 'organization') . ' - ' . $this->value($certification, 'year') . ' (' . $this->value($certification, 'duration') . ')')
+                trim($this->value($certification, 'organization').' - '.$this->value($certification, 'year').' ('.$this->value($certification, 'duration').')')
             );
         }
     }
@@ -213,7 +216,7 @@ class ApplicationDocumentService
 
     private function readRelation(object $application, string $relation): array
     {
-        if (!method_exists($application, 'relationLoaded') || !$application->relationLoaded($relation)) {
+        if (! method_exists($application, 'relationLoaded') || ! $application->relationLoaded($relation)) {
             return [];
         }
 

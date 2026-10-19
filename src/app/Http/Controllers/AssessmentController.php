@@ -77,7 +77,7 @@ class AssessmentController extends BaseApiController
     {
         try {
             $assignment = $service->assignToApplicant($id, $request->validated()['application_id']);
-        } catch (\InvalidArgumentException | RuntimeException $e) {
+        } catch (\InvalidArgumentException|RuntimeException $e) {
             return $this->error($e->getMessage(), 422);
         }
 

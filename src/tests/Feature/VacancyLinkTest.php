@@ -18,11 +18,11 @@ class VacancyLinkTest extends TestCase
     private function makeVacancy(array $override = []): Vacancy
     {
         return Vacancy::create(array_merge([
-            'title'       => 'Bandung - Cook',
-            'department'  => 'Kitchen',
-            'location'    => 'Bandung - KARNIVOR - JL. RIAU',
-            'type'        => 'full-time',
-            'status'      => 'open',
+            'title' => 'Bandung - Cook',
+            'department' => 'Kitchen',
+            'location' => 'Bandung - KARNIVOR - JL. RIAU',
+            'type' => 'full-time',
+            'status' => 'open',
             'description' => 'Masak.',
         ], $override));
     }
@@ -33,25 +33,25 @@ class VacancyLinkTest extends TestCase
         $n++;
 
         return Application::create(array_merge([
-            'personal_info'   => ['fullName' => "Pelamar $n"],
-            'contact_info'    => ['email' => "pelamar$n@example.com", 'phone' => '081'],
+            'personal_info' => ['fullName' => "Pelamar $n"],
+            'contact_info' => ['email' => "pelamar$n@example.com", 'phone' => '081'],
             'additional_info' => ['positionApplied' => 'Bandung - Cook'],
-            'stage'           => 'offer',
+            'stage' => 'offer',
         ], $override));
     }
 
     private function submitPayload(array $additionalInfo, ?string $vacancyId = null): array
     {
         return array_filter([
-            'personalInfo'   => ['fullName' => 'Budi Santoso'],
-            'contactInfo'    => ['email' => 'budi@example.com', 'phone' => '08123456789'],
-            'education'      => [],
+            'personalInfo' => ['fullName' => 'Budi Santoso'],
+            'contactInfo' => ['email' => 'budi@example.com', 'phone' => '08123456789'],
+            'education' => [],
             'certifications' => [],
             'workExperience' => [],
-            'parentInfo'     => [],
-            'spouseInfo'     => [],
+            'parentInfo' => [],
+            'spouseInfo' => [],
             'additionalInfo' => $additionalInfo,
-            'vacancyId'      => $vacancyId,
+            'vacancyId' => $vacancyId,
         ], fn ($v) => $v !== null);
     }
 
@@ -70,7 +70,7 @@ class VacancyLinkTest extends TestCase
 
         $this->postJson('/api/applications', $this->submitPayload([
             'positionApplied' => 'Bandung - Cook',
-            'workLocation'    => 'Bandung - KARNIVOR - JL. RIAU',
+            'workLocation' => 'Bandung - KARNIVOR - JL. RIAU',
         ]))->assertStatus(200);
 
         $this->assertSame($sameLocation->id, $this->submittedApplication()->vacancy_id);
@@ -94,7 +94,7 @@ class VacancyLinkTest extends TestCase
 
         $this->postJson('/api/applications', $this->submitPayload([
             'positionApplied' => 'Bandung - Cook',
-            'workLocation'    => 'Bandung - KARNIVOR - JL. RIAU',
+            'workLocation' => 'Bandung - KARNIVOR - JL. RIAU',
         ], $explicit->id))->assertStatus(200);
 
         $this->assertSame($explicit->id, $this->submittedApplication()->vacancy_id);
@@ -235,14 +235,14 @@ class VacancyLinkTest extends TestCase
     private function makeJobRequest(array $override = []): JobRequest
     {
         return JobRequest::create(array_merge([
-            'title'           => 'Bandung - Cook',
-            'department'      => 'Kitchen',
-            'location'        => 'Bandung - KARNIVOR - JL. RIAU',
+            'title' => 'Bandung - Cook',
+            'department' => 'Kitchen',
+            'location' => 'Bandung - KARNIVOR - JL. RIAU',
             'employment_type' => 'contract',
-            'headcount'       => 3,
-            'justification'   => 'Outlet baru.',
-            'requirements'    => ['Bisa masak'],
-            'status'          => 'approved',
+            'headcount' => 3,
+            'justification' => 'Outlet baru.',
+            'requirements' => ['Bisa masak'],
+            'status' => 'approved',
         ], $override));
     }
 

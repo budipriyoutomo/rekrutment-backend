@@ -15,8 +15,10 @@ class PayslipWatermarker
 {
     public function stamp(string $pdfPath, string $text = 'ALTIMA GROUP'): void
     {
-        $pdf = new class extends Fpdi {
+        $pdf = new class extends Fpdi
+        {
             public $angle = 0;
+
             protected $extgstates = [];
 
             // --- Transparansi (FPDF alpha extension via ExtGState) ---
@@ -44,7 +46,7 @@ class PayslipWatermarker
                     $p = $this->extgstates[$i]['parms'];
                     $this->_put(sprintf('/ca %.3F', $p['ca']));
                     $this->_put(sprintf('/CA %.3F', $p['CA']));
-                    $this->_put('/BM ' . $p['BM']);
+                    $this->_put('/BM '.$p['BM']);
                     $this->_put('>>');
                     $this->_put('endobj');
                 }
@@ -55,7 +57,7 @@ class PayslipWatermarker
                 parent::_putresourcedict();
                 $this->_put('/ExtGState <<');
                 foreach ($this->extgstates as $k => $extgstate) {
-                    $this->_put('/GS' . $k . ' ' . $extgstate['n'] . ' 0 R');
+                    $this->_put('/GS'.$k.' '.$extgstate['n'].' 0 R');
                 }
                 $this->_put('>>');
             }
@@ -81,8 +83,8 @@ class PayslipWatermarker
                 $this->angle = $angle;
                 if ($angle !== 0) {
                     $angle *= M_PI / 180;
-                    $c  = cos($angle);
-                    $s  = sin($angle);
+                    $c = cos($angle);
+                    $s = sin($angle);
                     $cx = $x * $this->k;
                     $cy = ($this->h - $y) * $this->k;
                     $this->_out(sprintf(
@@ -105,7 +107,7 @@ class PayslipWatermarker
         $pageCount = $pdf->setSourceFile($pdfPath);
 
         for ($p = 1; $p <= $pageCount; $p++) {
-            $tpl  = $pdf->importPage($p);
+            $tpl = $pdf->importPage($p);
             $size = $pdf->getTemplateSize($tpl);
 
             $pdf->AddPage($size['orientation'], [$size['width'], $size['height']]);

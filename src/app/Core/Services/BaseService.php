@@ -2,12 +2,12 @@
 
 namespace App\Core\Services;
 
-use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Http\Request;
-use Illuminate\Pagination\LengthAwarePaginator;
 use App\Core\Support\QueryFilter;
 use Exception;
+use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Model;
+use Illuminate\Http\Request;
+use Illuminate\Pagination\LengthAwarePaginator;
 
 abstract class BaseService
 {
@@ -45,8 +45,8 @@ abstract class BaseService
     {
         $model = $this->find($id);
 
-        if (!$model) {
-            throw new Exception("Data not found");
+        if (! $model) {
+            throw new Exception('Data not found');
         }
 
         $model->update($data);
@@ -58,8 +58,8 @@ abstract class BaseService
     {
         $model = $this->find($id);
 
-        if (!$model) {
-            throw new Exception("Data not found");
+        if (! $model) {
+            throw new Exception('Data not found');
         }
 
         $model->delete();

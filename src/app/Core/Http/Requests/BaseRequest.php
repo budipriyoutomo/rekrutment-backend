@@ -2,13 +2,14 @@
 
 namespace App\Core\Http\Requests;
 
-use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Contracts\Validation\Validator;
+use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Http\Exceptions\HttpResponseException;
 
 abstract class BaseRequest extends FormRequest
 {
     abstract protected function rulesForCreate(): array;
+
     abstract protected function rulesForUpdate(): array;
 
     public function authorize(): bool
@@ -49,8 +50,13 @@ abstract class BaseRequest extends FormRequest
     private function clean(array $data): array
     {
         return array_map(function ($value) {
-            if (is_array($value)) return $this->clean($value);
-            if (is_string($value)) return trim($value) ?: null;
+            if (is_array($value)) {
+                return $this->clean($value);
+            }
+            if (is_string($value)) {
+                return trim($value) ?: null;
+            }
+
             return $value;
         }, $data);
     }

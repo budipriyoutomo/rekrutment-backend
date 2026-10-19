@@ -30,16 +30,16 @@ class AssessmentTakeController extends BaseApiController
         }
 
         return $this->success([
-            'name'            => $assignment->application->personal_info['fullName'] ?? null,
-            'position'        => $assignment->application->additional_info['positionApplied'] ?? null,
-            'title'           => $assignment->assessment->title,
-            'description'     => $assignment->assessment->description,
+            'name' => $assignment->application->personal_info['fullName'] ?? null,
+            'position' => $assignment->application->additional_info['positionApplied'] ?? null,
+            'title' => $assignment->assessment->title,
+            'description' => $assignment->assessment->description,
             'durationMinutes' => (int) $assignment->assessment->duration_minutes,
-            'totalQuestions'  => count($assignment->effectiveQuestions()),
-            'status'          => $assignment->status,
-            'expiresAt'       => $assignment->expires_at,
-            'startedAt'       => $assignment->started_at,
-            'deadline'        => $assignment->deadline(),
+            'totalQuestions' => count($assignment->effectiveQuestions()),
+            'status' => $assignment->status,
+            'expiresAt' => $assignment->expires_at,
+            'startedAt' => $assignment->started_at,
+            'deadline' => $assignment->deadline(),
         ], 'Token valid');
     }
 
@@ -57,21 +57,21 @@ class AssessmentTakeController extends BaseApiController
             return $invalid;
         }
 
-        if (!$assignment->started_at) {
+        if (! $assignment->started_at) {
             $assignment->update([
                 'started_at' => now(),
-                'status'     => 'in_progress',
+                'status' => 'in_progress',
             ]);
 
             $assignment->refresh()->load('assessment.questions');
         }
 
         return $this->success([
-            'title'           => $assignment->assessment->title,
+            'title' => $assignment->assessment->title,
             'durationMinutes' => (int) $assignment->assessment->duration_minutes,
-            'startedAt'       => $assignment->started_at,
-            'deadline'        => $assignment->deadline(),
-            'questions'       => $assignment->publicQuestions(),
+            'startedAt' => $assignment->started_at,
+            'deadline' => $assignment->deadline(),
+            'questions' => $assignment->publicQuestions(),
         ], 'Tes dimulai');
     }
 
@@ -89,7 +89,7 @@ class AssessmentTakeController extends BaseApiController
             return $invalid;
         }
 
-        if (!$assignment->started_at) {
+        if (! $assignment->started_at) {
             return $this->error('Tes belum dimulai.', 422);
         }
 
@@ -107,7 +107,7 @@ class AssessmentTakeController extends BaseApiController
      */
     private function guard(?AssessmentAssignment $assignment): ?JsonResponse
     {
-        if (!$assignment) {
+        if (! $assignment) {
             return $this->error('Link tidak valid atau sudah tidak tersedia.', 404);
         }
 

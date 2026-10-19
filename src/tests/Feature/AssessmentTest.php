@@ -24,10 +24,10 @@ class AssessmentTest extends TestCase
     private function makeApplication(): Application
     {
         return Application::create([
-            'personal_info'   => ['fullName' => 'Budi Kandidat'],
-            'contact_info'    => ['email' => 'budi@example.com', 'phone' => '081'],
+            'personal_info' => ['fullName' => 'Budi Kandidat'],
+            'contact_info' => ['email' => 'budi@example.com', 'phone' => '081'],
             'additional_info' => ['positionApplied' => 'Backend Dev'],
-            'stage'           => 'screening',
+            'stage' => 'screening',
         ]);
     }
 
@@ -35,28 +35,28 @@ class AssessmentTest extends TestCase
     private function assessmentPayload(array $override = []): array
     {
         return array_merge([
-            'title'            => 'Tes Logika Dasar',
-            'description'      => 'Tes pilihan ganda',
+            'title' => 'Tes Logika Dasar',
+            'description' => 'Tes pilihan ganda',
             'duration_minutes' => 30,
-            'passing_score'    => 70,
-            'questions'        => [
+            'passing_score' => 70,
+            'questions' => [
                 [
-                    'question'       => '2 + 2 = ?',
-                    'options'        => [
+                    'question' => '2 + 2 = ?',
+                    'options' => [
                         ['key' => 'A', 'text' => '3'],
                         ['key' => 'B', 'text' => '4'],
                     ],
                     'correct_answer' => 'B',
-                    'score'          => 1,
+                    'score' => 1,
                 ],
                 [
-                    'question'       => 'Ibu kota Indonesia?',
-                    'options'        => [
+                    'question' => 'Ibu kota Indonesia?',
+                    'options' => [
                         ['key' => 'A', 'text' => 'Jakarta'],
                         ['key' => 'B', 'text' => 'Bandung'],
                     ],
                     'correct_answer' => 'A',
-                    'score'          => 3,
+                    'score' => 3,
                 ],
             ],
         ], $override);
@@ -97,27 +97,27 @@ class AssessmentTest extends TestCase
     public function test_update_syncs_questions(): void
     {
         $assessment = $this->makeAssessment();
-        $keep       = $assessment->questions->first();
+        $keep = $assessment->questions->first();
 
         $this->patchJson("/api/assessments/{$assessment->id}", [
             'questions' => [[
-                'id'             => $keep->id,
-                'question'       => '2 + 2 = ? (revisi)',
-                'options'        => [
+                'id' => $keep->id,
+                'question' => '2 + 2 = ? (revisi)',
+                'options' => [
                     ['key' => 'A', 'text' => '3'],
                     ['key' => 'B', 'text' => '4'],
                 ],
                 'correct_answer' => 'B',
-                'score'          => 2,
+                'score' => 2,
             ]],
         ])->assertStatus(200)->assertJsonCount(1, 'data.questions');
 
         // Soal yang tidak dikirim ulang ikut terhapus.
         $this->assertDatabaseCount('assessment_questions', 1);
         $this->assertDatabaseHas('assessment_questions', [
-            'id'       => $keep->id,
+            'id' => $keep->id,
             'question' => '2 + 2 = ? (revisi)',
-            'score'    => 2,
+            'score' => 2,
         ]);
     }
 
@@ -136,7 +136,7 @@ class AssessmentTest extends TestCase
 
     public function test_assign_sends_email_and_moves_candidate_to_assessment_stage(): void
     {
-        $assessment  = $this->makeAssessment();
+        $assessment = $this->makeAssessment();
         $application = $this->makeApplication();
 
         $this->postJson("/api/assessments/{$assessment->id}/assign", [
@@ -148,14 +148,14 @@ class AssessmentTest extends TestCase
         Mail::assertSent(AssessmentInvitationMail::class);
 
         $this->assertDatabaseHas('applications', [
-            'id'    => $application->id,
+            'id' => $application->id,
             'stage' => 'assessment',
         ]);
     }
 
     public function test_assign_rejects_inactive_assessment(): void
     {
-        $assessment  = $this->makeAssessment(['is_active' => false]);
+        $assessment = $this->makeAssessment(['is_active' => false]);
         $application = $this->makeApplication();
 
         $this->postJson("/api/assessments/{$assessment->id}/assign", [
@@ -164,7 +164,7 @@ class AssessmentTest extends TestCase
 
         Mail::assertNothingSent();
         $this->assertDatabaseHas('applications', [
-            'id'    => $application->id,
+            'id' => $application->id,
             'stage' => 'screening',
         ]);
     }
@@ -183,7 +183,7 @@ class AssessmentTest extends TestCase
 
     private function assign(): AssessmentAssignment
     {
-        $assessment  = $this->makeAssessment();
+        $assessment = $this->makeAssessment();
         $application = $this->makeApplication();
 
         $id = $this->postJson("/api/assessments/{$assessment->id}/assign", [
@@ -220,7 +220,7 @@ class AssessmentTest extends TestCase
         }
 
         $this->assertDatabaseHas('assessment_assignments', [
-            'id'     => $assignment->id,
+            'id' => $assignment->id,
             'status' => 'in_progress',
         ]);
     }
@@ -377,7 +377,7 @@ class AssessmentTest extends TestCase
      */
     public function test_editing_package_mid_test_does_not_affect_running_candidate(): void
     {
-        $assessment  = $this->makeAssessment();
+        $assessment = $this->makeAssessment();
         $application = $this->makeApplication();
 
         $assignmentId = $this->postJson("/api/assessments/{$assessment->id}/assign", [
@@ -385,8 +385,8 @@ class AssessmentTest extends TestCase
         ])->assertStatus(200)->json('data.id');
 
         $assignment = AssessmentAssignment::findOrFail($assignmentId);
-        $q1         = $assessment->questions->firstWhere('question', '2 + 2 = ?');
-        $q2         = $assessment->questions->firstWhere('question', 'Ibu kota Indonesia?');
+        $q1 = $assessment->questions->firstWhere('question', '2 + 2 = ?');
+        $q2 = $assessment->questions->firstWhere('question', 'Ibu kota Indonesia?');
 
         $this->postJson("/api/assessment/{$assignment->token}/start")
             ->assertStatus(200)
@@ -396,11 +396,11 @@ class AssessmentTest extends TestCase
         $this->patchJson("/api/assessments/{$assessment->id}", [
             'questions' => [
                 [
-                    'id'             => $q1->id,
-                    'question'       => '2 + 2 = ?',
-                    'options'        => [['key' => 'A', 'text' => '3'], ['key' => 'B', 'text' => '4']],
+                    'id' => $q1->id,
+                    'question' => '2 + 2 = ?',
+                    'options' => [['key' => 'A', 'text' => '3'], ['key' => 'B', 'text' => '4']],
                     'correct_answer' => 'A',
-                    'score'          => 1,
+                    'score' => 1,
                 ],
             ],
         ])->assertStatus(200);

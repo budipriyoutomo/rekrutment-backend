@@ -13,7 +13,7 @@ use PhpOffice\PhpSpreadsheet\Worksheet\Worksheet;
 /**
  * Sheet 1: header snake_case (kontrak import) + 1 baris contoh.
  */
-class TemplateDataSheet implements FromArray, WithHeadings, WithTitle, WithStyles, ShouldAutoSize
+class TemplateDataSheet implements FromArray, ShouldAutoSize, WithHeadings, WithStyles, WithTitle
 {
     public function title(): string
     {

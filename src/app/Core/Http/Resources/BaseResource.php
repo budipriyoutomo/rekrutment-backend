@@ -8,7 +8,7 @@ abstract class BaseResource extends JsonResource
 {
     protected array $hidden = [
         'password',
-        'remember_token'
+        'remember_token',
     ];
 
     // Sengaja TIDAK mengonversi string numerik jadi number secara otomatis:

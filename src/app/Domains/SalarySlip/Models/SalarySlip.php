@@ -3,12 +3,12 @@
 namespace App\Domains\SalarySlip\Models;
 
 use App\Core\Models\BaseModel;
-use App\Traits\HasUuid;
 use App\Traits\HasUserstamps;
+use App\Traits\HasUuid;
 
 class SalarySlip extends BaseModel
 {
-    use HasUuid, HasUserstamps;
+    use HasUserstamps, HasUuid;
 
     protected $table = 'salary_slips';
 
@@ -18,11 +18,15 @@ class SalarySlip extends BaseModel
     ];
 
     // Status lifecycle pengiriman
-    public const STATUS_DRAFT      = 'draft';
-    public const STATUS_QUEUED     = 'queued';
+    public const STATUS_DRAFT = 'draft';
+
+    public const STATUS_QUEUED = 'queued';
+
     public const STATUS_PROCESSING = 'processing';
-    public const STATUS_SENT       = 'sent';
-    public const STATUS_FAILED     = 'failed';
+
+    public const STATUS_SENT = 'sent';
+
+    public const STATUS_FAILED = 'failed';
 
     protected $fillable = [
         'batch_id',
@@ -48,32 +52,32 @@ class SalarySlip extends BaseModel
 
     protected $casts = [
         // nominal
-        'gaji_pokok'            => 'integer',
-        'tunjangan_jabatan'     => 'integer',
-        'tunjangan_makan'       => 'integer',
-        'tunjangan_transport'   => 'integer',
-        'tunjangan_lain'        => 'integer',
-        'lembur'                => 'integer',
-        'tambahan_gaji'         => 'integer',
-        'ph_dibayar'            => 'integer',
-        'refund_seragam'        => 'integer',
+        'gaji_pokok' => 'integer',
+        'tunjangan_jabatan' => 'integer',
+        'tunjangan_makan' => 'integer',
+        'tunjangan_transport' => 'integer',
+        'tunjangan_lain' => 'integer',
+        'lembur' => 'integer',
+        'tambahan_gaji' => 'integer',
+        'ph_dibayar' => 'integer',
+        'refund_seragam' => 'integer',
         'jumlah_service_charge' => 'integer',
-        'total_penerimaan'      => 'integer',
-        'total_pot_absen'       => 'integer',
-        'bpjs_ketenagakerjaan'  => 'integer',
-        'bpjs_kesehatan'        => 'integer',
-        'pinjaman'              => 'integer',
-        'pph21'                 => 'integer',
-        'potongan_seragam'      => 'integer',
-        'koreksi'               => 'integer',
-        'total_potongan'        => 'integer',
-        'take_home_pay'         => 'integer',
+        'total_penerimaan' => 'integer',
+        'total_pot_absen' => 'integer',
+        'bpjs_ketenagakerjaan' => 'integer',
+        'bpjs_kesehatan' => 'integer',
+        'pinjaman' => 'integer',
+        'pph21' => 'integer',
+        'potongan_seragam' => 'integer',
+        'koreksi' => 'integer',
+        'total_potongan' => 'integer',
+        'take_home_pay' => 'integer',
         // absensi
-        'hk_hari'      => 'integer',
-        'alpha_hari'   => 'integer',
+        'hk_hari' => 'integer',
+        'alpha_hari' => 'integer',
         'ijin_ap_hari' => 'integer',
-        'sakit_hari'   => 'integer',
-        'cuti_hari'    => 'integer',
+        'sakit_hari' => 'integer',
+        'cuti_hari' => 'integer',
         // timestamp
         'sent_at' => 'datetime',
     ];

@@ -32,7 +32,7 @@ class PayslipPdfConverter
         // (mis. konversi CV/bundling jalan barengan lewat queue) proses kedua
         // exit 0 tapi TIDAK menghasilkan file -> "File PDF ... tidak ditemukan".
         // Profile ditaruh di dalam outputDir yang sudah unik per run, lalu dibersihkan.
-        $profileDir = $outputDir . DIRECTORY_SEPARATOR . 'lo-profile';
+        $profileDir = $outputDir.DIRECTORY_SEPARATOR.'lo-profile';
         if (! is_dir($profileDir)) {
             mkdir($profileDir, 0777, true);
         }
@@ -40,7 +40,7 @@ class PayslipPdfConverter
         try {
             $process = new Process([
                 $binary,
-                '-env:UserInstallation=file://' . $profileDir,
+                '-env:UserInstallation=file://'.$profileDir,
                 '--headless',
                 '--convert-to',
                 'pdf',
@@ -51,20 +51,20 @@ class PayslipPdfConverter
             $process->setTimeout(120);
             $process->run();
 
-            $pdfPath = $outputDir . DIRECTORY_SEPARATOR
-                . pathinfo($sourcePath, PATHINFO_FILENAME) . '.pdf';
+            $pdfPath = $outputDir.DIRECTORY_SEPARATOR
+                .pathinfo($sourcePath, PATHINFO_FILENAME).'.pdf';
 
             // LibreOffice sering exit 0 walau gagal menulis file, jadi keberadaan
             // file PDF adalah sumber kebenaran, bukan cuma exit code.
             if (! $process->isSuccessful() || ! is_file($pdfPath)) {
                 Log::error('PAYSLIP PDF CONVERSION ERROR', [
-                    'binary'      => $binary,
-                    'source'      => $sourcePath,
-                    'expected'    => $pdfPath,
-                    'exit_code'   => $process->getExitCode(),
-                    'outdir_list' => glob($outputDir . DIRECTORY_SEPARATOR . '*') ?: [],
-                    'error'       => $process->getErrorOutput(),
-                    'output'      => $process->getOutput(),
+                    'binary' => $binary,
+                    'source' => $sourcePath,
+                    'expected' => $pdfPath,
+                    'exit_code' => $process->getExitCode(),
+                    'outdir_list' => glob($outputDir.DIRECTORY_SEPARATOR.'*') ?: [],
+                    'error' => $process->getErrorOutput(),
+                    'output' => $process->getOutput(),
                 ]);
 
                 throw new \RuntimeException(
@@ -106,7 +106,7 @@ class PayslipPdfConverter
             return $configured;
         }
 
-        $finder = new ExecutableFinder();
+        $finder = new ExecutableFinder;
         foreach (['libreoffice', 'soffice'] as $name) {
             if ($binary = $finder->find($name)) {
                 return $binary;

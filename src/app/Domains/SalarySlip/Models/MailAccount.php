@@ -3,17 +3,18 @@
 namespace App\Domains\SalarySlip\Models;
 
 use App\Core\Models\BaseModel;
-use App\Traits\HasUuid;
 use App\Traits\HasUserstamps;
+use App\Traits\HasUuid;
 
 class MailAccount extends BaseModel
 {
-    use HasUuid, HasUserstamps;
+    use HasUserstamps, HasUuid;
 
     protected $table = 'mail_accounts';
 
     // Peruntukan akun email. Extensible untuk kategori lain di kemudian hari.
     public const PURPOSE_RECRUITMENT = 'recruitment';
+
     public const PURPOSE_SALARY_SLIP = 'salary_slip';
 
     public const PURPOSES = [
@@ -39,9 +40,9 @@ class MailAccount extends BaseModel
     protected $casts = [
         // dekripsi hanya saat runtime; tersimpan terenkripsi di DB
         'smtp_password_encrypted' => 'encrypted',
-        'smtp_port'               => 'integer',
-        'is_default'              => 'boolean',
-        'is_active'               => 'boolean',
+        'smtp_port' => 'integer',
+        'is_default' => 'boolean',
+        'is_active' => 'boolean',
     ];
 
     // Jangan pernah bocorkan password ke response API / log

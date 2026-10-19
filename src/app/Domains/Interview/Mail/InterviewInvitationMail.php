@@ -14,9 +14,9 @@ class InterviewInvitationMail extends Mailable
     use Queueable, SerializesModels;
 
     /**
-     * @param Interview $interview   Jadwal interview terkait
-     * @param string    $recipientName Nama penerima (kandidat / interviewer)
-     * @param string    $audience    'candidate' atau 'interviewer'
+     * @param  Interview  $interview  Jadwal interview terkait
+     * @param  string  $recipientName  Nama penerima (kandidat / interviewer)
+     * @param  string  $audience  'candidate' atau 'interviewer'
      */
     public function __construct(
         public readonly Interview $interview,

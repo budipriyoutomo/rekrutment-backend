@@ -2,18 +2,19 @@
 
 namespace App\Domains\Application\Jobs;
 
-use Illuminate\Contracts\Queue\ShouldQueue;
-use Illuminate\Foundation\Queue\Queueable;
-use Illuminate\Foundation\Bus\Dispatchable;
-use Illuminate\Queue\InteractsWithQueue;
-use Illuminate\Queue\SerializesModels;
 use App\Domains\Application\Models\Application;
 use App\Domains\Application\Services\ApplicationDocumentService;
+use Illuminate\Contracts\Queue\ShouldQueue;
+use Illuminate\Foundation\Bus\Dispatchable;
+use Illuminate\Foundation\Queue\Queueable;
+use Illuminate\Queue\InteractsWithQueue;
+use Illuminate\Queue\SerializesModels;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Str;
+use setasign\Fpdi\Fpdi;
 use Symfony\Component\Process\ExecutableFinder;
 use Symfony\Component\Process\Process;
-use Illuminate\Support\Str;
 
 class ProcessApplicationBundlingJob implements ShouldQueue
 {
@@ -29,18 +30,20 @@ class ProcessApplicationBundlingJob implements ShouldQueue
     public function handle(ApplicationDocumentService $documentService): void
     {
         $application = Application::with(['educations', 'experiences', 'certifications'])->find($this->applicationId);
-        
-        if (!$application) return;
+
+        if (! $application) {
+            return;
+        }
 
         // 1. Inisialisasi folder temporary lokal
         $tempDir = storage_path('app/temp_processing');
-        if (!file_exists($tempDir)) {
+        if (! file_exists($tempDir)) {
             mkdir($tempDir, 0755, true);
         }
 
         $uniqueId = Str::random(10);
-        $generatedDocxPath = $tempDir . '/candidate_' . $this->applicationId . '_' . $uniqueId . '.docx';
-        $generatedPdfPath = $tempDir . '/candidate_' . $this->applicationId . '_' . $uniqueId . '.pdf';
+        $generatedDocxPath = $tempDir.'/candidate_'.$this->applicationId.'_'.$uniqueId.'.docx';
+        $generatedPdfPath = $tempDir.'/candidate_'.$this->applicationId.'_'.$uniqueId.'.pdf';
         $downloadedFiles = [];
 
         try {
@@ -49,13 +52,12 @@ class ProcessApplicationBundlingJob implements ShouldQueue
             // =========================================================================
             $documentService->generateApplicationDocx($application, $generatedDocxPath);
 
-
             // =========================================================================
             // TAHAP 2: KONVERSI BIODATA KE PDF
             // =========================================================================
             $this->convertToPdf($generatedDocxPath, $tempDir);
 
-            if (!file_exists($generatedPdfPath)) {
+            if (! file_exists($generatedPdfPath)) {
                 throw new \RuntimeException('PDF biodata kandidat tidak berhasil dibuat.');
             }
 
@@ -76,17 +78,18 @@ class ProcessApplicationBundlingJob implements ShouldQueue
                 $document = $documentsData[$key] ?? null;
                 $sourcePath = is_array($document) ? ($document['path'] ?? null) : $document;
 
-                if (!$sourcePath) {
+                if (! $sourcePath) {
                     continue;
                 }
 
                 $localPath = $this->downloadDocument($sourcePath, $tempDir, "{$key}_{$uniqueId}");
-                if (!$localPath) {
+                if (! $localPath) {
                     Log::warning('Application bundle document missing', [
                         'application_id' => $this->applicationId,
                         'document_type' => $key,
                         'path' => $sourcePath,
                     ]);
+
                     continue;
                 }
 
@@ -99,6 +102,7 @@ class ProcessApplicationBundlingJob implements ShouldQueue
                         'path' => $localPath,
                         'label' => $label,
                     ];
+
                     continue;
                 }
 
@@ -108,12 +112,13 @@ class ProcessApplicationBundlingJob implements ShouldQueue
                         'path' => $localPath,
                         'label' => $label,
                     ];
+
                     continue;
                 }
 
                 if (in_array($extension, ['doc', 'docx'], true)) {
                     $this->convertToPdf($localPath, $tempDir);
-                    $convertedPath = $tempDir . '/' . pathinfo($localPath, PATHINFO_FILENAME) . '.pdf';
+                    $convertedPath = $tempDir.'/'.pathinfo($localPath, PATHINFO_FILENAME).'.pdf';
                     if (file_exists($convertedPath)) {
                         $downloadedFiles[] = $convertedPath;
                         $filesToMerge[] = [
@@ -128,7 +133,7 @@ class ProcessApplicationBundlingJob implements ShouldQueue
             // =========================================================================
             // TAHAP 4: MERGE BIODATA + CV + FOTO + KTP + IJAZAH
             // =========================================================================
-            $outputFinalPdf = $tempDir . "/bundel_rekrutmen_{$this->applicationId}_{$uniqueId}.pdf";
+            $outputFinalPdf = $tempDir."/bundel_rekrutmen_{$this->applicationId}_{$uniqueId}.pdf";
             $this->mergeDocuments($filesToMerge, $outputFinalPdf);
 
             // =========================================================================
@@ -140,7 +145,7 @@ class ProcessApplicationBundlingJob implements ShouldQueue
                 'visibility' => 'public',
             ]);
 
-            if (!$uploaded) {
+            if (! $uploaded) {
                 throw new \RuntimeException("Upload bundel final ke disk {$bundleDisk} gagal.");
             }
 
@@ -180,12 +185,13 @@ class ProcessApplicationBundlingJob implements ShouldQueue
 
     private function mergeDocuments(array $files, string $outputPath): void
     {
-        $pdf = new \setasign\Fpdi\Fpdi();
+        $pdf = new Fpdi;
         $pdf->SetAutoPageBreak(true, 12);
 
         foreach ($files as $fileData) {
             if (($fileData['type'] ?? null) === 'image') {
                 $this->addImagePage($pdf, $fileData['path'], $fileData['label'] ?? 'Dokumen');
+
                 continue;
             }
 
@@ -202,10 +208,10 @@ class ProcessApplicationBundlingJob implements ShouldQueue
         $pdf->Output('F', $outputPath);
     }
 
-    private function addImagePage(\setasign\Fpdi\Fpdi $pdf, string $imagePath, string $label): void
+    private function addImagePage(Fpdi $pdf, string $imagePath, string $label): void
     {
         $size = getimagesize($imagePath);
-        if (!$size) {
+        if (! $size) {
             return;
         }
 
@@ -243,11 +249,12 @@ class ProcessApplicationBundlingJob implements ShouldQueue
         foreach ($diskNames as $diskName) {
             try {
                 $disk = Storage::disk($diskName);
-                if (!$disk->exists($path)) {
+                if (! $disk->exists($path)) {
                     continue;
                 }
 
                 file_put_contents($localPath, $disk->get($path));
+
                 return $localPath;
             } catch (\Throwable $e) {
                 Log::warning('Application bundle document download failed on disk', [
@@ -271,13 +278,13 @@ class ProcessApplicationBundlingJob implements ShouldQueue
     {
         $binary = $this->resolveLibreOfficeBinary();
         $profileDir = storage_path('app/libreoffice-profile');
-        if (!is_dir($profileDir)) {
+        if (! is_dir($profileDir)) {
             mkdir($profileDir, 0777, true);
         }
 
         $process = new Process([
             $binary,
-            '-env:UserInstallation=file://' . $profileDir,
+            '-env:UserInstallation=file://'.$profileDir,
             '--headless',
             '--convert-to',
             'pdf',
@@ -288,7 +295,7 @@ class ProcessApplicationBundlingJob implements ShouldQueue
         $process->setTimeout(60);
         $process->run();
 
-        if (!$process->isSuccessful()) {
+        if (! $process->isSuccessful()) {
             Log::error('Application bundle PDF conversion failed', [
                 'binary' => $binary,
                 'file' => $filePath,
@@ -296,7 +303,7 @@ class ProcessApplicationBundlingJob implements ShouldQueue
                 'output' => $process->getOutput(),
             ]);
 
-            throw new \Exception("LibreOffice Gagal: " . $process->getErrorOutput());
+            throw new \Exception('LibreOffice Gagal: '.$process->getErrorOutput());
         }
     }
 
@@ -307,7 +314,7 @@ class ProcessApplicationBundlingJob implements ShouldQueue
             return $configuredBinary;
         }
 
-        $finder = new ExecutableFinder();
+        $finder = new ExecutableFinder;
         foreach (['libreoffice', 'soffice'] as $name) {
             $binary = $finder->find($name);
             if ($binary) {
@@ -335,7 +342,8 @@ class ProcessApplicationBundlingJob implements ShouldQueue
             return Storage::disk($diskName)->url($path);
         } catch (\Throwable $e) {
             $baseUrl = config("filesystems.disks.{$diskName}.url", '');
-            return rtrim($baseUrl, '/') . '/' . ltrim($path, '/');
+
+            return rtrim($baseUrl, '/').'/'.ltrim($path, '/');
         }
     }
 

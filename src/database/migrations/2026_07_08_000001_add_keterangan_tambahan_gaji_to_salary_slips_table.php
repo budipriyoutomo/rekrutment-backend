@@ -9,7 +9,7 @@ return new class extends Migration
     public function up(): void
     {
         Schema::table('salary_slips', function (Blueprint $table) {
-            if (!Schema::hasColumn('salary_slips', 'keterangan_tambahan_gaji')) {
+            if (! Schema::hasColumn('salary_slips', 'keterangan_tambahan_gaji')) {
                 // Keterangan/catatan bebas untuk komponen Tambahan Gaji.
                 $table->string('keterangan_tambahan_gaji')->nullable()->after('tambahan_gaji');
             }

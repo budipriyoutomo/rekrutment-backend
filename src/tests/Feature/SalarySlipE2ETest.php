@@ -10,6 +10,7 @@ use App\Domains\SalarySlip\Models\MailAccount;
 use App\Domains\SalarySlip\Models\SalarySlip;
 use App\Domains\SalarySlip\Models\SendJob;
 use App\Domains\SalarySlip\Resources\MailAccountResource;
+use App\Domains\SalarySlip\Services\MailAccountResolver;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\DB;
@@ -65,7 +66,7 @@ class SalarySlipE2ETest extends TestCase
     /** Buat PDF dummy & mock generator agar E2E tak butuh LibreOffice. */
     private function fakePdfGenerator(): string
     {
-        $path = tempnam(sys_get_temp_dir(), 'slip') . '.pdf';
+        $path = tempnam(sys_get_temp_dir(), 'slip').'.pdf';
         file_put_contents($path, '%PDF-1.4 dummy');
 
         $this->mock(GeneratePayslipPdfAction::class, function ($m) use ($path) {
@@ -91,7 +92,7 @@ class SalarySlipE2ETest extends TestCase
     {
         Mail::fake();
         $pdf = $this->fakePdfGenerator();
-        $hr  = $this->hrAccount();
+        $hr = $this->hrAccount();
 
         // 1) Import 2 baris via endpoint.
         $file = $this->csvUpload([
@@ -109,7 +110,7 @@ class SalarySlipE2ETest extends TestCase
 
         // 2) Kirim dengan akun HR (queue sync -> job jalan inline).
         $this->postJson('/api/salary-slips/send', [
-            'ids'             => $ids,
+            'ids' => $ids,
             'mail_account_id' => $hr->id,
         ])
             ->assertStatus(200)
@@ -163,7 +164,7 @@ class SalarySlipE2ETest extends TestCase
     {
         Mail::fake();
 
-        $path = tempnam(sys_get_temp_dir(), 'slip') . '.pdf';
+        $path = tempnam(sys_get_temp_dir(), 'slip').'.pdf';
         file_put_contents($path, '%PDF-1.4 dummy');
         $this->mock(GeneratePayslipPdfAction::class, function ($m) use ($path) {
             $m->shouldReceive('execute')->andReturn($path);
@@ -177,6 +178,7 @@ class SalarySlipE2ETest extends TestCase
             if ($attempts < 3) {
                 throw new \RuntimeException('SMTP timeout');
             }
+
             return null;
         });
         Mail::shouldReceive('to')->andReturn($pending);
@@ -187,7 +189,7 @@ class SalarySlipE2ETest extends TestCase
         ]);
 
         $pdfAction = app(GeneratePayslipPdfAction::class);
-        $resolver = app(\App\Domains\SalarySlip\Services\MailAccountResolver::class);
+        $resolver = app(MailAccountResolver::class);
 
         // Percobaan 1 & 2 melempar exception (queue akan menjadwal ulang).
         for ($i = 1; $i <= 2; $i++) {

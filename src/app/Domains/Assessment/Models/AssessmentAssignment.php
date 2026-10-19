@@ -17,13 +17,13 @@ class AssessmentAssignment extends BaseModel
     protected function casts(): array
     {
         return array_merge(parent::casts(), [
-            'answers'            => 'array',
+            'answers' => 'array',
             'questions_snapshot' => 'array',
-            'score'              => 'float',
-            'passed'             => 'boolean',
-            'expires_at'         => 'datetime',
-            'started_at'         => 'datetime',
-            'submitted_at'       => 'datetime',
+            'score' => 'float',
+            'passed' => 'boolean',
+            'expires_at' => 'datetime',
+            'started_at' => 'datetime',
+            'submitted_at' => 'datetime',
         ]);
     }
 
@@ -52,7 +52,7 @@ class AssessmentAssignment extends BaseModel
      */
     public function isValid(): bool
     {
-        return !$this->isExpired() && !$this->isSubmitted();
+        return ! $this->isExpired() && ! $this->isSubmitted();
     }
 
     /**
@@ -60,7 +60,7 @@ class AssessmentAssignment extends BaseModel
      */
     public function deadline(): ?CarbonInterface
     {
-        if (!$this->started_at) {
+        if (! $this->started_at) {
             return null;
         }
 
@@ -101,13 +101,13 @@ class AssessmentAssignment extends BaseModel
     public function publicQuestions(): array
     {
         return array_map(fn (array $q) => [
-            'id'       => $q['id'],
+            'id' => $q['id'],
             'question' => $q['question'],
-            'options'  => array_map(fn (array $o) => [
-                'key'  => $o['key'] ?? null,
+            'options' => array_map(fn (array $o) => [
+                'key' => $o['key'] ?? null,
                 'text' => $o['text'] ?? null,
             ], $q['options'] ?? []),
-            'order'    => (int) ($q['order'] ?? 0),
+            'order' => (int) ($q['order'] ?? 0),
         ], $this->effectiveQuestions());
     }
 }

@@ -12,21 +12,21 @@ class SalaryRowValidatorTest extends TestCase
     protected function setUp(): void
     {
         parent::setUp();
-        $this->validator = new SalaryRowValidator();
+        $this->validator = new SalaryRowValidator;
     }
 
     private function validRow(array $override = []): array
     {
         return array_merge([
-            'nik'        => '12345',
-            'nama'       => 'Budi',
-            'jabatan'    => 'Staff',
-            'periode'    => '2026-06',
-            'cabang'     => 'Jakarta',
+            'nik' => '12345',
+            'nama' => 'Budi',
+            'jabatan' => 'Staff',
+            'periode' => '2026-06',
+            'cabang' => 'Jakarta',
             'perusahaan' => 'PT Maju',
-            'email'      => 'budi@example.com',
+            'email' => 'budi@example.com',
             'gaji_pokok' => '5000000',
-            'hk_hari'    => '22',
+            'hk_hari' => '22',
         ], $override);
     }
 

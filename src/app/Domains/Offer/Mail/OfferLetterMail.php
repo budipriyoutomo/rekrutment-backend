@@ -30,9 +30,9 @@ class OfferLetterMail extends Mailable
         return new Content(
             view: 'emails.offer-letter',
             with: [
-                'name'        => $this->offer->candidateName(),
+                'name' => $this->offer->candidateName(),
                 'companyName' => CompanySetting::get('company_name') ?: config('app.name'),
-                'offerUrl'    => $this->offer->publicUrl(),
+                'offerUrl' => $this->offer->publicUrl(),
             ],
         );
     }

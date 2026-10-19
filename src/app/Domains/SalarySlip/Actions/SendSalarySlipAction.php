@@ -28,7 +28,7 @@ class SendSalarySlipAction
 
         $jobBatchId = (string) Str::uuid();
         $dispatched = 0;
-        $skipped    = 0;
+        $skipped = 0;
 
         foreach ($slips as $slip) {
             // Idempotency: sudah terkirim & bukan resend -> lewati tanpa mengirim ulang.
@@ -39,17 +39,17 @@ class SendSalarySlipAction
             }
 
             $slip->update([
-                'send_status'     => SalarySlip::STATUS_QUEUED,
+                'send_status' => SalarySlip::STATUS_QUEUED,
                 'mail_account_id' => $mailAccountId,
-                'send_error'      => null,
+                'send_error' => null,
             ]);
 
             $sendJob = SendJob::create([
-                'salary_slip_id'  => $slip->id,
+                'salary_slip_id' => $slip->id,
                 'mail_account_id' => $mailAccountId,
-                'job_batch_id'    => $jobBatchId,
-                'status'          => SendJob::STATUS_QUEUED,
-                'attempt'         => 0,
+                'job_batch_id' => $jobBatchId,
+                'status' => SendJob::STATUS_QUEUED,
+                'attempt' => 0,
             ]);
 
             SendSalarySlipJob::dispatch($slip->id, $sendJob->id, $resend)->onQueue('emails');
@@ -57,8 +57,8 @@ class SendSalarySlipAction
         }
 
         return [
-            'dispatched'   => $dispatched,
-            'skipped'      => $skipped,
+            'dispatched' => $dispatched,
+            'skipped' => $skipped,
             'job_batch_id' => $jobBatchId,
         ];
     }

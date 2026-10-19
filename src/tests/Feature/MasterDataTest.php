@@ -19,8 +19,8 @@ class MasterDataTest extends TestCase
     private function masterDataPayload(array $override = []): array
     {
         return array_merge([
-            'type'      => 'position',
-            'name'      => 'Backend Developer',
+            'type' => 'position',
+            'name' => 'Backend Developer',
             'is_active' => true,
         ], $override);
     }

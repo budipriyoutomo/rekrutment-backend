@@ -13,8 +13,8 @@ class AssessmentQuestion extends BaseModel
     {
         return array_merge(parent::casts(), [
             'options' => 'array',
-            'score'   => 'integer',
-            'order'   => 'integer',
+            'score' => 'integer',
+            'order' => 'integer',
         ]);
     }
 

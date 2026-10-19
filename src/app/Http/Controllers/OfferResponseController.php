@@ -51,14 +51,14 @@ class OfferResponseController extends BaseApiController
             try {
                 $content = $pdf->render($offer);
             } catch (\Throwable $e) {
-                Log::error('Gagal merender PDF offer (publik): ' . $e->getMessage(), ['offer_id' => $offer->id]);
+                Log::error('Gagal merender PDF offer (publik): '.$e->getMessage(), ['offer_id' => $offer->id]);
 
                 return $this->error('Gagal membuat PDF offer letter.', 500);
             }
 
             return response($content, 200, [
-                'Content-Type'        => 'application/pdf',
-                'Content-Disposition' => 'attachment; filename="' . $offer->pdfFileName() . '"',
+                'Content-Type' => 'application/pdf',
+                'Content-Disposition' => 'attachment; filename="'.$offer->pdfFileName().'"',
             ]);
         });
     }

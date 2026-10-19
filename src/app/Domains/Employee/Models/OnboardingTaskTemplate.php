@@ -10,8 +10,8 @@ class OnboardingTaskTemplate extends BaseModel
 
     protected $casts = [
         'offset_days' => 'integer',
-        'sort_order'  => 'integer',
-        'is_active'   => 'boolean',
+        'sort_order' => 'integer',
+        'is_active' => 'boolean',
     ];
 
     /** Template aktif untuk sebuah departemen: yang umum (department null) + yang khusus departemen itu. */

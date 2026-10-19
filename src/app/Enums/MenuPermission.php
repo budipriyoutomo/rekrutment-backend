@@ -8,24 +8,24 @@ namespace App\Enums;
  */
 enum MenuPermission: string
 {
-    case DASHBOARD    = 'dashboard';
-    case APPLICANTS   = 'applicants';
-    case CANDIDATES   = 'candidates';
-    case PIPELINE     = 'pipeline';
-    case ASSESSMENTS  = 'assessments';
-    case INTERVIEWS   = 'interviews';
+    case DASHBOARD = 'dashboard';
+    case APPLICANTS = 'applicants';
+    case CANDIDATES = 'candidates';
+    case PIPELINE = 'pipeline';
+    case ASSESSMENTS = 'assessments';
+    case INTERVIEWS = 'interviews';
     case INTERVIEWERS = 'interviewers';
-    case DOCUMENTS    = 'documents';
-    case EVALUATIONS  = 'evaluations';
-    case OFFERS       = 'offers';
-    case ONBOARDING   = 'onboarding';
-    case VACANCIES    = 'vacancies';
+    case DOCUMENTS = 'documents';
+    case EVALUATIONS = 'evaluations';
+    case OFFERS = 'offers';
+    case ONBOARDING = 'onboarding';
+    case VACANCIES = 'vacancies';
     case JOB_REQUESTS = 'job-requests';
-    case ANALYTICS    = 'analytics';
+    case ANALYTICS = 'analytics';
     case SALARY_SLIPS = 'salary-slips';
     case SALARY_SLIP_REPORTS = 'salary-slip-reports';
-    case MASTER_DATA  = 'master-data';
-    case SETTINGS     = 'settings';
+    case MASTER_DATA = 'master-data';
+    case SETTINGS = 'settings';
 
     /**
      * Semua nilai key sebagai array string.

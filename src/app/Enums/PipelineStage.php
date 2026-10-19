@@ -8,15 +8,15 @@ namespace App\Enums;
  */
 enum PipelineStage: string
 {
-    case APPLIED            = 'applied';
-    case SCREENING          = 'screening';
+    case APPLIED = 'applied';
+    case SCREENING = 'screening';
     case PROFILE_COMPLETION = 'profile_completion';
-    case ASSESSMENT         = 'assessment';
-    case INTERVIEW          = 'interview';
-    case OFFER              = 'offer';
-    case HIRED              = 'hired';
-    case REJECTED           = 'rejected';
-    case ON_HOLD            = 'on_hold';
+    case ASSESSMENT = 'assessment';
+    case INTERVIEW = 'interview';
+    case OFFER = 'offer';
+    case HIRED = 'hired';
+    case REJECTED = 'rejected';
+    case ON_HOLD = 'on_hold';
 
     /**
      * Semua nilai stage sebagai array string.

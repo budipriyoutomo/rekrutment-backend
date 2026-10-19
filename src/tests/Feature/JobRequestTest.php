@@ -19,14 +19,14 @@ class JobRequestTest extends TestCase
     private function jobRequestData(array $override = []): array
     {
         return array_merge([
-            'title'           => 'Backend Developer',
-            'department'      => 'Engineering',
-            'location'        => 'Jakarta',
+            'title' => 'Backend Developer',
+            'department' => 'Engineering',
+            'location' => 'Jakarta',
             'employment_type' => 'full-time',
-            'headcount'       => 2,
-            'justification'   => 'Need more engineers.',
-            'requested_by'    => 'Manager A',
-            'priority'        => 'normal',
+            'headcount' => 2,
+            'justification' => 'Need more engineers.',
+            'requested_by' => 'Manager A',
+            'priority' => 'normal',
         ], $override);
     }
 
@@ -131,7 +131,7 @@ class JobRequestTest extends TestCase
             ->assertJsonPath('data.headcount', 3);
 
         $this->assertDatabaseHas('job_requests', [
-            'id'    => $jr->id,
+            'id' => $jr->id,
             'title' => 'Senior Backend Dev',
         ]);
     }
@@ -157,7 +157,7 @@ class JobRequestTest extends TestCase
             ->assertJsonPath('data.status', 'approved');
 
         $this->assertDatabaseHas('job_requests', [
-            'id'     => $jr->id,
+            'id' => $jr->id,
             'status' => 'approved',
         ]);
     }
@@ -174,7 +174,7 @@ class JobRequestTest extends TestCase
             ->assertJsonPath('data.status', 'rejected');
 
         $this->assertDatabaseHas('job_requests', [
-            'id'     => $jr->id,
+            'id' => $jr->id,
             'status' => 'rejected',
         ]);
     }

@@ -23,23 +23,23 @@ class SalarySlipSchemaTest extends TestCase
     private function slipData(array $override = []): array
     {
         return array_merge([
-            'nik'                   => '12345',
-            'nama'                  => 'Budi Santoso',
-            'jabatan'               => 'Staff',
-            'periode'               => '2026-06',
-            'cabang'                => 'Jakarta',
-            'perusahaan'            => 'PT Maju',
-            'email'                 => 'budi@example.com',
-            'gaji_pokok'            => 5000000,
-            'tunjangan_jabatan'     => 500000,
-            'total_penerimaan'      => 5500000,
-            'total_potongan'        => 500000,
-            'take_home_pay'         => 5000000,
-            'hk_hari'               => 22,
-            'sistem_pembayaran'     => 'transfer',
-            'no_rekening'           => '1234567890',
-            'nama_bank'             => 'BCA',
-            'atas_nama'             => 'Budi Santoso',
+            'nik' => '12345',
+            'nama' => 'Budi Santoso',
+            'jabatan' => 'Staff',
+            'periode' => '2026-06',
+            'cabang' => 'Jakarta',
+            'perusahaan' => 'PT Maju',
+            'email' => 'budi@example.com',
+            'gaji_pokok' => 5000000,
+            'tunjangan_jabatan' => 500000,
+            'total_penerimaan' => 5500000,
+            'total_potongan' => 500000,
+            'take_home_pay' => 5000000,
+            'hk_hari' => 22,
+            'sistem_pembayaran' => 'transfer',
+            'no_rekening' => '1234567890',
+            'nama_bank' => 'BCA',
+            'atas_nama' => 'Budi Santoso',
         ], $override);
     }
 
@@ -85,20 +85,20 @@ class SalarySlipSchemaTest extends TestCase
         // status default = draft
         $this->assertSame(SalarySlip::STATUS_DRAFT, $slip->send_status);
         $this->assertDatabaseHas('salary_slips', [
-            'nik'          => '12345',
-            'send_status'  => 'draft',
-            'gaji_pokok'   => 5000000,
+            'nik' => '12345',
+            'send_status' => 'draft',
+            'gaji_pokok' => 5000000,
         ]);
     }
 
     public function test_batch_relation_groups_slips(): void
     {
         $batch = ImportBatch::create([
-            'file_name'    => 'slip_juni.xlsx',
-            'total_rows'   => 2,
+            'file_name' => 'slip_juni.xlsx',
+            'total_rows' => 2,
             'success_rows' => 2,
-            'failed_rows'  => 0,
-            'errors'       => [],
+            'failed_rows' => 0,
+            'errors' => [],
         ]);
 
         SalarySlip::create($this->slipData(['batch_id' => $batch->id, 'nik' => 'A1']));
@@ -112,7 +112,7 @@ class SalarySlipSchemaTest extends TestCase
     {
         $batch = ImportBatch::create([
             'file_name' => 'x.xlsx',
-            'errors'    => [['row' => 3, 'messages' => ['email tidak valid']]],
+            'errors' => [['row' => 3, 'messages' => ['email tidak valid']]],
         ]);
 
         $fresh = $batch->fresh();
@@ -123,15 +123,15 @@ class SalarySlipSchemaTest extends TestCase
     public function test_mail_account_password_encrypted_at_rest_and_hidden(): void
     {
         $account = MailAccount::create([
-            'label'                   => 'HR Team',
-            'driver'                  => 'smtp',
-            'from_email'              => 'hr@example.com',
-            'from_name'               => 'HR Team',
-            'smtp_host'               => 'smtp.example.com',
-            'smtp_port'               => 587,
-            'smtp_username'           => 'hr@example.com',
+            'label' => 'HR Team',
+            'driver' => 'smtp',
+            'from_email' => 'hr@example.com',
+            'from_name' => 'HR Team',
+            'smtp_host' => 'smtp.example.com',
+            'smtp_port' => 587,
+            'smtp_username' => 'hr@example.com',
             'smtp_password_encrypted' => 'super-secret',
-            'is_default'              => true,
+            'is_default' => true,
         ]);
 
         // Model mendekripsi kembali ke plaintext saat runtime
@@ -151,8 +151,8 @@ class SalarySlipSchemaTest extends TestCase
         $slip = SalarySlip::create($this->slipData());
         $job = SendJob::create([
             'salary_slip_id' => $slip->id,
-            'status'         => SendJob::STATUS_QUEUED,
-            'attempt'        => 0,
+            'status' => SendJob::STATUS_QUEUED,
+            'attempt' => 0,
         ]);
 
         $this->assertSame($slip->id, $job->slip->id);

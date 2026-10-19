@@ -3,9 +3,11 @@
 namespace App\Domains\Auth\Services;
 
 use App\Models\User;
+use Illuminate\Support\Facades\Hash;
+use PHPOpenSourceSaver\JWTAuth\Exceptions\JWTException;
+use PHPOpenSourceSaver\JWTAuth\Exceptions\TokenExpiredException;
 use PHPOpenSourceSaver\JWTAuth\Facades\JWTAuth;
 use Symfony\Component\HttpKernel\Exception\UnauthorizedHttpException;
-use Illuminate\Support\Facades\Hash;
 
 class AuthService
 {
@@ -38,14 +40,14 @@ class AuthService
             'password' => $password,
         ];
 
-        if (!$token = JWTAuth::attempt($credentials)) {
+        if (! $token = JWTAuth::attempt($credentials)) {
             throw new UnauthorizedHttpException('', 'Email atau password salah');
         }
 
         $user = JWTAuth::user();
 
         // ✅ CHECK AKTIVASI
-        if (!$user->is_active) {
+        if (! $user->is_active) {
             throw new UnauthorizedHttpException('', 'Akun belum diaktifkan admin');
         }
 
@@ -79,10 +81,9 @@ class AuthService
 
             return $this->respondWithToken($newToken);
 
-        } catch (\PHPOpenSourceSaver\JWTAuth\Exceptions\TokenExpiredException $e) {
+        } catch (TokenExpiredException $e) {
             throw new UnauthorizedHttpException('', 'Token expired');
-
-        } catch (\PHPOpenSourceSaver\JWTAuth\Exceptions\JWTException $e) {
+        } catch (JWTException $e) {
             throw new UnauthorizedHttpException('', 'Token invalid');
         }
     }
@@ -108,7 +109,7 @@ class AuthService
         try {
             $user = JWTAuth::parseToken()->authenticate();
 
-            if (!$user) {
+            if (! $user) {
                 throw new UnauthorizedHttpException('', 'User tidak ditemukan');
             }
 

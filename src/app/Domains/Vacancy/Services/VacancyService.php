@@ -19,20 +19,20 @@ class VacancyService extends BaseService
     {
         $query = $this->withApplicantCounts(Vacancy::query());
 
-        if (!empty($filters['status'])) {
+        if (! empty($filters['status'])) {
             $query->where('status', $filters['status']);
         }
 
-        if (!empty($filters['department'])) {
+        if (! empty($filters['department'])) {
             $query->where('department', $filters['department']);
         }
 
-        if (!empty($filters['search'])) {
+        if (! empty($filters['search'])) {
             $search = $filters['search'];
             $query->where(function ($q) use ($search) {
                 $q->where('title', 'ilike', "%{$search}%")
-                  ->orWhere('department', 'ilike', "%{$search}%")
-                  ->orWhere('location', 'ilike', "%{$search}%");
+                    ->orWhere('department', 'ilike', "%{$search}%")
+                    ->orWhere('location', 'ilike', "%{$search}%");
             });
         }
 
@@ -55,7 +55,7 @@ class VacancyService extends BaseService
 
     public function createVacancy(array $data): Vacancy
     {
-        if (!isset($data['status'])) {
+        if (! isset($data['status'])) {
             $data['status'] = 'draft';
         }
 
@@ -177,15 +177,15 @@ class VacancyService extends BaseService
 
         $vacancy = $this->create([
             'job_request_id' => $jobRequest->id,
-            'title'          => $jobRequest->title,
-            'department'     => $jobRequest->department ?? '',
-            'location'       => $jobRequest->location ?? '',
-            'type'           => $jobRequest->employment_type ?: 'full-time',
-            'status'         => 'draft',
-            'headcount'      => $jobRequest->headcount,
-            'description'    => $jobRequest->justification ?? '',
-            'requirements'   => $jobRequest->requirements ?? [],
-            'closing_date'   => $jobRequest->needed_by,
+            'title' => $jobRequest->title,
+            'department' => $jobRequest->department ?? '',
+            'location' => $jobRequest->location ?? '',
+            'type' => $jobRequest->employment_type ?: 'full-time',
+            'status' => 'draft',
+            'headcount' => $jobRequest->headcount,
+            'description' => $jobRequest->justification ?? '',
+            'requirements' => $jobRequest->requirements ?? [],
+            'closing_date' => $jobRequest->needed_by,
         ]);
 
         return $this->getDetail($vacancy->id);

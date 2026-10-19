@@ -37,20 +37,20 @@ class PreboardingInvitationMail extends Mailable
         $rejected = collect($this->preboarding->rejectedDocuments())
             ->map(fn (string $type) => [
                 'label' => Preboarding::REQUIRED_DOCUMENTS[$type] ?? $type,
-                'note'  => $this->preboarding->document($type)['note'] ?? null,
+                'note' => $this->preboarding->document($type)['note'] ?? null,
             ])
             ->all();
 
         return new Content(
             view: 'emails.preboarding-invitation',
             with: [
-                'name'        => $this->preboarding->candidateName(),
+                'name' => $this->preboarding->candidateName(),
                 'companyName' => CompanySetting::get('company_name') ?: config('app.name'),
-                'position'    => $this->preboarding->position(),
-                'url'         => $this->preboarding->publicUrl(),
-                'expiresAt'   => $this->preboarding->token_expires_at->locale('id')->translatedFormat('j F Y'),
-                'documents'   => array_values(Preboarding::REQUIRED_DOCUMENTS),
-                'rejected'    => $rejected,
+                'position' => $this->preboarding->position(),
+                'url' => $this->preboarding->publicUrl(),
+                'expiresAt' => $this->preboarding->token_expires_at->locale('id')->translatedFormat('j F Y'),
+                'documents' => array_values(Preboarding::REQUIRED_DOCUMENTS),
+                'rejected' => $rejected,
             ],
         );
     }

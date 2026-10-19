@@ -17,7 +17,7 @@ class MasterDataService extends BaseService
     public function getByType(MasterDataType $type, bool $onlyActive = false): Collection
     {
         return MasterData::where('type', $type->value)
-            ->when($onlyActive, fn($q) => $q->where('is_active', true))
+            ->when($onlyActive, fn ($q) => $q->where('is_active', true))
             ->orderBy('sort_order')
             ->orderBy('name')
             ->get();
@@ -25,7 +25,7 @@ class MasterDataService extends BaseService
 
     public function getAllTypes(): array
     {
-        return array_map(fn(MasterDataType $t) => [
+        return array_map(fn (MasterDataType $t) => [
             'value' => $t->value,
             'label' => $t->label(),
         ], MasterDataType::cases());
@@ -33,7 +33,7 @@ class MasterDataService extends BaseService
 
     public function createItem(array $data): MasterData
     {
-        if (!isset($data['sort_order'])) {
+        if (! isset($data['sort_order'])) {
             $data['sort_order'] = MasterData::where('type', $data['type'])->max('sort_order') + 1;
         }
 
@@ -56,7 +56,7 @@ class MasterDataService extends BaseService
     public function toggleActive(string $id): MasterData
     {
         $item = MasterData::findOrFail($id);
-        $item->update(['is_active' => !$item->is_active]);
+        $item->update(['is_active' => ! $item->is_active]);
 
         return $item->refresh();
     }

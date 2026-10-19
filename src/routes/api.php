@@ -1,30 +1,29 @@
 <?php
 
-use Illuminate\Support\Facades\Route;
-
-use App\Http\Controllers\AuthController;
+use App\Enums\Role;
+use App\Http\Controllers\AnalyticsController;
 use App\Http\Controllers\ApplicationController;
 use App\Http\Controllers\AssessmentController;
 use App\Http\Controllers\AssessmentTakeController;
+use App\Http\Controllers\AuthController;
+use App\Http\Controllers\CompanySettingController;
+use App\Http\Controllers\EmployeeController;
 use App\Http\Controllers\EvaluationController;
 use App\Http\Controllers\InterviewController;
 use App\Http\Controllers\InterviewerController;
 use App\Http\Controllers\JobRequestController;
-use App\Http\Controllers\ProfileCompletionController;
-use App\Http\Controllers\VacancyController;
-use App\Http\Controllers\MasterDataController;
-use App\Http\Controllers\CompanySettingController;
-use App\Http\Controllers\UserController;
-use App\Http\Controllers\AnalyticsController;
-use App\Http\Controllers\SalarySlipController;
 use App\Http\Controllers\MailAccountController;
+use App\Http\Controllers\MasterDataController;
 use App\Http\Controllers\OfferController;
 use App\Http\Controllers\OfferResponseController;
+use App\Http\Controllers\OnboardingTemplateController;
 use App\Http\Controllers\PreboardingController;
 use App\Http\Controllers\PreboardingFormController;
-use App\Http\Controllers\EmployeeController;
-use App\Http\Controllers\OnboardingTemplateController;
-use App\Enums\Role;
+use App\Http\Controllers\ProfileCompletionController;
+use App\Http\Controllers\SalarySlipController;
+use App\Http\Controllers\UserController;
+use App\Http\Controllers\VacancyController;
+use Illuminate\Support\Facades\Route;
 
 // Rute publik untuk profile completion (diakses oleh kandidat via link email)
 Route::prefix('profile-completion')->group(function () {
@@ -235,7 +234,7 @@ Route::prefix('mail-accounts')->group(function () {
     Route::get('/', [MailAccountController::class, 'index']);
     Route::get('/{id}', [MailAccountController::class, 'show']);
 
-    Route::middleware('role:' . Role::ADMIN->value)->group(function () {
+    Route::middleware('role:'.Role::ADMIN->value)->group(function () {
         Route::post('/', [MailAccountController::class, 'store']);
         Route::put('/{id}', [MailAccountController::class, 'update']);
         Route::delete('/{id}', [MailAccountController::class, 'destroy']);

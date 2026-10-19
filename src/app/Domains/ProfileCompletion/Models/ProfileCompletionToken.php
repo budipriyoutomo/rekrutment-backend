@@ -11,7 +11,7 @@ class ProfileCompletionToken extends BaseModel
 
     protected $casts = [
         'expires_at' => 'datetime',
-        'used_at'    => 'datetime',
+        'used_at' => 'datetime',
     ];
 
     public function application()
@@ -26,12 +26,12 @@ class ProfileCompletionToken extends BaseModel
 
     public function isUsed(): bool
     {
-        return !is_null($this->used_at);
+        return ! is_null($this->used_at);
     }
 
     public function isValid(): bool
     {
-        return !$this->isExpired() && !$this->isUsed();
+        return ! $this->isExpired() && ! $this->isUsed();
     }
 
     public function markAsUsed(): void

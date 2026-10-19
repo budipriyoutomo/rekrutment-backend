@@ -28,8 +28,8 @@ class OfferService extends BaseService
 
                 $q->where(function ($q) use ($search, $like) {
                     $q->where('position', $like, "%{$search}%")
-                      ->orWhere('number', $like, "%{$search}%")
-                      ->orWhereHas('application', fn ($a) => $a->where('personal_info->fullName', $like, "%{$search}%"));
+                        ->orWhere('number', $like, "%{$search}%")
+                        ->orWhereHas('application', fn ($a) => $a->where('personal_info->fullName', $like, "%{$search}%"));
                 });
             })
             ->latest()
@@ -63,9 +63,9 @@ class OfferService extends BaseService
 
         $offer = $this->create([
             ...$data,
-            'number'     => $this->nextNumber(),
+            'number' => $this->nextNumber(),
             'vacancy_id' => $application->vacancy_id,
-            'status'     => Offer::STATUS_DRAFT,
+            'status' => Offer::STATUS_DRAFT,
         ]);
 
         return $this->getDetail($offer->id);
@@ -126,10 +126,10 @@ class OfferService extends BaseService
     /** Nomor surat berurutan per bulan, mis. OFR/2026/10/0003. */
     private function nextNumber(): string
     {
-        $prefix = 'OFR/' . now()->format('Y/m') . '/';
-        $last = Offer::where('number', 'like', $prefix . '%')->orderByDesc('number')->value('number');
+        $prefix = 'OFR/'.now()->format('Y/m').'/';
+        $last = Offer::where('number', 'like', $prefix.'%')->orderByDesc('number')->value('number');
         $seq = $last ? ((int) substr($last, strlen($prefix))) + 1 : 1;
 
-        return $prefix . str_pad((string) $seq, 4, '0', STR_PAD_LEFT);
+        return $prefix.str_pad((string) $seq, 4, '0', STR_PAD_LEFT);
     }
 }

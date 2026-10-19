@@ -28,7 +28,7 @@ class PreboardingFormController extends BaseApiController
             'type' => ['required', Rule::in(array_keys(Preboarding::REQUIRED_DOCUMENTS))],
             'file' => ['required', 'file', 'max:4096', 'mimes:pdf,jpg,jpeg,png'],
         ], [
-            'file.max'   => 'Ukuran file maksimal 4MB.',
+            'file.max' => 'Ukuran file maksimal 4MB.',
             'file.mimes' => 'Format file harus PDF, JPG, atau PNG.',
         ]);
 

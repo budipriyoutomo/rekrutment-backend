@@ -15,14 +15,14 @@ return new class extends Migration
     /** tabel => daftar kolom user-reference */
     private array $targets = [
         'import_batches' => ['uploaded_by'],
-        'mail_accounts'  => ['created_by', 'updated_by'],
-        'salary_slips'   => ['created_by', 'updated_by'],
+        'mail_accounts' => ['created_by', 'updated_by'],
+        'salary_slips' => ['created_by', 'updated_by'],
     ];
 
     public function up(): void
     {
         foreach ($this->targets as $table => $columns) {
-            if (!Schema::hasTable($table)) {
+            if (! Schema::hasTable($table)) {
                 continue;
             }
 
@@ -72,7 +72,7 @@ return new class extends Migration
     public function down(): void
     {
         foreach ($this->targets as $table => $columns) {
-            if (!Schema::hasTable($table)) {
+            if (! Schema::hasTable($table)) {
                 continue;
             }
 

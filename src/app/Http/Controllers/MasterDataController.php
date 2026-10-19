@@ -22,12 +22,12 @@ class MasterDataController extends BaseApiController
     {
         $typeValue = $request->get('type');
 
-        if (!$typeValue) {
+        if (! $typeValue) {
             return response()->json(['success' => false, 'message' => 'Parameter type wajib diisi.'], 422);
         }
 
         $type = MasterDataType::tryFrom($typeValue);
-        if (!$type) {
+        if (! $type) {
             return response()->json(['success' => false, 'message' => "Tipe '{$typeValue}' tidak valid."], 422);
         }
 

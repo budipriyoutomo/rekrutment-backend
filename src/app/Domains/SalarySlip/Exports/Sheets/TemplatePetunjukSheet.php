@@ -13,14 +13,14 @@ use PhpOffice\PhpSpreadsheet\Worksheet\Worksheet;
 /**
  * Sheet 2: penjelasan format tiap kolom.
  */
-class TemplatePetunjukSheet implements FromArray, WithHeadings, WithTitle, WithStyles, ShouldAutoSize
+class TemplatePetunjukSheet implements FromArray, ShouldAutoSize, WithHeadings, WithStyles, WithTitle
 {
     private const TYPE_LABEL = [
         SalarySlipColumns::TYPE_STRING => 'Teks',
-        SalarySlipColumns::TYPE_EMAIL  => 'Email',
+        SalarySlipColumns::TYPE_EMAIL => 'Email',
         SalarySlipColumns::TYPE_PERIOD => 'Periode (YYYY-MM)',
-        SalarySlipColumns::TYPE_MONEY  => 'Angka (tanpa Rp/titik)',
-        SalarySlipColumns::TYPE_DAYS   => 'Angka (hari)',
+        SalarySlipColumns::TYPE_MONEY => 'Angka (tanpa Rp/titik)',
+        SalarySlipColumns::TYPE_DAYS => 'Angka (hari)',
     ];
 
     public function title(): string

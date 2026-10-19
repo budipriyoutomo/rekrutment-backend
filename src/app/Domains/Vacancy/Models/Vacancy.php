@@ -13,9 +13,9 @@ class Vacancy extends BaseModel
 
     protected $casts = [
         'requirements' => 'array',
-        'salary'       => 'array',
-        'headcount'    => 'integer',
-        'posted_date'  => 'date:Y-m-d',
+        'salary' => 'array',
+        'headcount' => 'integer',
+        'posted_date' => 'date:Y-m-d',
         'closing_date' => 'date:Y-m-d',
     ];
 

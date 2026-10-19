@@ -3,29 +3,27 @@
 namespace App\Http\Controllers;
 
 use App\Core\Http\Controllers\BaseApiController;
-use App\Domains\Application\Requests\SubmitApplicationRequest;
-use App\Domains\Application\DTO\ApplicationDTO;
-use App\Domains\Application\Actions\SubmitApplicationAction;
+use App\Core\Services\FileUploadService;
 use App\Domains\Application\Actions\BundleApplicationDocumentAction;
 use App\Domains\Application\Actions\RejectApplicationAction;
+use App\Domains\Application\Actions\SubmitApplicationAction;
+use App\Domains\Application\DTO\ApplicationDTO;
+use App\Domains\Application\Models\Application;
+use App\Domains\Application\Requests\SubmitApplicationRequest;
+use App\Domains\Application\Resources\ApplicationBundleResource;
+use App\Domains\Application\Resources\ApplicationResource;
+use App\Domains\Application\Services\ApplicationService;
 use App\Domains\Evaluation\Resources\EvaluationResource;
 use App\Domains\Evaluation\Services\EvaluationService;
-use App\Core\Services\FileUploadService;
-use App\Domains\Application\Models\Application;
 use App\Domains\ProfileCompletion\Actions\SendProfileCompletionEmailAction;
 use App\Enums\PipelineStage;
-use Illuminate\Http\Request;
-use Illuminate\Validation\Rule;
-use App\Domains\Application\Services\ApplicationService;
-use App\Domains\Application\Resources\ApplicationResource;
-use App\Domains\Application\Resources\ApplicationBundleResource;
-use Illuminate\Support\Facades\Log;
 use Exception;
-
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Validation\Rule;
 
 class ApplicationController extends BaseApiController
 {
-
     public function index(Request $request, ApplicationService $service)
     {
         $data = $service->getList(
@@ -83,16 +81,16 @@ class ApplicationController extends BaseApiController
                 'required',
                 'file',
                 'max:2048',
-                'mimes:pdf,jpg,jpeg,png,doc,docx'
+                'mimes:pdf,jpg,jpeg,png,doc,docx',
             ],
             'type' => [
                 'required',
-                'in:cv,foto,ktp,ijazah,others'
+                'in:cv,foto,ktp,ijazah,others',
             ],
             'application_id' => [
                 'required',
                 'uuid',
-                'exists:applications,id'
+                'exists:applications,id',
             ],
 
         ]);
@@ -111,7 +109,7 @@ class ApplicationController extends BaseApiController
         $documents[$validated['type']] = $result;
 
         $app->update([
-            'documents' => $documents
+            'documents' => $documents,
         ]);
 
         return $this->success($result, 'Upload berhasil');
@@ -136,7 +134,7 @@ class ApplicationController extends BaseApiController
             'stage' => [
                 'required',
                 Rule::in(PipelineStage::values()),
-            ]
+            ],
         ]);
 
         $result = $service->updateStatus($id, $validated['stage']);
@@ -147,7 +145,7 @@ class ApplicationController extends BaseApiController
     public function bulkUpdateStatus(Request $request, ApplicationService $service)
     {
         $validated = $request->validate([
-            'ids'   => ['required', 'array', 'min:1'],
+            'ids' => ['required', 'array', 'min:1'],
             'ids.*' => ['required', 'string'],
             'stage' => [
                 'required',
@@ -178,7 +176,7 @@ class ApplicationController extends BaseApiController
     public function reject(string $id, Request $request, RejectApplicationAction $action)
     {
         $validated = $request->validate([
-            'reason'     => ['nullable', 'string', 'max:2000'],
+            'reason' => ['nullable', 'string', 'max:2000'],
             'send_email' => ['sometimes', 'boolean'],
         ]);
 
@@ -234,7 +232,7 @@ class ApplicationController extends BaseApiController
                 'message' => $e->getMessage(),
             ], 422);
         } catch (Exception $e) {
-            Log::error('Gagal mengirim email profile completion: ' . $e->getMessage(), [
+            Log::error('Gagal mengirim email profile completion: '.$e->getMessage(), [
                 'application_id' => $id,
             ]);
 
@@ -252,25 +250,25 @@ class ApplicationController extends BaseApiController
 
             $app = Application::with(['educations', 'experiences', 'certifications'])->findOrFail($id);
 
-        // Gunakan ApplicationBundleResource di sini
+            // Gunakan ApplicationBundleResource di sini
             return $this->success(
-                new ApplicationBundleResource($app), 
+                new ApplicationBundleResource($app),
                 'Proses penggabungan berkas pelamar berhasil dimasukkan ke antrean. File final akan segera siap di S3.'
             );
         } catch (\InvalidArgumentException $e) {
             return response()->json([
                 'success' => false,
-                'message' => $e->getMessage()
+                'message' => $e->getMessage(),
             ], 422);
 
         } catch (Exception $e) {
-            Log::error("Gagal memicu bundling pada ApplicationController: " . $e->getMessage(), [
-                'application_id' => $id
+            Log::error('Gagal memicu bundling pada ApplicationController: '.$e->getMessage(), [
+                'application_id' => $id,
             ]);
 
             return response()->json([
                 'success' => false,
-                'message' => 'Terjadi kesalahan sistem internal saat mempersiapkan dokumen.'
+                'message' => 'Terjadi kesalahan sistem internal saat mempersiapkan dokumen.',
             ], 500);
         }
     }
@@ -280,7 +278,7 @@ class ApplicationController extends BaseApiController
         $app = Application::findOrFail($id);
         $bundle = $app->documents['bundle'] ?? null;
 
-        if (!$bundle) {
+        if (! $bundle) {
             return $this->success([
                 'status' => 'not_requested',
                 'ready' => false,

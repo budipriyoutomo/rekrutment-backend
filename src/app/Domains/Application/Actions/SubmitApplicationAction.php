@@ -32,7 +32,7 @@ class SubmitApplicationAction
         );
 
         return [
-            'applicationId' => $app->id
+            'applicationId' => $app->id,
         ];
     }
 }

@@ -2,13 +2,13 @@
 
 namespace App\Core\Services;
 
+use Illuminate\Filesystem\FilesystemAdapter;
 use Illuminate\Http\UploadedFile;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
-use Illuminate\Support\Facades\Log;
 use Symfony\Component\Process\ExecutableFinder;
 use Symfony\Component\Process\Process;
-
 
 class FileUploadService
 {
@@ -44,12 +44,12 @@ class FileUploadService
             Log::error('UPLOAD ERROR', [
                 'disk' => $this->disk,
                 'directory' => $directory,
-                'message' => $e->getMessage()
+                'message' => $e->getMessage(),
             ]);
             throw $e;
         }
-        
-        if (!$path) {
+
+        if (! $path) {
             throw new \Exception('Failed to upload file');
         }
 
@@ -67,12 +67,12 @@ class FileUploadService
             return $this->upload($file, $directory);
         }
 
-        if (!in_array($extension, ['doc', 'docx'], true)) {
+        if (! in_array($extension, ['doc', 'docx'], true)) {
             return $this->upload($file, $directory);
         }
 
         $tempDir = storage_path('app/temp_cv_conversion');
-        if (!is_dir($tempDir)) {
+        if (! is_dir($tempDir)) {
             mkdir($tempDir, 0755, true);
         }
 
@@ -84,11 +84,11 @@ class FileUploadService
             copy($file->getRealPath(), $inputPath);
             $this->convertToPdf($inputPath, $tempDir);
 
-            if (!file_exists($outputPath)) {
+            if (! file_exists($outputPath)) {
                 throw new \Exception('File PDF hasil konversi tidak ditemukan');
             }
 
-            $originalName = pathinfo($file->getClientOriginalName(), PATHINFO_FILENAME) . '.pdf';
+            $originalName = pathinfo($file->getClientOriginalName(), PATHINFO_FILENAME).'.pdf';
             $convertedFile = new UploadedFile(
                 $outputPath,
                 $originalName,
@@ -141,7 +141,7 @@ class FileUploadService
      */
     public function url(string $path): string
     {
-        /** @var \Illuminate\Filesystem\FilesystemAdapter $disk */
+        /** @var FilesystemAdapter $disk */
         $disk = Storage::disk($this->disk);
 
         // Kalau driver support url()
@@ -156,7 +156,7 @@ class FileUploadService
         // fallback manual (IDCloudHost case)
         $baseUrl = config("filesystems.disks.{$this->disk}.url");
 
-        return rtrim($baseUrl, '/') . '/' . ltrim($path, '/');
+        return rtrim($baseUrl, '/').'/'.ltrim($path, '/');
     }
 
     /**
@@ -164,7 +164,7 @@ class FileUploadService
      */
     protected function generateFilename(UploadedFile $file): string
     {
-        return Str::uuid() . '.' . $file->getClientOriginalExtension();
+        return Str::uuid().'.'.$file->getClientOriginalExtension();
     }
 
     protected function convertToPdf(string $filePath, string $outputDir): void
@@ -173,13 +173,13 @@ class FileUploadService
 
         $profileDir = storage_path('app/libreoffice-profile');
 
-        if (!is_dir($profileDir)) {
+        if (! is_dir($profileDir)) {
             mkdir($profileDir, 0777, true);
         }
 
         $process = new Process([
             $binary,
-            '-env:UserInstallation=file://' . $profileDir,
+            '-env:UserInstallation=file://'.$profileDir,
             '--headless',
             '--convert-to',
             'pdf',
@@ -190,7 +190,7 @@ class FileUploadService
         $process->setTimeout(60);
         $process->run();
 
-        if (!$process->isSuccessful()) {
+        if (! $process->isSuccessful()) {
             Log::error('CV CONVERSION ERROR', [
                 'binary' => $binary,
                 'error' => $process->getErrorOutput(),
@@ -208,7 +208,7 @@ class FileUploadService
             return $configuredBinary;
         }
 
-        $finder = new ExecutableFinder();
+        $finder = new ExecutableFinder;
         foreach (['libreoffice', 'soffice'] as $name) {
             $binary = $finder->find($name);
             if ($binary) {

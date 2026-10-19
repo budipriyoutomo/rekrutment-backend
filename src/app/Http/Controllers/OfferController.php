@@ -70,14 +70,14 @@ class OfferController extends BaseApiController
         try {
             $content = $pdf->render($offer);
         } catch (\Throwable $e) {
-            Log::error('Gagal merender PDF offer: ' . $e->getMessage(), ['offer_id' => $id]);
+            Log::error('Gagal merender PDF offer: '.$e->getMessage(), ['offer_id' => $id]);
 
             return $this->error('Gagal membuat PDF offer letter.', 500);
         }
 
         return response($content, 200, [
-            'Content-Type'        => 'application/pdf',
-            'Content-Disposition' => 'inline; filename="' . $offer->pdfFileName() . '"',
+            'Content-Type' => 'application/pdf',
+            'Content-Disposition' => 'inline; filename="'.$offer->pdfFileName().'"',
         ]);
     }
 }

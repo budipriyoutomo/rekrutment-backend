@@ -16,15 +16,15 @@ class AuthTest extends TestCase
     {
         return User::factory()->create(array_merge([
             'is_active' => true,
-            'role'      => 'admin',
-            'password'  => bcrypt('password123'),
+            'role' => 'admin',
+            'password' => bcrypt('password123'),
         ], $attrs));
     }
 
     private function loginAndGetToken(string $email, string $password = 'password123'): string
     {
         $response = $this->postJson('/api/auth/login', [
-            'email'    => $email,
+            'email' => $email,
             'password' => $password,
         ]);
 
@@ -36,9 +36,9 @@ class AuthTest extends TestCase
     public function test_register_creates_inactive_user(): void
     {
         $response = $this->postJson('/api/auth/register', [
-            'name'                  => 'Test User',
-            'email'                 => 'newuser@example.com',
-            'password'              => 'secret1234',
+            'name' => 'Test User',
+            'email' => 'newuser@example.com',
+            'password' => 'secret1234',
             'password_confirmation' => 'secret1234',
         ]);
 
@@ -61,7 +61,7 @@ class AuthTest extends TestCase
         $user = $this->activeUser(['email' => 'admin@example.com']);
 
         $response = $this->postJson('/api/auth/login', [
-            'email'    => 'admin@example.com',
+            'email' => 'admin@example.com',
             'password' => 'password123',
         ]);
 
@@ -73,13 +73,13 @@ class AuthTest extends TestCase
     public function test_login_inactive_user_is_rejected(): void
     {
         User::factory()->create([
-            'email'     => 'inactive@example.com',
-            'password'  => bcrypt('password123'),
+            'email' => 'inactive@example.com',
+            'password' => bcrypt('password123'),
             'is_active' => false,
         ]);
 
         $this->postJson('/api/auth/login', [
-            'email'    => 'inactive@example.com',
+            'email' => 'inactive@example.com',
             'password' => 'password123',
         ])->assertStatus(401);
     }
@@ -89,7 +89,7 @@ class AuthTest extends TestCase
         $this->activeUser(['email' => 'user@example.com']);
 
         $this->postJson('/api/auth/login', [
-            'email'    => 'user@example.com',
+            'email' => 'user@example.com',
             'password' => 'wrongpassword',
         ])->assertStatus(401);
     }
@@ -113,7 +113,7 @@ class AuthTest extends TestCase
 
     public function test_me_returns_authenticated_user(): void
     {
-        $user  = $this->activeUser(['email' => 'me@example.com']);
+        $user = $this->activeUser(['email' => 'me@example.com']);
         $token = $this->loginAndGetToken('me@example.com');
 
         $this->withHeader('Authorization', "Bearer {$token}")
@@ -131,7 +131,7 @@ class AuthTest extends TestCase
 
     public function test_logout_invalidates_token(): void
     {
-        $user  = $this->activeUser(['email' => 'logout@example.com']);
+        $user = $this->activeUser(['email' => 'logout@example.com']);
         $token = $this->loginAndGetToken('logout@example.com');
 
         $this->withHeader('Authorization', "Bearer {$token}")
@@ -144,7 +144,7 @@ class AuthTest extends TestCase
 
     public function test_refresh_returns_new_token(): void
     {
-        $user  = $this->activeUser(['email' => 'refresh@example.com']);
+        $user = $this->activeUser(['email' => 'refresh@example.com']);
         $token = $this->loginAndGetToken('refresh@example.com');
 
         $this->withHeader('Authorization', "Bearer {$token}")

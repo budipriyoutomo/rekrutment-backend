@@ -17,7 +17,7 @@ class JobRequestService extends BaseService
     {
         $query = JobRequest::query()->with('vacancy:id,job_request_id');
 
-        if (!empty($filters['search'])) {
+        if (! empty($filters['search'])) {
             $search = $filters['search'];
             $query->where(function ($q) use ($search) {
                 $q->where('title', 'ilike', "%$search%")
@@ -26,15 +26,15 @@ class JobRequestService extends BaseService
             });
         }
 
-        if (!empty($filters['status'])) {
+        if (! empty($filters['status'])) {
             $query->where('status', $filters['status']);
         }
 
-        if (!empty($filters['department'])) {
+        if (! empty($filters['department'])) {
             $query->where('department', $filters['department']);
         }
 
-        if (!empty($filters['priority'])) {
+        if (! empty($filters['priority'])) {
             $query->where('priority', $filters['priority']);
         }
 
@@ -64,7 +64,7 @@ class JobRequestService extends BaseService
     public function approve(string $id, ?string $reviewerNotes = null): JobRequest
     {
         return $this->update($id, [
-            'status'         => 'approved',
+            'status' => 'approved',
             'reviewer_notes' => $reviewerNotes,
         ]);
     }
@@ -72,7 +72,7 @@ class JobRequestService extends BaseService
     public function reject(string $id, ?string $reviewerNotes = null): JobRequest
     {
         return $this->update($id, [
-            'status'         => 'rejected',
+            'status' => 'rejected',
             'reviewer_notes' => $reviewerNotes,
         ]);
     }

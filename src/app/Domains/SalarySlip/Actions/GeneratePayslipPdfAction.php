@@ -16,8 +16,8 @@ class GeneratePayslipPdfAction
 {
     public function __construct(
         private PayslipDocumentBuilder $builder,
-        private PayslipPdfConverter    $converter,
-        private PayslipWatermarker     $watermarker,
+        private PayslipPdfConverter $converter,
+        private PayslipWatermarker $watermarker,
     ) {}
 
     /**
@@ -32,7 +32,7 @@ class GeneratePayslipPdfAction
             return $absolute;
         }
 
-        $tmpDir = storage_path('app/temp_processing/payslip_' . Str::random(12));
+        $tmpDir = storage_path('app/temp_processing/payslip_'.Str::random(12));
         if (! is_dir($tmpDir)) {
             mkdir($tmpDir, 0777, true);
         }
@@ -62,7 +62,7 @@ class GeneratePayslipPdfAction
         if (! is_dir($dir)) {
             return;
         }
-        foreach (glob($dir . '/*') ?: [] as $file) {
+        foreach (glob($dir.'/*') ?: [] as $file) {
             @unlink($file);
         }
         @rmdir($dir);

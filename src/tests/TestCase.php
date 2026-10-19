@@ -20,11 +20,11 @@ abstract class TestCase extends BaseTestCase
     protected function actingAsAdmin(array $attributes = []): User
     {
         $user = User::factory()->create(array_merge([
-            'role'      => Role::ADMIN->value,
+            'role' => Role::ADMIN->value,
             'is_active' => true,
         ], $attributes));
 
-        $this->withHeader('Authorization', 'Bearer ' . JWTAuth::fromUser($user));
+        $this->withHeader('Authorization', 'Bearer '.JWTAuth::fromUser($user));
 
         return $user;
     }
@@ -35,7 +35,7 @@ abstract class TestCase extends BaseTestCase
     protected function actingAsUserWithPermissions(array $permissions): User
     {
         return $this->actingAsAdmin([
-            'role'        => Role::USER->value,
+            'role' => Role::USER->value,
             'permissions' => $permissions,
         ]);
     }

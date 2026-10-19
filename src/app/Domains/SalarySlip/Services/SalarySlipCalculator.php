@@ -31,7 +31,7 @@ class SalarySlipCalculator
         $warnings = [];
 
         $sumPenerimaan = $this->sum($row, self::PENERIMAAN_COMPONENTS);
-        $sumPotongan   = $this->sum($row, self::POTONGAN_COMPONENTS);
+        $sumPotongan = $this->sum($row, self::POTONGAN_COMPONENTS);
 
         if ($this->has($row, 'total_penerimaan')) {
             $filed = (int) $row['total_penerimaan'];
@@ -51,8 +51,8 @@ class SalarySlipCalculator
             $filed = (int) $row['take_home_pay'];
             // pakai total dari file bila ada, jika tidak pakai hasil penjumlahan
             $penerimaan = $this->has($row, 'total_penerimaan') ? (int) $row['total_penerimaan'] : $sumPenerimaan;
-            $potongan   = $this->has($row, 'total_potongan') ? (int) $row['total_potongan'] : $sumPotongan;
-            $expected   = $penerimaan - $potongan;
+            $potongan = $this->has($row, 'total_potongan') ? (int) $row['total_potongan'] : $sumPotongan;
+            $expected = $penerimaan - $potongan;
             if ($filed !== $expected) {
                 $warnings[] = "Take Home Pay di file ({$filed}) tidak sama dengan Total Penerimaan - Total Potongan ({$expected}).";
             }

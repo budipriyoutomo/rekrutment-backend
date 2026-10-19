@@ -3,7 +3,6 @@
 namespace App\Domains\Interviewer\Resources;
 
 use App\Core\Http\Resources\BaseResource;
-use Illuminate\Http\Request;
 
 class InterviewerResource extends BaseResource
 {

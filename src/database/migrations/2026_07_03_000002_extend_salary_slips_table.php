@@ -10,7 +10,7 @@ return new class extends Migration
     {
         Schema::table('salary_slips', function (Blueprint $table) {
             // --- grouping / audit ---
-            if (!Schema::hasColumn('salary_slips', 'batch_id')) {
+            if (! Schema::hasColumn('salary_slips', 'batch_id')) {
                 $table->uuid('batch_id')->nullable()->after('id');
                 $table->index('batch_id');
             }
@@ -25,54 +25,54 @@ return new class extends Migration
                 'pph21', 'potongan_seragam', 'koreksi', 'total_potongan',
             ];
             foreach ($money as $col) {
-                if (!Schema::hasColumn('salary_slips', $col)) {
+                if (! Schema::hasColumn('salary_slips', $col)) {
                     $table->bigInteger($col)->default(0)->after('take_home_pay');
                 }
             }
 
             // --- absensi (hari) ---
             foreach (['hk_hari', 'alpha_hari', 'ijin_ap_hari', 'sakit_hari', 'cuti_hari'] as $col) {
-                if (!Schema::hasColumn('salary_slips', $col)) {
+                if (! Schema::hasColumn('salary_slips', $col)) {
                     $table->integer($col)->default(0)->after('take_home_pay');
                 }
             }
 
             // --- info pembayaran ---
             foreach (['sistem_pembayaran', 'no_rekening', 'nama_bank', 'atas_nama'] as $col) {
-                if (!Schema::hasColumn('salary_slips', $col)) {
+                if (! Schema::hasColumn('salary_slips', $col)) {
                     $table->string($col)->nullable()->after('take_home_pay');
                 }
             }
 
             // --- lifecycle pengiriman ---
-            if (!Schema::hasColumn('salary_slips', 'send_status')) {
+            if (! Schema::hasColumn('salary_slips', 'send_status')) {
                 // draft | queued | processing | sent | failed
                 $table->string('send_status')->default('draft')->after('atas_nama');
                 $table->index('send_status');
             }
-            if (!Schema::hasColumn('salary_slips', 'send_error')) {
+            if (! Schema::hasColumn('salary_slips', 'send_error')) {
                 $table->text('send_error')->nullable()->after('send_status');
             }
-            if (!Schema::hasColumn('salary_slips', 'pdf_path')) {
+            if (! Schema::hasColumn('salary_slips', 'pdf_path')) {
                 $table->string('pdf_path')->nullable()->after('send_error');
             }
-            if (!Schema::hasColumn('salary_slips', 'mail_account_id')) {
+            if (! Schema::hasColumn('salary_slips', 'mail_account_id')) {
                 $table->uuid('mail_account_id')->nullable()->after('pdf_path');
                 $table->index('mail_account_id');
             }
 
             // --- userstamps (dibutuhkan trait HasUserstamps) ---
-            if (!Schema::hasColumn('salary_slips', 'created_by')) {
+            if (! Schema::hasColumn('salary_slips', 'created_by')) {
                 $table->uuid('created_by')->nullable();
             }
-            if (!Schema::hasColumn('salary_slips', 'updated_by')) {
+            if (! Schema::hasColumn('salary_slips', 'updated_by')) {
                 $table->uuid('updated_by')->nullable();
             }
         });
 
         // Backfill status untuk baris lama: yang sudah pernah terkirim => sent
         if (Schema::hasColumn('salary_slips', 'send_status')) {
-            \DB::table('salary_slips')->whereNotNull('sent_at')->update(['send_status' => 'sent']);
+            DB::table('salary_slips')->whereNotNull('sent_at')->update(['send_status' => 'sent']);
         }
     }
 

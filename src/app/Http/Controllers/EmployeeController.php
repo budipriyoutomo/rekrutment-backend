@@ -30,9 +30,9 @@ class EmployeeController extends BaseApiController
     public function store(Request $request, ConvertToEmployeeAction $action)
     {
         $validated = $request->validate([
-            'preboarding_id'  => ['required', 'uuid', 'exists:preboardings,id'],
+            'preboarding_id' => ['required', 'uuid', 'exists:preboardings,id'],
             'employee_number' => ['nullable', 'string', 'max:50'],
-            'start_date'      => ['nullable', 'date'],
+            'start_date' => ['nullable', 'date'],
         ]);
 
         $employee = $action->execute(
@@ -48,10 +48,10 @@ class EmployeeController extends BaseApiController
     {
         $validated = $request->validate([
             'employee_number' => ['sometimes', 'string', 'max:50'],
-            'position'        => ['sometimes', 'string', 'max:200'],
-            'department'      => ['sometimes', 'nullable', 'string', 'max:100'],
-            'location'        => ['sometimes', 'nullable', 'string', 'max:150'],
-            'start_date'      => ['sometimes', 'date'],
+            'position' => ['sometimes', 'string', 'max:200'],
+            'department' => ['sometimes', 'nullable', 'string', 'max:100'],
+            'location' => ['sometimes', 'nullable', 'string', 'max:150'],
+            'start_date' => ['sometimes', 'date'],
         ]);
 
         if (isset($validated['employee_number'])) {
@@ -64,10 +64,10 @@ class EmployeeController extends BaseApiController
     public function addTask(string $id, Request $request, EmployeeService $service)
     {
         $validated = $request->validate([
-            'title'       => ['required', 'string', 'max:200'],
+            'title' => ['required', 'string', 'max:200'],
             'description' => ['nullable', 'string', 'max:2000'],
-            'pic'         => ['nullable', 'string', 'max:100'],
-            'due_date'    => ['required', 'date'],
+            'pic' => ['nullable', 'string', 'max:100'],
+            'due_date' => ['required', 'date'],
         ]);
 
         return $this->success(new EmployeeResource($service->addTask($id, $validated)), 'Task ditambahkan');
@@ -76,12 +76,12 @@ class EmployeeController extends BaseApiController
     public function updateTask(string $taskId, Request $request, EmployeeService $service)
     {
         $validated = $request->validate([
-            'completed'   => ['sometimes', 'boolean'],
-            'title'       => ['sometimes', 'string', 'max:200'],
+            'completed' => ['sometimes', 'boolean'],
+            'title' => ['sometimes', 'string', 'max:200'],
             'description' => ['sometimes', 'nullable', 'string', 'max:2000'],
-            'pic'         => ['sometimes', 'nullable', 'string', 'max:100'],
-            'due_date'    => ['sometimes', 'date'],
-            'notes'       => ['sometimes', 'nullable', 'string', 'max:2000'],
+            'pic' => ['sometimes', 'nullable', 'string', 'max:100'],
+            'due_date' => ['sometimes', 'date'],
+            'notes' => ['sometimes', 'nullable', 'string', 'max:2000'],
         ]);
 
         return $this->success(new EmployeeResource($service->updateTask($taskId, $validated)), 'Task diperbarui');

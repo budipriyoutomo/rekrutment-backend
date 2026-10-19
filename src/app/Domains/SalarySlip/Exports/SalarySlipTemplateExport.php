@@ -16,8 +16,8 @@ class SalarySlipTemplateExport implements WithMultipleSheets
     public function sheets(): array
     {
         return [
-            new TemplateDataSheet(),
-            new TemplatePetunjukSheet(),
+            new TemplateDataSheet,
+            new TemplatePetunjukSheet,
         ];
     }
 }

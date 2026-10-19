@@ -8,7 +8,7 @@ use Illuminate\Support\Facades\DB;
 class ApplicationCertificationService
 {
     public function createMany(string $applicationId, array $items): void
-    {  
+    {
         foreach ($items as $item) {
             ApplicationCertification::create(
                 $this->map($applicationId, $item)
@@ -28,7 +28,7 @@ class ApplicationCertificationService
 
             foreach ($items as $item) {
 
-                if (!empty($item['id'])) {
+                if (! empty($item['id'])) {
                     $incomingIds[] = $item['id'];
 
                     ApplicationCertification::where('id', $item['id'])
@@ -42,7 +42,7 @@ class ApplicationCertificationService
 
             $deleteIds = array_diff($existingIds, $incomingIds);
 
-            if (!empty($deleteIds)) {
+            if (! empty($deleteIds)) {
                 ApplicationCertification::whereIn('id', $deleteIds)->delete();
             }
         });

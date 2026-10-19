@@ -28,25 +28,25 @@ class CandidateDecisionTest extends TestCase
     private function makeApplication(array $override = []): Application
     {
         return Application::create(array_merge([
-            'personal_info'   => ['fullName' => 'Siti Kandidat'],
-            'contact_info'    => ['email' => 'siti@example.com', 'phone' => '081'],
+            'personal_info' => ['fullName' => 'Siti Kandidat'],
+            'contact_info' => ['email' => 'siti@example.com', 'phone' => '081'],
             'additional_info' => ['positionApplied' => 'Bandung - Cook'],
-            'stage'           => 'interview',
+            'stage' => 'interview',
         ], $override));
     }
 
     private function makeEvaluation(Application $app, array $override = []): Evaluation
     {
         return Evaluation::create(array_merge([
-            'applicant_id'        => $app->id,
-            'applicant_name'      => 'Siti Kandidat',
-            'evaluator'           => 'Pak Interviewer',
-            'date'                => '2026-10-10',
+            'applicant_id' => $app->id,
+            'applicant_name' => 'Siti Kandidat',
+            'evaluator' => 'Pak Interviewer',
+            'date' => '2026-10-10',
             'communication_score' => 4,
-            'technical_score'     => 4,
-            'experience_score'    => 4,
-            'culture_fit_score'   => 4,
-            'recommendation'      => 'hire',
+            'technical_score' => 4,
+            'experience_score' => 4,
+            'culture_fit_score' => 4,
+            'recommendation' => 'hire',
         ], $override));
     }
 
@@ -58,10 +58,10 @@ class CandidateDecisionTest extends TestCase
         $this->makeEvaluation($app, ['recommendation' => 'strong_hire']);
         $this->makeEvaluation($app, [
             'communication_score' => 2,
-            'technical_score'     => 3,
-            'experience_score'    => 5,
-            'culture_fit_score'   => 1,
-            'recommendation'      => 'hold',
+            'technical_score' => 3,
+            'experience_score' => 5,
+            'culture_fit_score' => 1,
+            'recommendation' => 'hold',
         ]);
         $this->makeEvaluation($this->makeApplication(['contact_info' => ['email' => 'lain@example.com']]));
 
@@ -103,7 +103,7 @@ class CandidateDecisionTest extends TestCase
         $app = $this->makeApplication();
 
         $this->postJson("/api/applicants/{$app->id}/reject", [
-            'reason'     => 'Skor teknis di bawah standar',
+            'reason' => 'Skor teknis di bawah standar',
             'send_email' => true,
         ])
             ->assertStatus(200)

@@ -31,21 +31,21 @@ class MailAccountService
         $smtp = config('mail.mailers.smtp', []);
 
         return [
-            'id'             => 'env-recruitment',
-            'label'          => 'Email Rekrutmen (dari .env)',
-            'driver'         => config('mail.default', 'smtp'),
-            'purpose'        => MailAccount::PURPOSE_RECRUITMENT,
-            'fromEmail'      => config('mail.from.address'),
-            'fromName'       => config('mail.from.name'),
-            'smtpHost'       => $smtp['host'] ?? null,
-            'smtpPort'       => isset($smtp['port']) ? (int) $smtp['port'] : null,
-            'smtpUsername'   => $smtp['username'] ?? null,
+            'id' => 'env-recruitment',
+            'label' => 'Email Rekrutmen (dari .env)',
+            'driver' => config('mail.default', 'smtp'),
+            'purpose' => MailAccount::PURPOSE_RECRUITMENT,
+            'fromEmail' => config('mail.from.address'),
+            'fromName' => config('mail.from.name'),
+            'smtpHost' => $smtp['host'] ?? null,
+            'smtpPort' => isset($smtp['port']) ? (int) $smtp['port'] : null,
+            'smtpUsername' => $smtp['username'] ?? null,
             'smtpEncryption' => $smtp['encryption'] ?? env('MAIL_ENCRYPTION'),
-            'hasPassword'    => ! empty($smtp['password'] ?? env('MAIL_PASSWORD')),
-            'isDefault'      => true,
-            'isActive'       => true,
-            'isEnvDefault'   => true,
-            'createdAt'      => null,
+            'hasPassword' => ! empty($smtp['password'] ?? env('MAIL_PASSWORD')),
+            'isDefault' => true,
+            'isActive' => true,
+            'isEnvDefault' => true,
+            'createdAt' => null,
         ];
     }
 
