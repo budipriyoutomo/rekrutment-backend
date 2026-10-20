@@ -36,16 +36,7 @@ class ApplicationService extends BaseService
             'certifications' => [],
         ], $relations);
 
-        // 🔥 Cegah lamaran ganda dari orang yang sama. Email pelamar berada di
-        // contact_info (form lengkap maupun Quick Apply); personal_info dicek
-        // sebagai cadangan untuk data lama yang formatnya berbeda.
-        $email = $this->normalizeApplicantEmail(
-            $data['contact_info']['email'] ?? $data['personal_info']['email'] ?? null
-        );
-
-        if ($email !== null && $this->emailAlreadyApplied($email)) {
-            throw $this->duplicateApplicationException();
-        }
+        $this->ensureCanApply($data);
 
         try {
             return DB::transaction(function () use ($data, $relations) {
@@ -72,6 +63,24 @@ class ApplicationService extends BaseService
     }
 
     /** Normalisasi email pelamar: lowercase + trim, null bila kosong. */
+    /**
+     * 🔥 Cegah lamaran ganda dari orang yang sama. Email pelamar berada di
+     * contact_info (form lengkap maupun Quick Apply); personal_info dicek
+     * sebagai cadangan untuk data lama yang formatnya berbeda.
+     *
+     * Public agar Quick Apply bisa menolak duplikat sebelum mengunggah file.
+     */
+    public function ensureCanApply(array $data): void
+    {
+        $email = $this->normalizeApplicantEmail(
+            $data['contact_info']['email'] ?? $data['personal_info']['email'] ?? null
+        );
+
+        if ($email !== null && $this->emailAlreadyApplied($email)) {
+            throw $this->duplicateApplicationException();
+        }
+    }
+
     private function normalizeApplicantEmail(?string $email): ?string
     {
         $email = strtolower(trim((string) $email));

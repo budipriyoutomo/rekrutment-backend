@@ -7,9 +7,11 @@ use App\Core\Services\FileUploadService;
 use App\Domains\Application\Actions\BundleApplicationDocumentAction;
 use App\Domains\Application\Actions\RejectApplicationAction;
 use App\Domains\Application\Actions\SubmitApplicationAction;
+use App\Domains\Application\Actions\SubmitQuickApplyAction;
 use App\Domains\Application\DTO\ApplicationDTO;
 use App\Domains\Application\Models\Application;
 use App\Domains\Application\Requests\SubmitApplicationRequest;
+use App\Domains\Application\Requests\SubmitQuickApplyRequest;
 use App\Domains\Application\Resources\ApplicationBundleResource;
 use App\Domains\Application\Resources\ApplicationResource;
 use App\Domains\Application\Services\ApplicationService;
@@ -70,6 +72,18 @@ class ApplicationController extends BaseApiController
         $dto = ApplicationDTO::fromRequest($request);
 
         $result = $action->execute($dto);
+
+        return $this->success($result, 'Lamaran berhasil dikirim');
+    }
+
+    /** Quick Apply: data + CV + foto dalam satu request, tersimpan bersamaan. */
+    public function submitQuick(
+        SubmitQuickApplyRequest $request,
+        SubmitQuickApplyAction $action
+    ) {
+        $dto = ApplicationDTO::fromRequest($request);
+
+        $result = $action->execute($dto, $request->file('cv'), $request->file('foto'));
 
         return $this->success($result, 'Lamaran berhasil dikirim');
     }

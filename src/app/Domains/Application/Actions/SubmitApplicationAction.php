@@ -13,9 +13,13 @@ class SubmitApplicationAction
         private VacancyService $vacancyService,
     ) {}
 
-    public function execute(ApplicationDTO $dto)
+    /** @param  array<string, array>  $documents  dokumen yang sudah diunggah, per tipe */
+    public function execute(ApplicationDTO $dto, array $documents = [])
     {
         $data = $dto->toArray();
+        if ($documents !== []) {
+            $data['documents'] = $documents;
+        }
         $data['vacancy_id'] = $this->vacancyService->resolveForApplication(
             $dto->vacancyId,
             $dto->additionalInfo['positionApplied'] ?? null,
