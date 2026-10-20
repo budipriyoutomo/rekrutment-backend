@@ -80,22 +80,30 @@ class ApplicationExperienceService
             'position_category' => $item['positionCategory'] ?? null,
 
             'responsibilities' => $item['responsibilities'] ?? [],
-            'pos_experience' => is_array($item['posExperience'] ?? null)
-                ? $item['posExperience']
-                : null,
+            'pos_experience' => $this->choice($item['posExperience'] ?? null),
 
-            'pos_system' => is_array($item['posSystem'] ?? null)
-                ? $item['posSystem']
-                : null,
+            'pos_system' => $this->choice($item['posSystem'] ?? null),
 
-            'restaurant_type' => is_array($item['restaurantType'] ?? null)
-                ? $item['restaurantType']
-                : null,
+            'restaurant_type' => $this->choice($item['restaurantType'] ?? null),
 
             'shifts' => $item['shifts'] ?? [],
 
             'team_size' => $item['teamSize'] ?? null,
             'reason_for_leaving' => $item['reasonForLeaving'] ?? null,
         ];
+    }
+
+    /**
+     * Form mengirim pilihan tunggal sebagai string ("yes", "Casual Dining"),
+     * data lama berupa array. Dulu string dibuang (jadi null); sekarang
+     * keduanya disimpan apa adanya, string kosong dianggap tidak diisi.
+     */
+    private function choice(mixed $value): mixed
+    {
+        if (is_array($value)) {
+            return $value;
+        }
+
+        return is_string($value) && trim($value) !== '' ? $value : null;
     }
 }

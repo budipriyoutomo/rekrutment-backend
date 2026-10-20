@@ -69,14 +69,16 @@ class ApplicationService extends BaseService
      * sebagai cadangan untuk data lama yang formatnya berbeda.
      *
      * Public agar Quick Apply bisa menolak duplikat sebelum mengunggah file.
+     * `$exceptId` dipakai saat pelamar memperbarui lamarannya sendiri
+     * (profile completion) agar emailnya tidak dianggap duplikat.
      */
-    public function ensureCanApply(array $data): void
+    public function ensureCanApply(array $data, ?string $exceptId = null): void
     {
         $email = $this->normalizeApplicantEmail(
             $data['contact_info']['email'] ?? $data['personal_info']['email'] ?? null
         );
 
-        if ($email !== null && $this->emailAlreadyApplied($email)) {
+        if ($email !== null && $this->emailAlreadyApplied($email, $exceptId)) {
             throw $this->duplicateApplicationException();
         }
     }
@@ -89,12 +91,13 @@ class ApplicationService extends BaseService
     }
 
     /** Apakah email (sudah dinormalisasi) pernah dipakai melamar. */
-    private function emailAlreadyApplied(string $email): bool
+    private function emailAlreadyApplied(string $email, ?string $exceptId = null): bool
     {
         $contact = $this->jsonEmailExpression('contact_info');
         $personal = $this->jsonEmailExpression('personal_info');
 
         return Application::query()
+            ->when($exceptId, fn ($q) => $q->whereKeyNot($exceptId))
             ->where(function ($q) use ($contact, $personal, $email) {
                 $q->whereRaw("lower(trim($contact)) = ?", [$email])
                     ->orWhereRaw("lower(trim($personal)) = ?", [$email]);

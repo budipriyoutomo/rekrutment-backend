@@ -2,11 +2,10 @@
 
 namespace App\Domains\Application\Actions;
 
-use App\Core\Services\FileUploadService;
 use App\Domains\Application\DTO\ApplicationDTO;
+use App\Domains\Application\Services\ApplicantFileUploader;
 use App\Domains\Application\Services\ApplicationService;
 use Illuminate\Http\UploadedFile;
-use Illuminate\Validation\ValidationException;
 
 /**
  * Quick Apply: lamaran hanya tersimpan bila CV & foto berhasil diunggah.
@@ -20,7 +19,7 @@ class SubmitQuickApplyAction
     public function __construct(
         private SubmitApplicationAction $submit,
         private ApplicationService $service,
-        private FileUploadService $files,
+        private ApplicantFileUploader $uploader,
     ) {}
 
     public function execute(ApplicationDTO $dto, UploadedFile $cv, UploadedFile $foto): array
@@ -28,43 +27,13 @@ class SubmitQuickApplyAction
         // Tolak duplikat lebih dulu agar tidak membuang waktu konversi/unggah.
         $this->service->ensureCanApply($dto->toArray());
 
-        $documents = [];
+        $documents = $this->uploader->uploadAll(['cv' => $cv, 'foto' => $foto]);
 
         try {
-            $documents['cv'] = $this->uploadOrFail('cv', 'CV gagal diproses. Coba unggah ulang dalam format PDF.',
-                fn () => $this->files->uploadCvAsPdf($cv, 'applications/cv'));
-            $documents['foto'] = $this->uploadOrFail('foto', 'Foto gagal diunggah. Silakan coba lagi.',
-                fn () => $this->files->upload($foto, 'applications/foto'));
-
             return $this->submit->execute($dto, $documents);
         } catch (\Throwable $e) {
-            $this->cleanup($documents);
+            $this->uploader->delete($documents);
             throw $e;
-        }
-    }
-
-    private function uploadOrFail(string $field, string $message, callable $upload): array
-    {
-        try {
-            return $upload();
-        } catch (\Throwable $e) {
-            report($e);
-            throw ValidationException::withMessages([$field => $message]);
-        }
-    }
-
-    /** @param  array<string, array>  $documents */
-    private function cleanup(array $documents): void
-    {
-        foreach ($documents as $document) {
-            if (empty($document['path'])) {
-                continue;
-            }
-            try {
-                $this->files->delete($document['path']);
-            } catch (\Throwable $e) {
-                report($e);
-            }
         }
     }
 }

@@ -13,6 +13,7 @@ class ApplicationCertificationResource extends JsonResource
             'courseName' => $this->course_name,
             'organization' => $this->organization,
             'year' => $this->year,
+            'duration' => $this->duration,
             'certificate' => $this->certificate,
         ];
     }

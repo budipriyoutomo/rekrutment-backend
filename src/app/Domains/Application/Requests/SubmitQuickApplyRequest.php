@@ -2,6 +2,8 @@
 
 namespace App\Domains\Application\Requests;
 
+use App\Core\Http\Requests\Concerns\DecodesJsonPayload;
+
 /**
  * Quick Apply (/apply) dikirim sebagai satu request multipart: data lamaran
  * sebagai JSON di field `payload`, plus file `cv` & `foto` yang wajib ada.
@@ -9,6 +11,8 @@ namespace App\Domains\Application\Requests;
  */
 class SubmitQuickApplyRequest extends SubmitApplicationRequest
 {
+    use DecodesJsonPayload;
+
     public const MAX_FILE_KB = 2048;
 
     protected function rulesForCreate(): array
@@ -30,16 +34,5 @@ class SubmitQuickApplyRequest extends SubmitApplicationRequest
             'foto.max' => 'Ukuran foto maksimal 2 MB.',
             'foto.mimes' => 'Foto harus berformat JPG atau PNG.',
         ];
-    }
-
-    protected function prepareForValidation()
-    {
-        $payload = json_decode((string) $this->input('payload'), true);
-
-        if (is_array($payload)) {
-            $this->merge($payload);
-        }
-
-        parent::prepareForValidation();
     }
 }

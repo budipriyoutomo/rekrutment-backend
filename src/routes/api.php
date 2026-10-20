@@ -28,6 +28,7 @@ use Illuminate\Support\Facades\Route;
 // Rute publik untuk profile completion (diakses oleh kandidat via link email)
 Route::prefix('profile-completion')->group(function () {
     Route::get('/{token}', [ProfileCompletionController::class, 'validateToken']);
+    Route::post('/{token}', [ProfileCompletionController::class, 'submit']);
     Route::post('/{token}/complete', [ProfileCompletionController::class, 'complete']);
 });
 

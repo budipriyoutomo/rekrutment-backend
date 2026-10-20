@@ -109,6 +109,17 @@ class ApplicationController extends BaseApiController
 
         ]);
 
+        // Endpoint ini publik & hanya butuh application_id. Supaya tidak bisa
+        // dipakai mengganti dokumen pelamar lain, hanya slot yang masih kosong
+        // yang boleh diisi. Penggantian dokumen lewat profile completion (token).
+        $existing = Application::query()->select(['id', 'documents'])->findOrFail($validated['application_id']);
+        if ($existing->hasDocument($validated['type'])) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Dokumen ini sudah ada dan tidak bisa diganti lewat endpoint ini.',
+            ], 409);
+        }
+
         // mapping folder biar tidak hardcoded di FE
         $directory = $this->resolveDirectory($validated['type']);
 

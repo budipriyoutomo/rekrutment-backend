@@ -97,8 +97,9 @@ RUN echo "opcache.enable=1" > /usr/local/etc/php/conf.d/opcache.ini \
 
 # Batas upload PHP. Default upload_max_filesize=2M persis di batas app (2MB),
 # jadi foto PNG yang mepet 2MB bisa ketolak. Kasih headroom + samakan post_max_size.
+# post_max_size menampung profile completion yang mengirim 4 dokumen sekaligus (maks 15MB).
 RUN echo "upload_max_filesize=10M" > /usr/local/etc/php/conf.d/uploads.ini \
-    && echo "post_max_size=12M" >> /usr/local/etc/php/conf.d/uploads.ini
+    && echo "post_max_size=20M" >> /usr/local/etc/php/conf.d/uploads.ini
 
 EXPOSE 80
 
