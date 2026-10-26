@@ -1,7 +1,7 @@
 # =========================================
 # STAGE 1 — Build Laravel (PHP 8.4)
 # =========================================
-FROM php:8.4-fpm AS builder
+FROM php:8.4.27-fpm AS builder
 
 WORKDIR /var/www/html
 
