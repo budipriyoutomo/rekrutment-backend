@@ -192,8 +192,11 @@ Route::prefix('evaluations')->middleware('permission:evaluations')->group(functi
 Route::prefix('master-data')->group(function () {
     Route::get('/types', [MasterDataController::class, 'types']);
     Route::get('/', [MasterDataController::class, 'index']);
+    Route::get('/apply-options', [MasterDataController::class, 'applyOptions']);
 
     Route::middleware('permission:master-data')->group(function () {
+        Route::get('/locations/{id}/positions', [MasterDataController::class, 'locationPositions']);
+        Route::put('/locations/{id}/positions', [MasterDataController::class, 'syncLocationPositions']);
         Route::post('/', [MasterDataController::class, 'store']);
         Route::put('/{id}', [MasterDataController::class, 'update']);
         Route::delete('/{id}', [MasterDataController::class, 'destroy']);

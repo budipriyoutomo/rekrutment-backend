@@ -2,6 +2,7 @@
 
 namespace Database\Seeders;
 
+use App\Domains\MasterData\Actions\SyncCityHierarchyAction;
 use App\Domains\MasterData\Models\MasterData;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Str;
@@ -118,6 +119,9 @@ class MasterDataSeeder extends Seeder
                 );
             }
         }
+
+        // Kota, parent_id, dan mapping awal lokasi ↔ posisi diturunkan dari prefix nama.
+        app(SyncCityHierarchyAction::class)->execute();
     }
 
     /**

@@ -178,6 +178,19 @@ class ApplicationService extends BaseService
             $query->where('additional_info->workLocation', $filters['workLocation']);
         }
 
+        // Kota: lamaran baru menyimpan additional_info.city; lamaran lama
+        // dikenali dari prefix "Kota - " pada lokasi kerja atau posisi.
+        if (! empty($filters['city'])) {
+            $city = $filters['city'];
+            $prefix = addcslashes($city, '%_\\').' - %';
+
+            $query->where(function ($q) use ($city, $prefix) {
+                $q->where('additional_info->city', $city)
+                    ->orWhere('additional_info->workLocation', 'like', $prefix)
+                    ->orWhere('additional_info->positionApplied', 'like', $prefix);
+            });
+        }
+
         if (! empty($filters['jobSource'])) {
             $query->where('additional_info->jobSource', $filters['jobSource']);
         }

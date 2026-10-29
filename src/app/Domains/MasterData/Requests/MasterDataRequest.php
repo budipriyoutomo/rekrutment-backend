@@ -17,6 +17,7 @@ class MasterDataRequest extends BaseRequest
                 'nullable', 'string', 'max:50',
                 Rule::unique('master_data')->where('type', $this->input('type')),
             ],
+            'parent_id' => $this->parentRules(),
             'is_active' => ['sometimes', 'boolean'],
             'sort_order' => ['sometimes', 'integer', 'min:0', 'max:9999'],
         ];
@@ -33,8 +34,25 @@ class MasterDataRequest extends BaseRequest
                 'nullable', 'string', 'max:50',
                 Rule::unique('master_data')->where('type', $this->input('type'))->ignore($id),
             ],
+            'parent_id' => $this->parentRules(),
             'is_active' => ['sometimes', 'boolean'],
             'sort_order' => ['sometimes', 'integer', 'min:0', 'max:9999'],
+        ];
+    }
+
+    /**
+     * Lokasi wajib punya kota. Posisi boleh tanpa kota (berlaku di semua kota).
+     * Field hanya dipakai bila dikirim, sehingga klien lama tetap kompatibel.
+     */
+    private function parentRules(): array
+    {
+        $required = $this->input('type') === MasterDataType::LOCATION->value && $this->has('parent_id');
+
+        return [
+            'sometimes',
+            $required ? 'required' : 'nullable',
+            'uuid',
+            Rule::exists('master_data', 'id')->where('type', MasterDataType::CITY->value),
         ];
     }
 }

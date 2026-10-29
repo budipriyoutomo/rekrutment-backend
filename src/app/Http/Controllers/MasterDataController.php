@@ -69,4 +69,31 @@ class MasterDataController extends BaseApiController
             'Status berhasil diubah'
         );
     }
+
+    /** Pilihan bertingkat Kota → Lokasi Kerja → Posisi untuk halaman publik /apply. */
+    public function applyOptions(MasterDataService $service)
+    {
+        return $this->success($service->applyOptions(), 'Pilihan kota, lokasi, dan posisi');
+    }
+
+    public function locationPositions(string $id, MasterDataService $service)
+    {
+        return $this->success(
+            MasterDataResource::collection($service->locationPositions($id)),
+            'Posisi di lokasi'
+        );
+    }
+
+    public function syncLocationPositions(string $id, Request $request, MasterDataService $service)
+    {
+        $validated = $request->validate([
+            'position_ids' => ['present', 'array'],
+            'position_ids.*' => ['uuid', 'distinct'],
+        ]);
+
+        return $this->success(
+            MasterDataResource::collection($service->syncLocationPositions($id, $validated['position_ids'])),
+            'Mapping posisi berhasil disimpan'
+        );
+    }
 }

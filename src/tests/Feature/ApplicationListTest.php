@@ -81,4 +81,24 @@ class ApplicationListTest extends TestCase
             ->assertStatus(200)
             ->assertJsonPath('meta.total', 6);
     }
+
+    public function test_index_filters_by_city_including_legacy_prefix(): void
+    {
+        $make = fn (string $email, array $info) => Application::create([
+            'personal_info' => ['fullName' => $email],
+            'contact_info' => ['email' => "{$email}@example.com", 'phone' => '081'],
+            'additional_info' => $info,
+            'stage' => 'applied',
+        ]);
+
+        $make('baru', ['city' => 'Bandung', 'workLocation' => 'Bandung - RIAU', 'positionApplied' => 'Bandung - Cook']);
+        $make('lama-lokasi', ['workLocation' => 'Bandung - GEDEBAGE', 'positionApplied' => 'Cook']);
+        $make('lama-posisi', ['positionApplied' => 'Bandung - Barista']);
+        $make('jakarta', ['city' => 'Jakarta', 'workLocation' => 'Jakarta - HO', 'positionApplied' => 'Jakarta - Driver']);
+        $make('mirip', ['workLocation' => 'Bandung Barat - X', 'positionApplied' => 'Cook']);
+
+        $this->getJson('/api/applicants?city=Bandung')
+            ->assertStatus(200)
+            ->assertJsonPath('meta.total', 3);
+    }
 }

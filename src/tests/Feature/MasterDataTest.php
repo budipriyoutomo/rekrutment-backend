@@ -47,7 +47,7 @@ class MasterDataTest extends TestCase
         $response = $this->getJson('/api/master-data/types');
 
         $response->assertStatus(200);
-        $this->assertCount(7, $response->json('data'));
+        $this->assertCount(8, $response->json('data'));
     }
 
     // ------------------------------------------------------------------ index

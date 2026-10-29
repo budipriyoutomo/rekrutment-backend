@@ -4,6 +4,7 @@ namespace App\Domains\MasterData\Enums;
 
 enum MasterDataType: string
 {
+    case CITY = 'city';
     case POSITION = 'position';
     case JOB_SOURCE = 'job_source';
     case DEPARTMENT = 'department';
@@ -15,6 +16,7 @@ enum MasterDataType: string
     public function label(): string
     {
         return match ($this) {
+            self::CITY => 'Kota',
             self::POSITION => 'Posisi yang Dilamar',
             self::JOB_SOURCE => 'Sumber Lowongan',
             self::DEPARTMENT => 'Departemen',
