@@ -7,6 +7,7 @@ use App\Core\Support\CityPrefix;
 use App\Domains\MasterData\Enums\MasterDataType;
 use App\Domains\MasterData\Models\MasterData;
 use Illuminate\Database\Eloquent\Collection;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\ValidationException;
 
 class MasterDataService extends BaseService
@@ -25,7 +26,9 @@ class MasterDataService extends BaseService
             ->when($onlyActive, fn ($q) => $q->where('is_active', true))
             ->when(in_array($type, self::CITY_CHILD_TYPES, true), fn ($q) => $q->with('parent:id,name'))
             ->when($type === MasterDataType::LOCATION, fn ($q) => $q->withCount('positions'))
-            ->when($type === MasterDataType::POSITION, fn ($q) => $q->withCount('locations'))
+            ->when($type === MasterDataType::POSITION, fn ($q) => $q->withCount('locations')
+                ->with(['locations' => fn ($l) => $l->orderBy('sort_order')->orderBy('name')
+                    ->select('master_data.id', 'master_data.name', 'master_data.parent_id', 'master_data.is_active')]))
             ->when($type === MasterDataType::CITY, fn ($q) => $q->withCount('children'))
             ->orderBy('sort_order')
             ->orderBy('name')
@@ -42,21 +45,42 @@ class MasterDataService extends BaseService
 
     public function createItem(array $data): MasterData
     {
+        [$data, $locationIds] = $this->pullLocationIds($data);
         $data = $this->normalizeCityChild($data);
 
         if (! isset($data['sort_order'])) {
             $data['sort_order'] = MasterData::where('type', $data['type'])->max('sort_order') + 1;
         }
 
-        return $this->create($data);
+        return DB::transaction(function () use ($data, $locationIds) {
+            $item = $this->create($data);
+            if ($locationIds !== null) {
+                $this->syncPositionLocations($item, $locationIds);
+            }
+
+            return $item;
+        });
     }
 
     public function updateItem(string $id, array $data): MasterData
     {
         $item = MasterData::findOrFail($id);
-        $item->update($this->normalizeCityChild($data));
+        [$data, $locationIds] = $this->pullLocationIds($data);
 
-        return $item->refresh();
+        return DB::transaction(function () use ($item, $data, $locationIds) {
+            $item->update($this->normalizeCityChild($data));
+
+            if ($locationIds !== null) {
+                $this->syncPositionLocations($item, $locationIds);
+            } elseif ($item->type === MasterDataType::POSITION && $item->wasChanged('parent_id') && $item->parent_id) {
+                // Kota posisi diganti tanpa daftar lokasi baru: lepas lokasi kota lain.
+                $item->locations()->detach(
+                    $item->locations()->where('master_data.parent_id', '!=', $item->parent_id)->pluck('master_data.id')
+                );
+            }
+
+            return $item->refresh();
+        });
     }
 
     public function deleteItem(string $id): void
@@ -162,6 +186,44 @@ class MasterDataService extends BaseService
         $location->positions()->sync($positionIds);
 
         return $this->locationPositions($locationId);
+    }
+
+    /** @return array{0: array, 1: string[]|null} data tanpa `location_ids`, dan daftar lokasi bila dikirim untuk posisi */
+    private function pullLocationIds(array $data): array
+    {
+        $ids = $data['location_ids'] ?? null;
+        unset($data['location_ids']);
+
+        $isPosition = ($data['type'] ?? null) === MasterDataType::POSITION->value;
+
+        return [$data, $isPosition && is_array($ids) ? array_values(array_unique($ids)) : null];
+    }
+
+    /**
+     * Ganti seluruh lokasi kerja tempat posisi aktif. Lokasi harus sekota dengan
+     * posisinya; posisi tanpa kota (umum) boleh di lokasi kota mana pun.
+     *
+     * @param  string[]  $locationIds
+     */
+    private function syncPositionLocations(MasterData $position, array $locationIds): void
+    {
+        $invalid = MasterData::whereIn('id', $locationIds)
+            ->where(fn ($q) => $q->where('type', '!=', MasterDataType::LOCATION->value)
+                ->when($position->parent_id, fn ($q) => $q->orWhere(fn ($q) => $q->whereNull('parent_id')
+                    ->orWhere('parent_id', '!=', $position->parent_id))))
+            ->pluck('name');
+
+        $missing = count($locationIds) - MasterData::whereIn('id', $locationIds)->count();
+
+        if ($invalid->isNotEmpty() || $missing > 0) {
+            throw ValidationException::withMessages([
+                'location_ids' => $invalid->isNotEmpty()
+                    ? 'Lokasi harus sekota dengan posisi: '.$invalid->implode(', ')
+                    : 'Lokasi tidak ditemukan.',
+            ]);
+        }
+
+        $position->locations()->sync($locationIds);
     }
 
     private function findLocation(string $id): MasterData

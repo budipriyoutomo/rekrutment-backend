@@ -196,6 +196,86 @@ class CityHierarchyTest extends TestCase
             ->assertStatus(403);
     }
 
+    public function test_position_saves_locations_and_lists_them(): void
+    {
+        $this->actingAsAdmin();
+        $this->legacyData();
+        app(SyncCityHierarchyAction::class)->execute();
+
+        $bandung = $this->city('Bandung');
+        $riau = $this->named('location', 'Bandung - KARNIVOR - JL. RIAU');
+        $ck = $this->named('location', 'Bandung - CENTRAL KITCHEN - GEDEBAGE');
+
+        $this->postJson('/api/master-data', [
+            'type' => 'position', 'name' => 'Waiter', 'parent_id' => $bandung->id, 'location_ids' => [$riau->id],
+        ])->assertOk();
+        $waiter = $this->named('position', 'Bandung - Waiter');
+        $this->assertSame([$riau->id], $waiter->locations()->pluck('master_data.id')->all());
+
+        // Satu posisi bisa aktif di lebih dari satu lokasi
+        $this->putJson("/api/master-data/{$waiter->id}", [
+            'type' => 'position', 'name' => 'Waiter', 'parent_id' => $bandung->id, 'location_ids' => [$riau->id, $ck->id],
+        ])->assertOk();
+        $this->assertSame(2, $waiter->locations()->count());
+
+        $row = collect($this->getJson('/api/master-data?type=position')->assertOk()->json('data'))
+            ->firstWhere('id', $waiter->id);
+        $this->assertSame(2, $row['locationsCount']);
+        $this->assertEqualsCanonicalizing(
+            ['Bandung - KARNIVOR - JL. RIAU', 'Bandung - CENTRAL KITCHEN - GEDEBAGE'],
+            array_column($row['locations'], 'name')
+        );
+
+        // Tanpa location_ids: mapping tidak disentuh (klien lama)
+        $this->putJson("/api/master-data/{$waiter->id}", [
+            'type' => 'position', 'name' => 'Waiter', 'parent_id' => $bandung->id,
+        ])->assertOk();
+        $this->assertSame(2, $waiter->locations()->count());
+
+        // Kosongkan
+        $this->putJson("/api/master-data/{$waiter->id}", [
+            'type' => 'position', 'name' => 'Waiter', 'parent_id' => $bandung->id, 'location_ids' => [],
+        ])->assertOk();
+        $this->assertSame(0, $waiter->locations()->count());
+    }
+
+    public function test_position_rejects_location_from_other_city(): void
+    {
+        $this->actingAsAdmin();
+        $this->legacyData();
+        app(SyncCityHierarchyAction::class)->execute();
+
+        $cook = $this->named('position', 'Bandung - Cook');
+        $hq = $this->named('location', 'Jakarta - HEAD OFFICE JAKARTA');
+
+        $this->putJson("/api/master-data/{$cook->id}", [
+            'type' => 'position', 'name' => 'Cook', 'parent_id' => $this->city('Bandung')->id, 'location_ids' => [$hq->id],
+        ])->assertStatus(422)->assertJsonValidationErrors('location_ids');
+        $this->assertSame(2, $cook->locations()->count());
+
+        // Posisi umum boleh di lokasi kota mana pun
+        $global = $this->named('position', 'Tanpa Kota');
+        $riau = $this->named('location', 'Bandung - KARNIVOR - JL. RIAU');
+        $this->putJson("/api/master-data/{$global->id}", [
+            'type' => 'position', 'name' => 'Tanpa Kota', 'parent_id' => null, 'location_ids' => [$hq->id, $riau->id],
+        ])->assertOk();
+        $this->assertSame(2, $global->locations()->count());
+    }
+
+    public function test_changing_position_city_detaches_other_city_locations(): void
+    {
+        $this->actingAsAdmin();
+        $this->legacyData();
+        app(SyncCityHierarchyAction::class)->execute();
+
+        $cook = $this->named('position', 'Bandung - Cook');
+        $this->putJson("/api/master-data/{$cook->id}", [
+            'type' => 'position', 'name' => 'Cook', 'parent_id' => $this->city('Jakarta')->id,
+        ])->assertOk()->assertJsonPath('data.name', 'Jakarta - Cook');
+
+        $this->assertSame(0, $cook->locations()->count());
+    }
+
     // ------------------------------------------------------------------ submit /apply
 
     private function submit(array $additional, array $extra = [])

@@ -18,6 +18,7 @@ class MasterDataRequest extends BaseRequest
                 Rule::unique('master_data')->where('type', $this->input('type')),
             ],
             'parent_id' => $this->parentRules(),
+            ...$this->locationRules(),
             'is_active' => ['sometimes', 'boolean'],
             'sort_order' => ['sometimes', 'integer', 'min:0', 'max:9999'],
         ];
@@ -35,8 +36,25 @@ class MasterDataRequest extends BaseRequest
                 Rule::unique('master_data')->where('type', $this->input('type'))->ignore($id),
             ],
             'parent_id' => $this->parentRules(),
+            ...$this->locationRules(),
             'is_active' => ['sometimes', 'boolean'],
             'sort_order' => ['sometimes', 'integer', 'min:0', 'max:9999'],
+        ];
+    }
+
+    /**
+     * Posisi: lokasi kerja tempat posisi aktif (ganti seluruh mapping). Hanya
+     * diproses bila dikirim; kecocokan kota dicek di service.
+     */
+    private function locationRules(): array
+    {
+        if ($this->input('type') !== MasterDataType::POSITION->value) {
+            return [];
+        }
+
+        return [
+            'location_ids' => ['sometimes', 'array'],
+            'location_ids.*' => ['uuid', 'distinct'],
         ];
     }
 
