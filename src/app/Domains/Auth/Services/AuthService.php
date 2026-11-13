@@ -77,7 +77,14 @@ class AuthService
     public function refresh(): array
     {
         try {
-            $newToken = JWTAuth::parseToken()->refresh();
+            $user = JWTAuth::parseToken()->authenticate();
+
+            if (! $user || ! $user->is_active) {
+                throw new UnauthorizedHttpException('', 'Akun dinonaktifkan');
+            }
+
+            // Klaim role diperbarui dari DB (refresh bawaan membuang klaim kustom).
+            $newToken = JWTAuth::claims(['role' => $user->role])->refresh();
 
             return $this->respondWithToken($newToken);
 
@@ -109,8 +116,8 @@ class AuthService
         try {
             $user = JWTAuth::parseToken()->authenticate();
 
-            if (! $user) {
-                throw new UnauthorizedHttpException('', 'User tidak ditemukan');
+            if (! $user || ! $user->is_active) {
+                throw new UnauthorizedHttpException('', 'Akun dinonaktifkan');
             }
 
             return $this->transformUser($user);

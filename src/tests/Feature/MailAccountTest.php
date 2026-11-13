@@ -22,7 +22,7 @@ class MailAccountTest extends TestCase
 
     private function actingAsRole(string $role): self
     {
-        $user = User::factory()->create(['role' => $role]);
+        $user = User::factory()->create(['role' => $role, 'is_active' => true]);
         $token = JWTAuth::fromUser($user);
 
         return $this->withHeader('Authorization', "Bearer {$token}");
