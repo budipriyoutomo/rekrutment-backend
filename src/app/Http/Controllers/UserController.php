@@ -7,7 +7,10 @@ use App\Domains\User\Requests\CreateUserRequest;
 use App\Domains\User\Requests\UpdateUserRequest;
 use App\Domains\User\Resources\UserResource;
 use App\Models\User;
+use Illuminate\Auth\Access\Response;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\Hash;
 
 class UserController extends BaseApiController
@@ -40,6 +43,11 @@ class UserController extends BaseApiController
     public function store(CreateUserRequest $request)
     {
         $data = $request->validated();
+
+        if ($denied = $this->deny(Gate::forUser($this->actor())->inspect('create', [User::class, $data['role']]))) {
+            return $denied;
+        }
+
         $data['password'] = Hash::make($data['password']);
 
         return $this->success(
@@ -52,6 +60,10 @@ class UserController extends BaseApiController
     {
         $user = User::findOrFail($id);
         $data = $request->validated();
+
+        if ($denied = $this->deny(Gate::forUser($this->actor())->inspect('update', [$user, $data]))) {
+            return $denied;
+        }
 
         if (! empty($data['password'])) {
             $data['password'] = Hash::make($data['password']);
@@ -75,8 +87,25 @@ class UserController extends BaseApiController
             ], 422);
         }
 
+        if ($denied = $this->deny(Gate::forUser($this->actor())->inspect('delete', $user))) {
+            return $denied;
+        }
+
         $user->delete();
 
         return $this->success(null, 'User berhasil dihapus');
+    }
+
+    /**
+     * User yang sedang login; PermissionMiddleware sudah memvalidasi token.
+     */
+    private function actor(): User
+    {
+        return auth()->user();
+    }
+
+    private function deny(Response $decision): ?JsonResponse
+    {
+        return $decision->denied() ? $this->error($decision->message() ?? 'Akses ditolak', 403) : null;
     }
 }
