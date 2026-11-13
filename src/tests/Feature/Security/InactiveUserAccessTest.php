@@ -69,7 +69,8 @@ class InactiveUserAccessTest extends TestCase
 
         $this->withHeader('Authorization', "Bearer {$token}")
             ->postJson('/api/auth/refresh')
-            ->assertStatus(401);
+            ->assertStatus(401)
+            ->assertJsonPath('message', 'Akun dinonaktifkan');
     }
 
     public function test_deactivated_user_cannot_fetch_me(): void
@@ -81,7 +82,8 @@ class InactiveUserAccessTest extends TestCase
 
         $this->withHeader('Authorization', "Bearer {$token}")
             ->getJson('/api/auth/me')
-            ->assertStatus(401);
+            ->assertStatus(401)
+            ->assertJsonPath('message', 'Akun dinonaktifkan');
     }
 
     public function test_refreshed_token_carries_current_role(): void

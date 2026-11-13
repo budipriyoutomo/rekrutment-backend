@@ -122,6 +122,8 @@ class AuthService
 
             return $this->transformUser($user);
 
+        } catch (UnauthorizedHttpException $e) {
+            throw $e;
         } catch (\Exception $e) {
             throw new UnauthorizedHttpException('', 'Unauthorized');
         }
