@@ -96,7 +96,8 @@ class MailAccountTest extends TestCase
         $this->makeAccount(['label' => 'HR']);
         $this->makeAccount(['label' => 'Recruitment', 'from_email' => 'rec@altima.co.id']);
 
-        $this->getJson('/api/mail-accounts')
+        $this->actingAsRole('admin')
+            ->getJson('/api/mail-accounts')
             ->assertStatus(200)
             ->assertJsonCount(2, 'data');
     }
@@ -183,7 +184,8 @@ class MailAccountTest extends TestCase
         $this->makeAccount(['label' => 'Slip', 'purpose' => 'salary_slip']);
         $this->makeAccount(['label' => 'Rekrutmen', 'from_email' => 'rec@altima.co.id', 'purpose' => 'recruitment']);
 
-        $this->getJson('/api/mail-accounts?purpose=salary_slip')
+        $this->actingAsRole('admin')
+            ->getJson('/api/mail-accounts?purpose=salary_slip')
             ->assertStatus(200)
             ->assertJsonCount(1, 'data')
             ->assertJsonPath('data.0.purpose', 'salary_slip');
@@ -192,6 +194,8 @@ class MailAccountTest extends TestCase
     public function test_env_default_included_only_when_requested(): void
     {
         $this->makeAccount(['label' => 'Rekrutmen', 'from_email' => 'rec@altima.co.id', 'purpose' => 'recruitment']);
+
+        $this->actingAsRole('admin');
 
         // Tanpa include_env — hanya akun DB.
         $this->getJson('/api/mail-accounts?purpose=recruitment')

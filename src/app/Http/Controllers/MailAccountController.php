@@ -7,6 +7,7 @@ use App\Domains\SalarySlip\Models\MailAccount;
 use App\Domains\SalarySlip\Requests\MailAccountRequest;
 use App\Domains\SalarySlip\Resources\MailAccountResource;
 use App\Domains\SalarySlip\Services\MailAccountService;
+use App\Enums\Role;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 
@@ -26,8 +27,10 @@ class MailAccountController extends BaseApiController
         $data = MailAccountResource::collection($accounts)->resolve($request);
 
         // Sisipkan entri default rekrutmen dari .env bila diminta (untuk halaman
-        // pengaturan). Hanya relevan saat memandang purpose rekrutmen / semua.
+        // pengaturan). Hanya untuk admin/super_admin, dan hanya relevan saat
+        // memandang purpose rekrutmen / semua.
         if ($request->boolean('include_env')
+            && $this->actorIsAdmin()
             && (! $purpose || $purpose === MailAccount::PURPOSE_RECRUITMENT)) {
             array_unshift($data, $this->service->envRecruitmentDefault());
         }
@@ -63,5 +66,10 @@ class MailAccountController extends BaseApiController
         $this->service->delete($account);
 
         return $this->success(null, 'Akun email berhasil dihapus');
+    }
+
+    private function actorIsAdmin(): bool
+    {
+        return in_array(auth()->user()?->role, [Role::SUPER_ADMIN->value, Role::ADMIN->value], true);
     }
 }

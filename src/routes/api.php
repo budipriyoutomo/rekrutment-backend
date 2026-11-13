@@ -231,13 +231,16 @@ Route::prefix('job-requests')->middleware('permission:job-requests')->group(func
     Route::post('/{id}/create-vacancy', [JobRequestController::class, 'createVacancy'])->middleware('permission:vacancies');
 });
 
-Route::get('analytics', [AnalyticsController::class, 'index']);
+Route::get('analytics', [AnalyticsController::class, 'index'])
+    ->middleware('permission:dashboard,analytics');
 
-// Akun email pengirim. Pembacaan (dropdown) terbuka, tetapi pengelolaan
-// kredensial dibatasi role admin/super_admin.
+// Akun email pengirim. Pembacaan (dropdown) untuk pemegang izin Settings /
+// Salary Slip; pengelolaan kredensial dibatasi role admin/super_admin.
 Route::prefix('mail-accounts')->group(function () {
-    Route::get('/', [MailAccountController::class, 'index']);
-    Route::get('/{id}', [MailAccountController::class, 'show']);
+    Route::middleware('permission:settings,salary-slips,salary-slip-reports')->group(function () {
+        Route::get('/', [MailAccountController::class, 'index']);
+        Route::get('/{id}', [MailAccountController::class, 'show']);
+    });
 
     Route::middleware('role:'.Role::ADMIN->value)->group(function () {
         Route::post('/', [MailAccountController::class, 'store']);
