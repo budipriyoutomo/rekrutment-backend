@@ -30,6 +30,11 @@ class UserController extends BaseApiController
             $query->where('role', $role);
         }
 
+        // Filter status aktivasi, mis. ?is_active=0 untuk "Menunggu aktivasi".
+        if ($request->has('is_active')) {
+            $query->where('is_active', $request->boolean('is_active'));
+        }
+
         $users = $query->latest()->paginate((int) $request->get('per_page', 20));
 
         return $this->success(UserResource::collection($users), 'Data user berhasil diambil');
@@ -49,6 +54,8 @@ class UserController extends BaseApiController
         }
 
         $data['password'] = Hash::make($data['password']);
+        // User yang dibuat admin dari Settings langsung aktif kecuali diminta lain.
+        $data['is_active'] ??= true;
 
         return $this->success(
             new UserResource(User::create($data)),
@@ -63,6 +70,10 @@ class UserController extends BaseApiController
 
         if ($denied = $this->deny(Gate::forUser($this->actor())->inspect('update', [$user, $data]))) {
             return $denied;
+        }
+
+        if ($user->is($this->actor()) && array_key_exists('is_active', $data) && ! $data['is_active']) {
+            return $this->error('Tidak dapat menonaktifkan akun sendiri.', 422);
         }
 
         if (! empty($data['password'])) {

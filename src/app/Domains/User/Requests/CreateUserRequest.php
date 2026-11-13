@@ -19,6 +19,7 @@ class CreateUserRequest extends BaseRequest
             'role' => ['required', Rule::in(array_column(Role::cases(), 'value'))],
             'permissions' => ['sometimes', 'nullable', 'array'],
             'permissions.*' => [Rule::in(MenuPermission::values())],
+            'is_active' => ['sometimes', 'boolean'],
         ];
     }
 

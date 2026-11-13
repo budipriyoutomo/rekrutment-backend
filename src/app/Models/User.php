@@ -44,6 +44,7 @@ class User extends Authenticatable implements JWTSubject
         'email_verified_at' => 'datetime',
         'password' => 'hashed', // Mengotomatiskan Hash::make() di Laravel 10/11
         'permissions' => 'array',
+        'is_active' => 'boolean',
     ];
 
     public function getJWTIdentifier()

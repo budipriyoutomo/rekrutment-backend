@@ -26,6 +26,7 @@ class UpdateUserRequest extends BaseRequest
             'role' => ['sometimes', Rule::in(array_column(Role::cases(), 'value'))],
             'permissions' => ['sometimes', 'nullable', 'array'],
             'permissions.*' => [Rule::in(MenuPermission::values())],
+            'is_active' => ['sometimes', 'boolean'],
         ];
     }
 }
