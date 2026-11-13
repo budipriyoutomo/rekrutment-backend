@@ -26,36 +26,38 @@ use App\Http\Controllers\VacancyController;
 use Illuminate\Support\Facades\Route;
 
 // Rute publik untuk profile completion (diakses oleh kandidat via link email)
-Route::prefix('profile-completion')->group(function () {
+Route::prefix('profile-completion')->middleware('throttle:public-token')->group(function () {
     Route::get('/{token}', [ProfileCompletionController::class, 'validateToken']);
     Route::post('/{token}', [ProfileCompletionController::class, 'submit']);
     Route::post('/{token}/complete', [ProfileCompletionController::class, 'complete']);
 });
 
 // Rute publik untuk kandidat mengerjakan tes (diakses via link email, token = kredensial)
-Route::prefix('assessment')->group(function () {
+Route::prefix('assessment')->middleware('throttle:public-token')->group(function () {
     Route::get('/{token}', [AssessmentTakeController::class, 'validateToken']);
     Route::post('/{token}/start', [AssessmentTakeController::class, 'start']);
     Route::post('/{token}/submit', [AssessmentTakeController::class, 'submit']);
 });
 
-Route::prefix('offer')->group(function () {
+Route::prefix('offer')->middleware('throttle:public-token')->group(function () {
     Route::get('/{token}', [OfferResponseController::class, 'show']);
     Route::get('/{token}/pdf', [OfferResponseController::class, 'pdf']);
     Route::post('/{token}/accept', [OfferResponseController::class, 'accept']);
     Route::post('/{token}/decline', [OfferResponseController::class, 'decline']);
 });
 
-Route::prefix('preboarding')->group(function () {
+Route::prefix('preboarding')->middleware('throttle:public-token')->group(function () {
     Route::get('/{token}', [PreboardingFormController::class, 'show']);
     Route::post('/{token}/documents', [PreboardingFormController::class, 'upload']);
     Route::post('/{token}/submit', [PreboardingFormController::class, 'submit']);
 });
 
 Route::prefix('auth')->group(function () {
-    Route::post('register', [AuthController::class, 'register']);
-    Route::post('login', [AuthController::class, 'login']);
-    Route::post('forgot-password', [AuthController::class, 'forgotPassword']);
+    Route::middleware('throttle:login')->group(function () {
+        Route::post('register', [AuthController::class, 'register']);
+        Route::post('login', [AuthController::class, 'login']);
+        Route::post('forgot-password', [AuthController::class, 'forgotPassword']);
+    });
 
     Route::middleware('auth:api')->group(function () {
         Route::get('me', [AuthController::class, 'me']);
@@ -65,10 +67,12 @@ Route::prefix('auth')->group(function () {
 });
 
 Route::prefix('applications')->group(function () {
-    Route::post('/', [ApplicationController::class, 'submit']);
-    Route::post('/quick', [ApplicationController::class, 'submitQuick']);
-    Route::post('/upload', [ApplicationController::class, 'upload']);
-    Route::get('/status/{id}', [ApplicationController::class, 'status']);
+    Route::middleware('throttle:public-submit')->group(function () {
+        Route::post('/', [ApplicationController::class, 'submit']);
+        Route::post('/quick', [ApplicationController::class, 'submitQuick']);
+        Route::post('/upload', [ApplicationController::class, 'upload']);
+    });
+    Route::get('/status/{id}', [ApplicationController::class, 'status'])->middleware('throttle:public-token');
 });
 
 // Dikonsumsi oleh menu Applicants, Candidates, Pipeline, Documents, dan

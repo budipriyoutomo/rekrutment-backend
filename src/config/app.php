@@ -130,4 +130,16 @@ return [
         'store' => env('APP_MAINTENANCE_STORE', 'database'),
     ],
 
+    /*
+    |--------------------------------------------------------------------------
+    | Trusted Proxies
+    |--------------------------------------------------------------------------
+    |
+    | Daftar IP/CIDR proxy (dipisah koma) atau "*" bila aplikasi hanya bisa
+    | dijangkau lewat reverse proxy (Traefik/nginx). Kosong = tidak percaya proxy.
+    |
+    */
+
+    'trusted_proxies' => env('TRUSTED_PROXIES'),
+
 ];
