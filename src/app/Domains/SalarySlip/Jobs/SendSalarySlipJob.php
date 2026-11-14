@@ -30,6 +30,12 @@ class SendSalarySlipJob implements ShouldQueue
 
     public int $tries = 3;
 
+    /**
+     * Konversi PDF payslip via LibreOffice dibatasi 120 dtk; harus < worker
+     * --timeout (180) dan < DB_QUEUE_RETRY_AFTER (240) agar tidak dijalankan ganda.
+     */
+    public int $timeout = 170;
+
     /** Backoff bertingkat (detik) antar percobaan. */
     public array $backoff = [30, 60, 120];
 

@@ -20,6 +20,12 @@ class ProcessApplicationBundlingJob implements ShouldQueue
 {
     use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
 
+    /**
+     * Konversi LibreOffice bisa makan waktu; harus < worker --timeout (180)
+     * dan < DB_QUEUE_RETRY_AFTER (240) agar tidak dijalankan ganda.
+     */
+    public int $timeout = 170;
+
     protected $applicationId;
 
     public function __construct($applicationId)
