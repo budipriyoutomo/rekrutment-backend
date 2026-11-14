@@ -7,6 +7,7 @@ use App\Domains\Assessment\Actions\AutoGradeAssessmentAction;
 use App\Domains\Assessment\Models\AssessmentAssignment;
 use App\Domains\Assessment\Requests\SubmitAssessmentRequest;
 use Illuminate\Http\JsonResponse;
+use Symfony\Component\HttpKernel\Exception\HttpException;
 
 /**
  * Endpoint publik untuk kandidat mengerjakan tes lewat token dari email.
@@ -97,7 +98,11 @@ class AssessmentTakeController extends BaseApiController
             return $this->error('Waktu pengerjaan sudah habis. Hubungi HR untuk mendapatkan kesempatan baru.', 422);
         }
 
-        $autoGrade->execute($assignment, $request->validated()['answers'] ?? []);
+        try {
+            $autoGrade->execute($assignment, $request->validated()['answers'] ?? []);
+        } catch (HttpException $e) {
+            return $this->error($e->getMessage(), $e->getStatusCode());
+        }
 
         return $this->success(null, 'Jawaban berhasil dikumpulkan. Hasil akan diinformasikan oleh tim HR.');
     }

@@ -4,6 +4,8 @@ namespace App\Domains\Assessment\Actions;
 
 use App\Domains\Assessment\Models\AssessmentAssignment;
 use App\Domains\Assessment\Models\AssessmentQuestion;
+use Illuminate\Support\Facades\DB;
+use Symfony\Component\HttpKernel\Exception\HttpException;
 
 /**
  * Menilai jawaban pilihan ganda kandidat secara otomatis.
@@ -17,6 +19,24 @@ class AutoGradeAssessmentAction
      * @param  array<string, string>  $answers  Peta question_id => key opsi, mis. ['<uuid>' => 'A']
      */
     public function execute(AssessmentAssignment $assignment, array $answers): AssessmentAssignment
+    {
+        // Kunci baris & cek ulang di dalam transaksi: dua kiriman bersamaan (klik
+        // ganda / dua tab) tidak boleh menilai dua kali dan menimpa hasil pertama.
+        return DB::transaction(function () use ($assignment, $answers) {
+            $assignment = AssessmentAssignment::lockForUpdate()->findOrFail($assignment->id);
+
+            if ($assignment->isSubmitted()) {
+                throw new HttpException(409, 'Tes ini sudah pernah Anda kerjakan.');
+            }
+
+            return $this->grade($assignment, $answers);
+        });
+    }
+
+    /**
+     * @param  array<string, string>  $answers
+     */
+    private function grade(AssessmentAssignment $assignment, array $answers): AssessmentAssignment
     {
         $assessment = $assignment->assessment()->with('questions')->firstOrFail();
 
