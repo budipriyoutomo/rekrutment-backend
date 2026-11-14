@@ -58,6 +58,7 @@ class ImportSalarySlipsAction
         $errors = [];
         $warnings = [];
         $dtos = [];
+        $dtoRowNumbers = []; // index $dtos → nomor baris di file
         $seen = []; // "nik|periode" yang sudah diproses dalam file ini
 
         foreach ($dataRows as $offset => $row) {
@@ -90,9 +91,24 @@ class ImportSalarySlipsAction
             }
 
             $dtos[] = SalarySlipDTO::fromArray(array_merge($row, ['batch_id' => $batchId]));
+            $dtoRowNumbers[] = $rowNum;
         }
 
-        $successRows = empty($dtos) ? 0 : $this->service->bulkInsert($dtos);
+        $successRows = 0;
+        if (! empty($dtos)) {
+            $result = $this->service->bulkInsert($dtos);
+            $successRows = $result['inserted'];
+
+            // Bentrok unique di DB (import paralel) → laporkan sebagai error baris.
+            foreach ($result['duplicates'] as $index) {
+                $dto = $dtos[$index];
+                $errors[] = [
+                    'row' => $dtoRowNumbers[$index],
+                    'messages' => ["Duplikat: NIK {$dto->nik} periode {$dto->periode} sudah ada, baris ditolak."],
+                ];
+            }
+            usort($errors, fn ($a, $b) => $a['row'] <=> $b['row']);
+        }
 
         ImportBatch::create([
             'id' => $batchId,

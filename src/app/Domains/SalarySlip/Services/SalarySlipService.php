@@ -5,7 +5,9 @@ namespace App\Domains\SalarySlip\Services;
 use App\Domains\SalarySlip\DTO\SalarySlipDTO;
 use App\Domains\SalarySlip\Models\SalarySlip;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
+use Illuminate\Database\UniqueConstraintViolationException;
 use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 
 class SalarySlipService
@@ -66,7 +68,15 @@ class SalarySlipService
             ->all();
     }
 
-    public function bulkInsert(array $dtos): int
+    /**
+     * Insert massal. Bila ada baris yang bentrok unique (nik, periode) — mis. import
+     * paralel yang lolos pengecekan awal — insert diulang per baris dan index baris
+     * yang bentrok dikembalikan di `duplicates` (index sesuai urutan $dtos).
+     *
+     * @param  SalarySlipDTO[]  $dtos
+     * @return array{inserted:int, duplicates:int[]}
+     */
+    public function bulkInsert(array $dtos): array
     {
         $rows = array_map(fn (SalarySlipDTO $dto) => array_merge($dto->toArray(), [
             'id' => Str::uuid()->toString(),
@@ -74,9 +84,35 @@ class SalarySlipService
             'updated_at' => now(),
         ]), $dtos);
 
-        SalarySlip::insert($rows);
+        try {
+            SalarySlip::insert($rows);
 
-        return count($rows);
+            return ['inserted' => count($rows), 'duplicates' => []];
+        } catch (UniqueConstraintViolationException) {
+            return $this->insertRowByRow($rows);
+        }
+    }
+
+    /**
+     * @param  array<int, array<string, mixed>>  $rows
+     * @return array{inserted:int, duplicates:int[]}
+     */
+    private function insertRowByRow(array $rows): array
+    {
+        $inserted = 0;
+        $duplicates = [];
+
+        foreach ($rows as $index => $row) {
+            try {
+                // Savepoint per baris agar kegagalan tidak membatalkan transaksi luar (pgsql).
+                DB::transaction(fn () => SalarySlip::insert($row));
+                $inserted++;
+            } catch (UniqueConstraintViolationException) {
+                $duplicates[] = $index;
+            }
+        }
+
+        return ['inserted' => $inserted, 'duplicates' => $duplicates];
     }
 
     public function bulkDelete(array $ids): int
