@@ -4,6 +4,7 @@ namespace App\Console\Commands;
 
 use App\Domains\Application\Models\Application;
 use App\Domains\Preboarding\Models\Preboarding;
+use App\Domains\SalarySlip\Models\SalarySlip;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\Storage;
 use League\Flysystem\FileAttributes;
@@ -17,6 +18,9 @@ use League\Flysystem\FileAttributes;
  * others/bundle) dan preboardings.documents. Default-nya dry-run; file baru
  * hanya dihapus dengan --delete. File yang lebih muda dari --min-age jam
  * dilewati agar upload yang baris DB-nya belum tersimpan tidak ikut terhapus.
+ *
+ * Tanpa --prefix, PDF payslip lokal (storage/app/payslips/{id}.pdf) yang
+ * slip-nya sudah dihapus juga ikut diperiksa.
  */
 class PruneOrphanStorageFiles extends Command
 {
@@ -39,6 +43,9 @@ class PruneOrphanStorageFiles extends Command
         $prefixes = $this->option('prefix') ?: self::DEFAULT_PREFIXES;
         $cutoff = now()->subHours((int) $this->option('min-age'))->getTimestamp();
         $disk = Storage::disk($diskName);
+
+        // PDF payslip disimpan lokal (storage/app/payslips), bukan di disk upload.
+        $payslipsOk = $this->option('prefix') ? true : $this->prunePayslips($cutoff);
 
         $referenced = $this->referencedPaths();
         $this->info('Path direferensikan DB: '.count($referenced));
@@ -79,7 +86,7 @@ class PruneOrphanStorageFiles extends Command
         if ($orphans === []) {
             $this->info('Tidak ada file orphan.');
 
-            return self::SUCCESS;
+            return $payslipsOk ? self::SUCCESS : self::FAILURE;
         }
 
         $limit = (int) $this->option('limit');
@@ -92,13 +99,13 @@ class PruneOrphanStorageFiles extends Command
         if (! $this->option('delete')) {
             $this->comment('Dry-run: tidak ada file yang dihapus. Jalankan ulang dengan --delete untuk menghapus.');
 
-            return self::SUCCESS;
+            return $payslipsOk ? self::SUCCESS : self::FAILURE;
         }
 
         if (! $this->option('force') && ! $this->confirm('Hapus '.count($orphans)." file dari disk {$diskName}?")) {
             $this->comment('Dibatalkan.');
 
-            return self::SUCCESS;
+            return $payslipsOk ? self::SUCCESS : self::FAILURE;
         }
 
         $deleted = 0;
@@ -111,7 +118,59 @@ class PruneOrphanStorageFiles extends Command
         }
         $this->info("{$deleted} file dihapus.");
 
-        return $deleted === count($orphans) ? self::SUCCESS : self::FAILURE;
+        return $deleted === count($orphans) && $payslipsOk ? self::SUCCESS : self::FAILURE;
+    }
+
+    /**
+     * PDF payslip ({id}.pdf) yang slip-nya sudah tidak ada di salary_slips.
+     * Mengikuti --min-age, --delete, dan --force yang sama.
+     *
+     * @return bool false bila ada file yang gagal dihapus
+     */
+    private function prunePayslips(int $cutoff): bool
+    {
+        $dir = storage_path('app/payslips');
+        if (! is_dir($dir)) {
+            return true;
+        }
+
+        $orphans = [];
+        foreach (glob("{$dir}/*.pdf") ?: [] as $file) {
+            if (filemtime($file) > $cutoff) {
+                continue;
+            }
+            $orphans[basename($file, '.pdf')] = $file;
+        }
+
+        if ($orphans !== []) {
+            $existing = SalarySlip::query()->whereIn('id', array_keys($orphans))->pluck('id')->all();
+            $orphans = array_diff_key($orphans, array_flip($existing));
+        }
+
+        if ($orphans === []) {
+            $this->info('Tidak ada PDF payslip orphan.');
+
+            return true;
+        }
+
+        $this->table(['PDF payslip orphan (lokal)'], array_map(
+            fn (string $id) => ["payslips/{$id}.pdf"],
+            array_slice(array_keys($orphans), 0, (int) $this->option('limit')),
+        ));
+        $this->warn(count($orphans).' PDF payslip orphan.');
+
+        if (! $this->option('delete')) {
+            return true;
+        }
+
+        if (! $this->option('force') && ! $this->confirm('Hapus '.count($orphans).' PDF payslip orphan?')) {
+            return true;
+        }
+
+        $failed = array_filter($orphans, fn (string $file) => ! @unlink($file));
+        $this->info((count($orphans) - count($failed)).' PDF payslip dihapus.');
+
+        return $failed === [];
     }
 
     /**

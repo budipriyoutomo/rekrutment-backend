@@ -31,15 +31,18 @@ class SalarySlipService
         if (! empty($filters['periode'])) {
             $query->where('periode', $filters['periode']);
         }
+        // pgsql: LIKE peka huruf besar/kecil → pakai ILIKE (sqlite LIKE sudah tidak peka).
+        $like = $query->getConnection()->getDriverName() === 'pgsql' ? 'ilike' : 'like';
+
         if (! empty($filters['cabang'])) {
-            $query->where('cabang', 'like', '%'.$filters['cabang'].'%');
+            $query->where('cabang', $like, '%'.$filters['cabang'].'%');
         }
         if (! empty($filters['search'])) {
             $search = $filters['search'];
-            $query->where(function ($q) use ($search) {
-                $q->where('nama', 'like', "%{$search}%")
-                    ->orWhere('nik', 'like', "%{$search}%")
-                    ->orWhere('email', 'like', "%{$search}%");
+            $query->where(function ($q) use ($search, $like) {
+                $q->where('nama', $like, "%{$search}%")
+                    ->orWhere('nik', $like, "%{$search}%")
+                    ->orWhere('email', $like, "%{$search}%");
             });
         }
 
@@ -115,9 +118,22 @@ class SalarySlipService
         return ['inserted' => $inserted, 'duplicates' => $duplicates];
     }
 
+    /**
+     * Hapus slip beserta PDF hasil generate-nya (storage/app/payslips/{id}.pdf).
+     */
     public function bulkDelete(array $ids): int
     {
-        return SalarySlip::whereIn('id', $ids)->delete();
+        $existingIds = SalarySlip::whereIn('id', $ids)->pluck('id')->all();
+        $deleted = SalarySlip::whereIn('id', $existingIds)->delete();
+
+        foreach ($existingIds as $id) {
+            $pdf = storage_path("app/payslips/{$id}.pdf");
+            if (is_file($pdf)) {
+                @unlink($pdf);
+            }
+        }
+
+        return $deleted;
     }
 
     public function getByIds(array $ids): Collection
