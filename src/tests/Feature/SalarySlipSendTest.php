@@ -6,6 +6,7 @@ use App\Domains\SalarySlip\Actions\GeneratePayslipPdfAction;
 use App\Domains\SalarySlip\Actions\SendSalarySlipAction;
 use App\Domains\SalarySlip\Jobs\SendSalarySlipJob;
 use App\Domains\SalarySlip\Mail\SalarySlipMail;
+use App\Domains\SalarySlip\Models\MailAccount;
 use App\Domains\SalarySlip\Models\SalarySlip;
 use App\Domains\SalarySlip\Models\SendJob;
 use App\Domains\SalarySlip\Services\MailAccountResolver;
@@ -197,10 +198,15 @@ class SalarySlipSendTest extends TestCase
     {
         Queue::fake();
         $slip = $this->makeSlip();
+        $account = MailAccount::create([
+            'label' => 'HR', 'driver' => 'smtp', 'purpose' => MailAccount::PURPOSE_SALARY_SLIP,
+            'from_email' => 'hr@altima.co.id', 'from_name' => 'HR', 'smtp_host' => 'smtp.altima.co.id',
+            'smtp_port' => 587, 'is_active' => true,
+        ]);
 
         $this->postJson('/api/salary-slips/send', [
             'ids' => [$slip->id],
-            'mail_account_id' => 'hr-id',
+            'mail_account_id' => $account->id,
         ])
             ->assertStatus(200)
             ->assertJsonPath('status', true)

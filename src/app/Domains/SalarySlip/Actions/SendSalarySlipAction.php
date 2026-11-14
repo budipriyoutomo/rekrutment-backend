@@ -13,6 +13,8 @@ use Illuminate\Support\Str;
  * status `queued`, membuat record send_jobs, dan melempar job ke worker.
  *
  * Resend: slip yang statusnya sudah `sent` dilewati (skipped) kecuali $resend = true.
+ * $resendOnly (actor hanya berizin Report): slip yang belum pernah terkirim
+ * (`sent_at` kosong) dilewati — Report hanya boleh mengirim ulang.
  */
 class SendSalarySlipAction
 {
@@ -20,20 +22,29 @@ class SendSalarySlipAction
 
     /**
      * @param  string[]  $ids
-     * @return array{dispatched:int,skipped:int,job_batch_id:string}
+     * @return array{dispatched:int,skipped:int,skipped_details:array<int,array{id:string,reason:string}>,job_batch_id:string}
      */
-    public function execute(array $ids, ?string $mailAccountId = null, bool $resend = false): array
+    public function execute(array $ids, ?string $mailAccountId = null, bool $resend = false, bool $resendOnly = false): array
     {
         $slips = $this->service->getByIds($ids);
 
         $jobBatchId = (string) Str::uuid();
         $dispatched = 0;
-        $skipped = 0;
+        $skippedDetails = [];
 
         foreach ($slips as $slip) {
+            if ($resendOnly && $slip->sent_at === null) {
+                $skippedDetails[] = [
+                    'id' => $slip->id,
+                    'reason' => 'Belum pernah dikirim — izin Report hanya bisa mengirim ulang.',
+                ];
+
+                continue;
+            }
+
             // Idempotency: sudah terkirim & bukan resend -> lewati tanpa mengirim ulang.
             if ($slip->send_status === SalarySlip::STATUS_SENT && ! $resend) {
-                $skipped++;
+                $skippedDetails[] = ['id' => $slip->id, 'reason' => 'Sudah terkirim.'];
 
                 continue;
             }
@@ -58,7 +69,8 @@ class SendSalarySlipAction
 
         return [
             'dispatched' => $dispatched,
-            'skipped' => $skipped,
+            'skipped' => count($skippedDetails),
+            'skipped_details' => $skippedDetails,
             'job_batch_id' => $jobBatchId,
         ];
     }

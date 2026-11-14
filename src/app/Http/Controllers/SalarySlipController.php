@@ -10,8 +10,12 @@ use App\Domains\SalarySlip\Actions\SendSalarySlipAction;
 use App\Domains\SalarySlip\Exports\SalarySlipTemplateExport;
 use App\Domains\SalarySlip\Models\SalarySlip;
 use App\Domains\SalarySlip\Requests\ImportSalarySlipRequest;
+use App\Domains\SalarySlip\Requests\SendSalarySlipRequest;
 use App\Domains\SalarySlip\Resources\SalarySlipResource;
 use App\Domains\SalarySlip\Services\SalarySlipService;
+use App\Enums\MenuPermission;
+use App\Enums\Role;
+use App\Models\User;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Maatwebsite\Excel\Facades\Excel;
@@ -71,24 +75,38 @@ class SalarySlipController extends BaseApiController
         );
     }
 
-    public function send(Request $request): JsonResponse
+    public function send(SendSalarySlipRequest $request): JsonResponse
     {
-        $ids = $request->input('ids', []);
-
-        if (empty($ids) || ! is_array($ids)) {
-            return $this->error('Parameter ids wajib diisi dan harus berupa array.', 422);
-        }
+        $validated = $request->validated();
 
         $result = $this->sendAction->execute(
-            $ids,
-            $request->input('mail_account_id'),
+            $validated['ids'],
+            $validated['mail_account_id'] ?? null,
             $request->boolean('resend'),
+            resendOnly: ! $this->canSendNewSlips($request->user()),
         );
 
         return $this->success(
             $result,
-            "{$result['dispatched']} slip dijadwalkan dikirim, {$result['skipped']} dilewati (sudah terkirim).",
+            "{$result['dispatched']} slip dijadwalkan dikirim, {$result['skipped']} dilewati.",
         );
+    }
+
+    /**
+     * Izin "Report Salary Slip" saja hanya boleh mengirim ULANG slip yang pernah
+     * terkirim; pengiriman pertama butuh izin "Salary Slips" (admin bypass).
+     */
+    private function canSendNewSlips(?User $user): bool
+    {
+        if (! $user) {
+            return false;
+        }
+
+        if (in_array($user->role, [Role::SUPER_ADMIN->value, Role::ADMIN->value], true)) {
+            return true;
+        }
+
+        return in_array(MenuPermission::SALARY_SLIPS->value, $user->permissions ?? [], true);
     }
 
     public function bulkDelete(Request $request): JsonResponse
