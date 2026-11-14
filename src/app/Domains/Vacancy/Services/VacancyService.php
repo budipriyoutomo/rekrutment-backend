@@ -39,9 +39,11 @@ class VacancyService extends BaseService
         return $query->latest()->paginate($perPage);
     }
 
-    public function getDetail(string $id): Vacancy
+    public function getDetail(string $id, bool $onlyOpen = false): Vacancy
     {
-        return $this->withApplicantCounts(Vacancy::query())->findOrFail($id);
+        return $this->withApplicantCounts(Vacancy::query())
+            ->when($onlyOpen, fn ($query) => $query->where('status', 'open'))
+            ->findOrFail($id);
     }
 
     /** Tambah applications_count & hired_count untuk VacancyResource. */
