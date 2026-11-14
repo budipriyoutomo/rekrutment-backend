@@ -44,11 +44,6 @@ class SalarySlipService
         return $query->paginate($perPage);
     }
 
-    public function store(SalarySlipDTO $dto): SalarySlip
-    {
-        return SalarySlip::create($dto->toArray());
-    }
-
     /**
      * Kembalikan set kombinasi "nik|periode" yang SUDAH ada di DB,
      * dibatasi pada nik & periode yang muncul di file (agar query ringan).

@@ -263,9 +263,9 @@ Route::prefix('salary-slips')->group(function () {
         Route::post('/send', [SalarySlipController::class, 'send']);
     });
 
-    // Tulis (import, buat, hapus massal): hanya izin menu "Salary Slips".
+    // Tulis (import, hapus massal): hanya izin menu "Salary Slips".
+    // Slip hanya masuk lewat import Excel — tidak ada endpoint input satu slip.
     Route::middleware('permission:salary-slips')->group(function () {
-        Route::post('/', [SalarySlipController::class, 'store']);
         Route::post('/import', [SalarySlipController::class, 'import']);
         Route::delete('/bulk', [SalarySlipController::class, 'bulkDelete']);
     });

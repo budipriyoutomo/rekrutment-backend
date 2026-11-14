@@ -7,11 +7,9 @@ use App\Core\Http\PerPage;
 use App\Domains\SalarySlip\Actions\GeneratePayslipPdfAction;
 use App\Domains\SalarySlip\Actions\ImportSalarySlipsAction;
 use App\Domains\SalarySlip\Actions\SendSalarySlipAction;
-use App\Domains\SalarySlip\DTO\SalarySlipDTO;
 use App\Domains\SalarySlip\Exports\SalarySlipTemplateExport;
 use App\Domains\SalarySlip\Models\SalarySlip;
 use App\Domains\SalarySlip\Requests\ImportSalarySlipRequest;
-use App\Domains\SalarySlip\Requests\StoreSalarySlipRequest;
 use App\Domains\SalarySlip\Resources\SalarySlipResource;
 use App\Domains\SalarySlip\Services\SalarySlipService;
 use Illuminate\Http\JsonResponse;
@@ -61,13 +59,6 @@ class SalarySlipController extends BaseApiController
             'page' => $data->currentPage(),
             'last_page' => $data->lastPage(),
         ], 'Data slip gaji berhasil diambil');
-    }
-
-    public function store(StoreSalarySlipRequest $request): JsonResponse
-    {
-        $slip = $this->service->store(SalarySlipDTO::fromArray($request->validated()));
-
-        return $this->success(new SalarySlipResource($slip), 'Slip gaji berhasil disimpan');
     }
 
     public function import(ImportSalarySlipRequest $request): JsonResponse
