@@ -29,7 +29,6 @@ use Illuminate\Support\Facades\Route;
 Route::prefix('profile-completion')->middleware('throttle:public-token')->group(function () {
     Route::get('/{token}', [ProfileCompletionController::class, 'validateToken']);
     Route::post('/{token}', [ProfileCompletionController::class, 'submit']);
-    Route::post('/{token}/complete', [ProfileCompletionController::class, 'complete']);
 });
 
 // Rute publik untuk kandidat mengerjakan tes (diakses via link email, token = kredensial)

@@ -12,7 +12,6 @@ use App\Domains\ProfileCompletion\Actions\CompleteProfileAction;
 use App\Domains\ProfileCompletion\Models\ProfileCompletionToken;
 use App\Domains\ProfileCompletion\Requests\CompleteProfileRequest;
 use Illuminate\Http\JsonResponse;
-use Illuminate\Support\Facades\Log;
 
 class ProfileCompletionController extends BaseApiController
 {
@@ -58,52 +57,6 @@ class ProfileCompletionController extends BaseApiController
         $app = $action->execute($record, ApplicationDTO::fromRequest($request), $request->documentFiles());
 
         return $this->success(['applicationId' => $app->id], 'Profil berhasil dilengkapi');
-    }
-
-    /**
-     * @deprecated Hanya menandai status tanpa menyimpan data. Dipertahankan
-     * sementara untuk frontend lama; frontend baru memakai `submit`.
-     */
-    public function complete(string $token)
-    {
-        $record = ProfileCompletionToken::where('token', $token)->first();
-
-        if (! $record) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Link tidak valid atau sudah tidak tersedia.',
-            ], 404);
-        }
-
-        if ($record->isExpired()) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Link sudah kedaluwarsa.',
-            ], 410);
-        }
-
-        if ($record->isUsed()) {
-            return $this->success(null, 'Profile completion sudah ditandai selesai sebelumnya.');
-        }
-
-        try {
-            $record->application()->update([
-                'profile_completion_status' => 'done',
-            ]);
-
-            $record->markAsUsed();
-
-            return $this->success(null, 'Profile completion berhasil ditandai selesai.');
-        } catch (\Throwable $e) {
-            Log::error('Gagal menyelesaikan profile completion: '.$e->getMessage(), [
-                'token' => $token,
-            ]);
-
-            return response()->json([
-                'success' => false,
-                'message' => 'Terjadi kesalahan. Silakan coba lagi.',
-            ], 500);
-        }
     }
 
     /** Respons error bila token tidak bisa dipakai, null bila valid. */
