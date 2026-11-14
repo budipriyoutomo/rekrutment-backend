@@ -2,6 +2,7 @@
 
 namespace App\Core\Services;
 
+use App\Core\Http\PerPage;
 use App\Core\Support\QueryFilter;
 use Exception;
 use Illuminate\Database\Eloquent\Builder;
@@ -27,7 +28,7 @@ abstract class BaseService
         $query = app(QueryFilter::class)->apply($query, $request);
 
         return $query->paginate(
-            (int) $request->get('per_page', 15)
+            PerPage::from($request, 15)
         );
     }
 

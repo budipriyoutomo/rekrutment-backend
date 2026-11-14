@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Core\Http\Controllers\BaseApiController;
+use App\Core\Http\PerPage;
 use App\Domains\SalarySlip\Actions\GeneratePayslipPdfAction;
 use App\Domains\SalarySlip\Actions\ImportSalarySlipsAction;
 use App\Domains\SalarySlip\Actions\SendSalarySlipAction;
@@ -51,7 +52,7 @@ class SalarySlipController extends BaseApiController
     {
         $data = $this->service->getList(
             $request->only(['periode', 'cabang', 'search', 'status']),
-            (int) $request->get('per_page', 50),
+            PerPage::from($request, 50),
         );
 
         return $this->success([

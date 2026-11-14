@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Core\Http\Controllers\BaseApiController;
+use App\Core\Http\PerPage;
 use App\Domains\Vacancy\Requests\VacancyRequest;
 use App\Domains\Vacancy\Resources\VacancyResource;
 use App\Domains\Vacancy\Services\VacancyService;
@@ -22,7 +23,7 @@ class VacancyController extends BaseApiController
 
         $data = $service->getList(
             filters: $filters,
-            perPage: (int) $request->get('per_page', $request->get('limit', 20))
+            perPage: PerPage::from($request, 20)
         );
 
         return $this->success(

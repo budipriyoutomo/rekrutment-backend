@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Core\Http\Controllers\BaseApiController;
+use App\Core\Http\PerPage;
 use App\Domains\User\Requests\CreateUserRequest;
 use App\Domains\User\Requests\UpdateUserRequest;
 use App\Domains\User\Resources\UserResource;
@@ -35,7 +36,7 @@ class UserController extends BaseApiController
             $query->where('is_active', $request->boolean('is_active'));
         }
 
-        $users = $query->latest()->paginate((int) $request->get('per_page', 20));
+        $users = $query->latest()->paginate(PerPage::from($request, 20));
 
         return $this->success(UserResource::collection($users), 'Data user berhasil diambil');
     }

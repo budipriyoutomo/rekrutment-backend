@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Core\Http\Controllers\BaseApiController;
+use App\Core\Http\PerPage;
 use App\Domains\Preboarding\Models\Preboarding;
 use App\Domains\Preboarding\Resources\PreboardingResource;
 use App\Domains\Preboarding\Services\PreboardingService;
@@ -15,7 +16,7 @@ class PreboardingController extends BaseApiController
     {
         $data = $service->getList(
             filters: $request->only(['status', 'applicationId', 'search']),
-            perPage: (int) $request->get('per_page', $request->get('limit', 50))
+            perPage: PerPage::from($request, 50)
         );
 
         return $this->successPaginated(PreboardingResource::collection($data), $data, 'Data pre-boarding berhasil diambil');

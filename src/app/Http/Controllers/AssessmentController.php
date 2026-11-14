@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Core\Http\Controllers\BaseApiController;
+use App\Core\Http\PerPage;
 use App\Domains\Assessment\Requests\AssessmentRequest;
 use App\Domains\Assessment\Requests\AssignAssessmentRequest;
 use App\Domains\Assessment\Resources\AssessmentAssignmentResource;
@@ -23,7 +24,7 @@ class AssessmentController extends BaseApiController
     {
         $data = $service->getList(
             filters: $request->only(['is_active', 'search']),
-            perPage: (int) $request->get('per_page', $request->get('limit', 50))
+            perPage: PerPage::from($request, 50)
         );
 
         return $this->success(
@@ -91,7 +92,7 @@ class AssessmentController extends BaseApiController
     {
         $data = $service->getAssignments(
             filters: $request->only(['status', 'assessment_id', 'application_id', 'passed']),
-            perPage: (int) $request->get('per_page', $request->get('limit', 50))
+            perPage: PerPage::from($request, 50)
         );
 
         return $this->success(

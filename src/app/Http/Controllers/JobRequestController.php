@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Core\Http\Controllers\BaseApiController;
+use App\Core\Http\PerPage;
 use App\Domains\JobRequest\Requests\JobRequestRequest;
 use App\Domains\JobRequest\Resources\JobRequestResource;
 use App\Domains\JobRequest\Services\JobRequestService;
@@ -16,7 +17,7 @@ class JobRequestController extends BaseApiController
     {
         $data = $service->getList(
             filters: $request->only(['search', 'status', 'department', 'priority']),
-            perPage: (int) $request->get('per_page', $request->get('limit', 50))
+            perPage: PerPage::from($request, 50)
         );
 
         return $this->success(

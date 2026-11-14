@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Core\Http\Controllers\BaseApiController;
+use App\Core\Http\PerPage;
 use App\Domains\Employee\Actions\ConvertToEmployeeAction;
 use App\Domains\Employee\Resources\EmployeeResource;
 use App\Domains\Employee\Services\EmployeeService;
@@ -15,7 +16,7 @@ class EmployeeController extends BaseApiController
     {
         $data = $service->getList(
             filters: $request->only(['status', 'applicationId', 'search']),
-            perPage: (int) $request->get('per_page', $request->get('limit', 50))
+            perPage: PerPage::from($request, 50)
         );
 
         return $this->successPaginated(EmployeeResource::collection($data), $data, 'Data karyawan berhasil diambil');

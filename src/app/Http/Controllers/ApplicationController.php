@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Core\Http\Controllers\BaseApiController;
+use App\Core\Http\PerPage;
 use App\Core\Services\FileUploadService;
 use App\Domains\Application\Actions\BundleApplicationDocumentAction;
 use App\Domains\Application\Actions\RejectApplicationAction;
@@ -48,7 +49,7 @@ class ApplicationController extends BaseApiController
                 'ageMax',
                 'vacancyId',
             ]),
-            perPage: $request->get('per_page', $request->get('limit', 10))
+            perPage: PerPage::from($request, 10)
         );
 
         return $this->successPaginated(

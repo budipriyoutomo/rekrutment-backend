@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Core\Http\Controllers\BaseApiController;
+use App\Core\Http\PerPage;
 use App\Domains\Offer\Actions\SendOfferAction;
 use App\Domains\Offer\Requests\OfferRequest;
 use App\Domains\Offer\Resources\OfferResource;
@@ -17,7 +18,7 @@ class OfferController extends BaseApiController
     {
         $data = $service->getList(
             filters: $request->only(['status', 'applicationId', 'search']),
-            perPage: (int) $request->get('per_page', $request->get('limit', 50))
+            perPage: PerPage::from($request, 50)
         );
 
         return $this->successPaginated(OfferResource::collection($data), $data, 'Data offer berhasil diambil');

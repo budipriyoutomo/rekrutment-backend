@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Core\Http\Controllers\BaseApiController;
+use App\Core\Http\PerPage;
 use App\Domains\Interviewer\Requests\InterviewerRequest;
 use App\Domains\Interviewer\Resources\InterviewerResource;
 use App\Domains\Interviewer\Services\InterviewerService;
@@ -14,7 +15,7 @@ class InterviewerController extends BaseApiController
     {
         $data = $service->getList(
             filters: $request->only(['search', 'role', 'department', 'active']),
-            perPage: (int) $request->get('per_page', $request->get('limit', 50))
+            perPage: PerPage::from($request, 50)
         );
 
         return $this->success(
