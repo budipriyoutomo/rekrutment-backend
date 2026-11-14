@@ -23,6 +23,13 @@ class SalarySlipSendTest extends TestCase
     {
         parent::setUp();
         $this->actingAsAdmin();
+
+        // Job tidak lagi jatuh ke mailer .env: wajib ada akun Slip Gaji default.
+        MailAccount::create([
+            'label' => 'Slip Gaji Default', 'driver' => 'smtp', 'purpose' => MailAccount::PURPOSE_SALARY_SLIP,
+            'from_email' => 'slip@altima.co.id', 'from_name' => 'HR', 'smtp_host' => 'smtp.altima.co.id',
+            'smtp_port' => 587, 'is_active' => true, 'is_default' => true,
+        ]);
     }
 
     private function makeSlip(array $o = []): SalarySlip

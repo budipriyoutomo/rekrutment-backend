@@ -14,6 +14,7 @@ use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\SerializesModels;
 use Illuminate\Support\Facades\Mail;
+use RuntimeException;
 
 /**
  * Kirim 1 slip gaji: generate PDF -> attach -> kirim email, sambil menjaga
@@ -64,21 +65,20 @@ class SendSalarySlipJob implements ShouldQueue
             'started_at' => $sendJob->started_at ?? now(),
         ]);
 
+        // Akun pengirim wajib akun Slip Gaji yang aktif — tidak pernah jatuh
+        // diam-diam ke mailer .env (email rekrutmen).
+        $account = $this->resolveAccount($slip);
+        if (is_string($account)) {
+            $this->failWithoutRetry(new RuntimeException($account));
+
+            return;
+        }
+
         // Generate PDF (idempotent) lalu kirim sebagai attachment.
         $pdfPath = $pdfAction->execute($slip);
 
-        // Pilih akun email pengirim jika ditentukan (transport SMTP dinamis).
-        $account = $slip->mail_account_id
-            ? MailAccount::where('is_active', true)->find($slip->mail_account_id)
-            : null;
-
         $mailable = new SalarySlipMail($slip, $pdfPath, $account);
-
-        if ($account && $account->driver === 'smtp') {
-            Mail::mailer($resolver->build($account))->to($slip->email)->send($mailable);
-        } else {
-            Mail::to($slip->email)->send($mailable);
-        }
+        Mail::mailer($resolver->build($account))->to($slip->email)->send($mailable);
 
         $slip->update([
             'send_status' => SalarySlip::STATUS_SENT,
@@ -89,6 +89,48 @@ class SendSalarySlipJob implements ShouldQueue
             'status' => SendJob::STATUS_SUCCESS,
             'finished_at' => now(),
         ]);
+    }
+
+    /**
+     * Akun yang dipilih saat kirim, atau akun default purpose salary_slip.
+     *
+     * @return MailAccount|string akun, atau pesan error bila tidak bisa dipakai
+     */
+    private function resolveAccount(SalarySlip $slip): MailAccount|string
+    {
+        $query = MailAccount::query()
+            ->where('is_active', true)
+            ->where('purpose', MailAccount::PURPOSE_SALARY_SLIP);
+
+        $account = $slip->mail_account_id
+            ? $query->find($slip->mail_account_id)
+            : $query->where('is_default', true)->first();
+
+        if (! $account) {
+            return $slip->mail_account_id
+                ? 'Akun email pengirim tidak aktif atau sudah dihapus. Pilih akun lain lalu kirim ulang.'
+                : 'Belum ada akun email Slip Gaji default yang aktif. Atur di Settings → Akun Email.';
+        }
+
+        if ($account->driver !== 'smtp') {
+            return "Driver email \"{$account->driver}\" belum didukung untuk slip gaji. Gunakan akun SMTP.";
+        }
+
+        return $account;
+    }
+
+    /**
+     * Kegagalan konfigurasi tidak akan sembuh dengan retry: tandai gagal sekarang.
+     */
+    private function failWithoutRetry(\Throwable $e): void
+    {
+        if ($this->job) {
+            $this->fail($e); // memanggil failed() lewat queue
+
+            return;
+        }
+
+        $this->failed($e);
     }
 
     /**

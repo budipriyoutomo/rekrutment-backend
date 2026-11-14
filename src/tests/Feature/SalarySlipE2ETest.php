@@ -139,6 +139,7 @@ class SalarySlipE2ETest extends TestCase
     {
         Mail::fake();
         $this->fakePdfGenerator();
+        $this->hrAccount(); // akun Slip Gaji default — wajib, tidak ada fallback ke .env
 
         $slip = SalarySlip::create($this->row([
             'nik' => 'R1', 'send_status' => SalarySlip::STATUS_SENT, 'sent_at' => now(),
@@ -181,7 +182,11 @@ class SalarySlipE2ETest extends TestCase
 
             return null;
         });
-        Mail::shouldReceive('to')->andReturn($pending);
+        $this->hrAccount();
+        $mailer = Mockery::mock();
+        $mailer->shouldReceive('to')->andReturn($pending);
+        Mail::shouldReceive('purge');
+        Mail::shouldReceive('mailer')->andReturn($mailer);
 
         $slip = SalarySlip::create($this->row(['nik' => 'T1']));
         $sendJob = SendJob::create([
