@@ -317,6 +317,8 @@ class ApplicationController extends BaseApiController
             ]);
         }
 
+        $bundle = FileUploadService::documentWithTemporaryUrl($bundle, config('filesystems.bundle_disk', 's3'));
+
         return $this->success([
             'status' => $bundle['status'] ?? 'processing',
             'ready' => ($bundle['status'] ?? null) === 'ready',

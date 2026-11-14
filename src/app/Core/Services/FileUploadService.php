@@ -12,6 +12,9 @@ use Symfony\Component\Process\Process;
 
 class FileUploadService
 {
+    /** Masa berlaku temporary URL dokumen pelamar untuk HR (cukup untuk sesi review). */
+    public const DOCUMENT_URL_TTL_MINUTES = 30;
+
     protected string $disk;
 
     public function __construct(?string $disk = null)
@@ -25,20 +28,15 @@ class FileUploadService
     public function upload(UploadedFile $file, string $directory): array
     {
         $filename = $this->generateFilename($file);
-        /*
-        $path = Storage::disk($this->disk)->putFileAs(
-            $directory,
-            $file,
-            $filename,
-            ['visibility' => 'public']
-        );*/
 
+        // Dokumen pelamar (KTP, CV, ijazah, foto) bersifat sensitif: private,
+        // diakses HR lewat temporary URL (lihat documentWithTemporaryUrl()).
         try {
             $path = Storage::disk($this->disk)->putFileAs(
                 $directory,
                 $file,
                 $filename,
-                ['visibility' => 'public']
+                ['visibility' => 'private']
             );
         } catch (\Throwable $e) {
             Log::error('UPLOAD ERROR', [
@@ -137,6 +135,32 @@ class FileUploadService
     }
 
     /**
+     * Isi `file_url` metadata dokumen dengan temporary URL (berlaku $minutes menit).
+     * Dokumen tanpa path dikembalikan apa adanya; bila disk tidak mendukung
+     * temporary URL, `file_url` dikosongkan — URL publik lama tidak pernah dikirim.
+     *
+     * @param  array<string, mixed>|null  $document
+     * @return array<string, mixed>|null
+     */
+    public static function documentWithTemporaryUrl(?array $document, ?string $defaultDisk = null, int $minutes = self::DOCUMENT_URL_TTL_MINUTES): ?array
+    {
+        if (empty($document['path'])) {
+            return $document;
+        }
+
+        $disk = $document['disk'] ?? $defaultDisk ?? config('filesystems.upload_disk', 's3');
+
+        try {
+            $document['file_url'] = (new self($disk))->temporaryUrl($document['path'], $minutes);
+        } catch (\Throwable $e) {
+            report($e);
+            $document['file_url'] = null;
+        }
+
+        return $document;
+    }
+
+    /**
      * Get public URL (safe fallback)
      */
     public function url(string $path): string
@@ -164,7 +188,10 @@ class FileUploadService
      */
     protected function generateFilename(UploadedFile $file): string
     {
-        return Str::uuid().'.'.$file->getClientOriginalExtension();
+        // Ekstensi dari isi file (MIME), bukan nama dari klien yang bisa dimanipulasi.
+        $extension = $file->guessExtension() ?: strtolower($file->getClientOriginalExtension());
+
+        return Str::uuid().'.'.$extension;
     }
 
     protected function convertToPdf(string $filePath, string $outputDir): void
@@ -252,7 +279,8 @@ class FileUploadService
             'path' => $path,
             'disk' => $this->disk,
             'file_name' => $file->getClientOriginalName(),
-            'file_url' => $this->url($path),
+            // File private: URL dibuat saat dibutuhkan (temporary URL), tidak disimpan.
+            'file_url' => null,
             'mime_type' => $file->getMimeType(),
             'size' => $file->getSize(),
         ];

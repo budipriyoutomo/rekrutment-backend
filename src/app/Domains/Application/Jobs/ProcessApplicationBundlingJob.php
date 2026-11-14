@@ -142,18 +142,18 @@ class ProcessApplicationBundlingJob implements ShouldQueue
             $s3FinalKey = "final_bundel/rekrutmen_{$this->applicationId}.pdf";
             $bundleDisk = config('filesystems.bundle_disk', 's3');
             $uploaded = Storage::disk($bundleDisk)->put($s3FinalKey, file_get_contents($outputFinalPdf), [
-                'visibility' => 'public',
+                'visibility' => 'private',
             ]);
 
             if (! $uploaded) {
                 throw new \RuntimeException("Upload bundel final ke disk {$bundleDisk} gagal.");
             }
 
-            $bundleUrl = $this->url($bundleDisk, $s3FinalKey);
             $documentsData['bundle'] = [
                 'status' => 'ready',
                 'path' => $s3FinalKey,
-                'file_url' => $bundleUrl,
+                // Private: URL sementara dibuat saat HR meminta (ApplicationResource / bundleStatus).
+                'file_url' => null,
                 'file_name' => "bundel_rekrutmen_{$this->applicationId}.pdf",
                 'mime_type' => 'application/pdf',
                 'size' => filesize($outputFinalPdf),
@@ -334,17 +334,6 @@ class ProcessApplicationBundlingJob implements ShouldQueue
         }
 
         throw new \Exception('LibreOffice tidak ditemukan di server. Install LibreOffice atau set LIBREOFFICE_BINARY.');
-    }
-
-    private function url(string $diskName, string $path): string
-    {
-        try {
-            return Storage::disk($diskName)->url($path);
-        } catch (\Throwable $e) {
-            $baseUrl = config("filesystems.disks.{$diskName}.url", '');
-
-            return rtrim($baseUrl, '/').'/'.ltrim($path, '/');
-        }
     }
 
     private function markBundleFailed(Application $application, string $message): void

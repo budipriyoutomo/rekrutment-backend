@@ -2,6 +2,7 @@
 
 namespace App\Domains\Application\Resources;
 
+use App\Core\Services\FileUploadService;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 
@@ -97,12 +98,16 @@ class ApplicationResource extends JsonResource
             // =========================
             // DOCUMENTS
             // =========================
+            // File private → file_url diganti temporary URL setiap response.
             'documents' => [
-                'cv' => $this->documents['cv'] ?? null,
-                'foto' => $this->documents['foto'] ?? null,
-                'ktp' => $this->documents['ktp'] ?? null,
-                'ijazah' => $this->documents['ijazah'] ?? null,
-                'bundle' => $this->documents['bundle'] ?? null,
+                'cv' => FileUploadService::documentWithTemporaryUrl($this->documents['cv'] ?? null),
+                'foto' => FileUploadService::documentWithTemporaryUrl($this->documents['foto'] ?? null),
+                'ktp' => FileUploadService::documentWithTemporaryUrl($this->documents['ktp'] ?? null),
+                'ijazah' => FileUploadService::documentWithTemporaryUrl($this->documents['ijazah'] ?? null),
+                'bundle' => FileUploadService::documentWithTemporaryUrl(
+                    $this->documents['bundle'] ?? null,
+                    config('filesystems.bundle_disk', 's3'),
+                ),
             ],
 
             // =========================
