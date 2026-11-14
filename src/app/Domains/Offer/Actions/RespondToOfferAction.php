@@ -54,7 +54,9 @@ class RespondToOfferAction
         // Dicari di luar transaksi: penandaan expired tidak boleh ikut ter-rollback
         $offer = $this->findRespondable($token);
 
-        DB::transaction(function () use ($offer) {
+        $offer = DB::transaction(function () use ($offer) {
+            $offer = $this->lockRespondable($offer);
+
             $offer->update([
                 'status' => Offer::STATUS_ACCEPTED,
                 'responded_at' => now(),
@@ -62,6 +64,8 @@ class RespondToOfferAction
 
             $offer->application->update(['stage' => PipelineStage::HIRED->value]);
             $this->vacancyService->closeFilledVacancies([$offer->application->vacancy_id]);
+
+            return $offer;
         });
 
         // Pre-boarding dimulai otomatis; gagal di sini tidak membatalkan penerimaan
@@ -81,13 +85,29 @@ class RespondToOfferAction
     {
         $offer = $this->findRespondable($token);
 
-        $offer->update([
-            'status' => Offer::STATUS_DECLINED,
-            'responded_at' => now(),
-            'decline_reason' => $reason !== null && trim($reason) !== '' ? trim($reason) : null,
-        ]);
+        return DB::transaction(function () use ($offer, $reason) {
+            $offer = $this->lockRespondable($offer);
 
-        return $offer;
+            $offer->update([
+                'status' => Offer::STATUS_DECLINED,
+                'responded_at' => now(),
+                'decline_reason' => $reason !== null && trim($reason) !== '' ? trim($reason) : null,
+            ]);
+
+            return $offer;
+        });
+    }
+
+    /**
+     * Baca ulang offer dengan row lock di dalam transaksi lalu cek ulang statusnya,
+     * agar dua respons bersamaan (terima & tolak) tidak saling menimpa.
+     */
+    private function lockRespondable(Offer $offer): Offer
+    {
+        $locked = Offer::with('application')->lockForUpdate()->findOrFail($offer->id);
+        $this->assertRespondable($locked);
+
+        return $locked;
     }
 
     private function assertRespondable(Offer $offer): void
